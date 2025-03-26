@@ -1,0 +1,17 @@
+<div class="home-container">
+  <header class="header">
+    <h1>The Nexus Project</h1>
+    <p>Real-time Sensor Measurements</p>
+  </header>
+
+  <section class="cards-container">
+    <mat-card *ngFor="let measurement of measurements" class="sensor-card">
+      <mat-card-header>
+        <mat-card-title>{{ measurement.sensorName }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ measurement.value }} {{ measurement.unit }}</p>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>

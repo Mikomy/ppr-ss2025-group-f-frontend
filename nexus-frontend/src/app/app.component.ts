@@ -1,12 +1,24 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { CommonModule} from '@angular/common';
 
+interface ParticlesJS {
+  load: (id: string, path: string, callback: () => void) => void;
+}
+declare const particlesJS: ParticlesJS;
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'nexus-frontend';
+
+  ngOnInit() {
+    particlesJS.load('particles', 'assets/particles.json', () => {
+      console.log('Particles.json config loaded');
+    })
+  }
 }
