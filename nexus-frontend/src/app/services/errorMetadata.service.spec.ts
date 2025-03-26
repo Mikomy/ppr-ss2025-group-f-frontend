@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { WebStorageService } from './web-storage.service';
+import { ErrorMetadataService } from './errorMetadata.service';
 
-describe('WebStorageService', () => {
-  let service: WebStorageService;
+describe('ErrorMetadataService', () => {
+  let service: ErrorMetadataService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(WebStorageService);
+    service = TestBed.inject(ErrorMetadataService);
   });
 
   it('should be created', () => {

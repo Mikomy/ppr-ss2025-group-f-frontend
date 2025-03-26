@@ -2,7 +2,7 @@
 FROM node:18-alpine AS build
 
 # 2. Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # 3. Copy package.json and package-lock.json and install dependencies
 COPY package.json package-lock.json ./
@@ -12,12 +12,12 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-RUN ls -la /usr/src/app/dist/nexus-frontend
+RUN ls -la /app/dist/nexus-frontend
 # 5. Use a lightweight web server image for the finished frontend
 FROM nginx:alpine
 
 # 6. Copy the built Angular project into the Nginx web server
-COPY --from=build /usr/src/app/dist/nexus-frontend /usr/share/nginx/html
+COPY --from=build /app/dist/nexus-frontend/browser /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 # 7. Expose the port for the container
