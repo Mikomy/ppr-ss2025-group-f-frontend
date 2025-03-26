@@ -1,0 +1,46 @@
+---
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: ./nexus-frontend/package-lock.json
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./nexus-frontend
+      - name: Build Angular app
+        run: npm run build --if-present
+        working-directory: ./nexus-frontend
+      - name: Install Google Chrome
+        run: |
+          wget -q -O -
+          https://dl.google.com/linux/linux_signing_key.pub |
+          sudo apt-key add -
+          echo "deb [arch=amd64]
+          http://dl.google.com/linux/chrome/deb/ stable main" |
+          sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+      - name: Run Karma tests
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Angular app and Playwright tests
+        run: npx start-server-and-test "npm start"
+          http://localhost:4200 "npx playwright test"

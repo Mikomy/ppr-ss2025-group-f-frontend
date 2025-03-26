@@ -1,0 +1,18 @@
+---
+name: Linting
+on:
+  push:
+    branches:
+      - main
+jobs:
+  angular-lint:
+    name: AngularLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./nexus-frontend
+      - name: Run Angular lint
+        run: npm run lint
+        working-directory: ./nexus-frontend
