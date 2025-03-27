@@ -2,7 +2,7 @@
 
 https://github.com/VincentGarreau/particles.js
 
-
+https://vincentgarreau.com/particles.js/
 The MIT License (MIT)
 
 Copyright (c) 2015, Vincent Garreau
