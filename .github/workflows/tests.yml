@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: ./nexus-frontend/package-lock.json
+          cache-dependency-path: nexus-frontend/package-lock.json
       - name: Install dependencies
         run: npm install
         working-directory: ./nexus-frontend
