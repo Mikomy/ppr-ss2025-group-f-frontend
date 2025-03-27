@@ -32,11 +32,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
       - name: Run Karma tests
+        working-directory: ./nexus-frontend
         env:
           CHROME_BIN: /usr/bin/google-chrome
         run: npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
       - name: Install Playwright Browsers
+        working-directory: ./nexus-frontend
         run: npx playwright install --with-deps
       - name: Run Angular app and Playwright tests
+        working-directory: ./nexus-frontend
         run: npx start-server-and-test "npm start"
           http://localhost:4200 "npx playwright test"
