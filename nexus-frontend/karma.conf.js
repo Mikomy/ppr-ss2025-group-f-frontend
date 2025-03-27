@@ -1,50 +1,65 @@
-module.exports = function (config) {
-  config.set({
-    // Base path to be used for resolving files and excluding files
-    basePath: '',
+// eslint.config.mjs
+import js from '@eslint/js';
+import { plugin as tsPlugin, configs as tsConfigs } from '@typescript-eslint/eslint-plugin';
+import { parser as tsParser } from '@typescript-eslint/parser';
+import { plugin as angularPlugin, configs as angularConfigs } from '@angular-eslint/eslint-plugin';
+import { parser as angularTemplateParser, configs as angularTemplateConfigs } from '@angular-eslint/template';
 
-    // Define which test frameworks to use
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
-    plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma'),
-    ],
-
-    // Configuration for Karma-Jasmine HTML Reporter plugin
-    client: {
-      clearContext: false, // Prevents clearing the test run in the browser after completion
+export default [
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
     },
-
-    jasmineHtmlReporter: {
-      suppressAll: true //removes the duplication traces
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      '@angular-eslint': angularPlugin,
     },
-    coverageReporter: {
-      dir: require('path').join(__dirname, '.coverage/ng-testing-and-debugging'),
-      subdir: '.',
-      reporters: [
-        { type: 'html' },
-        { type: 'text-summary' }
-      ]
+    rules: {
+      ...js.configs.recommended.rules,
+      ...tsConfigs.recommended.rules,
+      ...tsConfigs.stylistic.rules,
+      ...angularConfigs.recommended.rules,
+      '@angular-eslint/directive-selector': [
+        'error',
+        {
+          type: 'attribute',
+          prefix: 'app',
+          style: 'camelCase',
+        },
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        {
+          type: 'element',
+          prefix: 'app',
+          style: 'kebab-case',
+        },
+      ],
     },
-
-    // Define which reporters to use
-    reporters: ['progress', 'kjhtml'],
-    port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
-    autoWatch: true,
-    // Configure the browsers to be used for testing
-    browsers: ['ChromeHeadless'],
-
-    // Optional: Allow the tests to finish and exit Karma after running
-    singleRun: false,
-
-    // Automatically restart the browser when files change
-    restartOnFileChange: true,
-
-
-  });
-};
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error', // Correctly placed
+    },
+  },
+  {
+    files: ['**/*.html'],
+    languageOptions: {
+      parser: angularTemplateParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@angular-eslint/template': angularPlugin,
+    },
+    rules: {
+      ...angularTemplateConfigs.recommended.rules,
+      ...angularTemplateConfigs.accessibility.rules,
+    },
+  },
+];
