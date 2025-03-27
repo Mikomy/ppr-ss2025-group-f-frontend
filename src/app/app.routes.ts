@@ -1,13 +1,8 @@
 import { Routes } from '@angular/router';
-import {HomePageComponent} from './pages/home-page/home-page.component';
-import {
-  HistoricalAnalysisComponentComponent
-} from './pages/historical-analysis-component/historical-analysis-component.component';
-import {StatisticsComponent} from './pages/statistics/statistics.component';
 
 export const routes: Routes = [
-  { path: '', component: HomePageComponent },
-  { path: 'history', component: HistoricalAnalysisComponentComponent },
-  { path: 'statistics', component: StatisticsComponent }
-
+  { path: '', loadComponent: () => import('./pages/home-page/home-page.component').then(m => m.HomePageComponent) },
+  { path: 'home', loadComponent: () => import('./pages/home-page/home-page.component').then(m => m.HomePageComponent) },
+  { path: 'history', loadComponent: () => import('./pages/historical-analysis-component/historical-analysis-component.component').then(m => m.HistoricalAnalysisComponentComponent) },
+  { path: 'statistics', loadComponent: () => import('./pages/statistics/statistics.component').then(m => m.StatisticsComponent) },
 ];

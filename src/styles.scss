@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+#nav-bar a.mat-tab-link {
+  background-color: #808080 !important;
+  color: #ffffff !important;
+  font-size: 28px !important;
+  border-radius: 0.375rem;
+  padding: 10px 15px;
+  text-transform: uppercase;
+}
+
+/* Optional hover effect */
+#nav-bar a.mat-tab-link:hover {
+  background-color: #6e6e6e !important;
+}

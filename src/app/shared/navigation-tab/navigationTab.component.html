@@ -1,0 +1,12 @@
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" id="nav-bar">
+  <ng-container *ngFor="let link of links">
+    <a
+      mat-tab-link
+      routerLink="/{{link.link}}"
+      routerLinkActive="custom-button"
+      [routerLinkActiveOptions]="{ exact: true }">
+      {{ link.label }}
+    </a>
+  </ng-container>
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
