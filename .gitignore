@@ -21,6 +21,7 @@ yarn-error.log
 *.sublime-workspace
 
 # Visual Studio Code
+.vscode
 ../.vscode/*
 !../.vscode/settings.json
 !../.vscode/tasks.json
@@ -42,3 +43,6 @@ testem.log
 Thumbs.db
 node_modules
 nexus-frontend/.angular/cache
+node_modules/*
+node_modules/.package-lock.json
+
