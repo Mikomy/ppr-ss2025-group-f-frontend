@@ -17,6 +17,8 @@ import {NgForOf} from '@angular/common';
   templateUrl: './navigationTab.component.html',
   styleUrls: ['./navigationTab.component.css']
 })
+
+
 export class TabNavigationComponent {
   links = [
     {link: '/', label: 'Actual'},

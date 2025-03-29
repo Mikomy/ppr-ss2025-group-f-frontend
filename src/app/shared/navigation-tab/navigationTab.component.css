@@ -1,3 +1,10 @@
+#nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #ffffff;
+}
+
 #nav-bar a.mat-tab-link.mat-tab-label-active {
   background-color: #808080;
   color: darkgrey !important;
