@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SensorDataService } from '../../services/sensorData.service';
 import { InfluxMeasurement } from '../../models/InfluxMeasurement';
-import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-statistics',
@@ -11,10 +10,10 @@ import { Subject } from 'rxjs';
   templateUrl: './statistics.component.html',
   styleUrl: './statistics.component.scss'
 })
-export class StatisticsComponent implements OnInit, OnDestroy {
+export class StatisticsComponent implements OnInit {
 
   measurements: InfluxMeasurement[] = [];
-  
+
   constructor(private sensorDataService: SensorDataService) {}
 
   ngOnInit(): void {

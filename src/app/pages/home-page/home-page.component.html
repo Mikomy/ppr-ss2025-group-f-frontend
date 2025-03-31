@@ -3,15 +3,14 @@
     <h1>The Nexus Project</h1>
     <p>Real-time Sensor Measurements</p>
   </header>
-
-  <section class="cards-container">
-    <mat-card *ngFor="let measurement of measurements" class="sensor-card">
-      <mat-card-header>
-        <mat-card-title>{{ measurement.sensorName }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ measurement.value }} {{ measurement.unit }}</p>
-      </mat-card-content>
-    </mat-card>
-  </section>
+  <mat-grid-list cols="3" gutterSize="16px" rowHeight="fit">
+    <div class="home-container">
+      <mat-card class="cards-container" *ngFor="let group of measurementsByLocation | keyvalue">
+        <h2>{{ group.key }}</h2>
+        <div *ngFor="let measurement of group.value">
+          <p>{{ measurement.name }} - {{ measurement.latestData?.timestamp }} - {{ measurement.latestData?.value }}</p>
+        </div>
+      </mat-card>
+    </div>
+  </mat-grid-list>
 </div>
