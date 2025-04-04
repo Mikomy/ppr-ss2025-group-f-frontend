@@ -12,22 +12,22 @@ import { InfluxPoint } from '../../models/InfluxPoint';
 })
 export class StatisticsComponent implements OnInit {
 
-  measurements: InfluxPoint[] = [];
+  dataPoints: InfluxPoint[] = [];
 
   constructor(private sensorDataService: SensorDataService) {}
 
   ngOnInit(): void {
-    this.loadInfluxData( 'data_Humidity' );
+    this.loadInfluxData( 'device_frmpayload_data_data_Humidity' );
   }
 
 
   loadInfluxData( measurementType : string ): void {
     console.log('Attempting to load data from service');
-    this.sensorDataService.getInfluxPoints( measurementType ).subscribe({
+    this.sensorDataService.getInfluxPoints( measurementType, 0, 0  ).subscribe({
       next: (data) => {
         console.log('Data received:', data);
         if (data && data.length > 0) {
-          this.measurements = data;
+          this.dataPoints = data;
         } else {
           console.warn('Received empty data array from service');
         }

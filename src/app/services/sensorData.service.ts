@@ -47,10 +47,48 @@ export class SensorDataService {
     );
   }
 
-  getInfluxPoints(measureMentType: string): Observable<InfluxPoint[]> {
+  countInfluxPoints(measurementName: String): Observable<number> {
     const params = {
-      db: 'test_db',
-      q: `SELECT "time", "value" FROM "device_frmpayload_data_${measureMentType}"`
+      db: 'nexus',
+      q: `SELECT COUNT("value") FROM "${measurementName}"`
+    };
+
+    console.log('Querying Influx for count with:', params);
+
+    return this.http.get<any>(this.localInfluxUrl, { params }).pipe(
+      map(response => {
+        console.log('Raw Influx response for count:', response);
+
+        try {
+          if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
+            const series = response.results[0].series[0];
+            const values = series.values;
+
+            // Extract the count value from the response
+            if (values && values[0] && values[0][1] !== undefined) {
+              return values[0][1];
+            }
+          }
+
+          console.warn('Unexpected Influx response format for count:', response);
+          return 0;
+        } catch (error) {
+          console.error('Error parsing Influx count data:', error);
+          return 0;
+        }
+      }),
+      catchError(error => {
+        console.error('HTTP error from Influx for count:', error);
+        return of(0);
+      })
+    );
+  }
+
+  getInfluxPoints(measureMentType: string, page: number, pageSize: number): Observable<InfluxPoint[]> {
+    const offset = (page - 1) * pageSize;
+    const params = {
+      db: 'nexus',
+      q: `SELECT "time", "value" FROM "${measureMentType}" LIMIT ${pageSize} OFFSET ${offset}`
     };
 
     console.log('Querying Influx with:', params);
@@ -59,15 +97,12 @@ export class SensorDataService {
       map(response => {
         console.log('Raw Influx response:', response);
 
-        // Handle potential response formats from Influx
-        // This is needed because Influx might return data in different formats
         try {
           if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
-            const series  = response.results[0].series[0];
+            const series = response.results[0].series[0];
             const columns = series.columns;
-            const values  = series.values;
+            const values = series.values;
 
-            // Map the influx data to our InfluxMeasurement model
             return values.map((value: any[]) => {
               const measurement: InfluxPoint = {
                 sensorName: series.name || 'Unknown Sensor',
@@ -78,7 +113,6 @@ export class SensorDataService {
             });
           }
 
-          // If the response doesn't match expected format, return empty array
           console.warn('Unexpected Influx response format:', response);
           return [];
         } catch (error) {
@@ -92,7 +126,4 @@ export class SensorDataService {
       })
     );
   }
-
-
-
 }

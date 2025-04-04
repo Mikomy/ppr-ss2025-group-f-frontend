@@ -3,21 +3,23 @@
 <div class="container mt-4">
     <h2>All Measurements in nexus DB</h2>
     
-   
     <div *ngIf="measurements.length > 0">
       <table datatable class="row-border hover table table-striped">
         <thead>
           <tr>
-            <th>Measurement Name</th>
+            <th>Measurement Names</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let measurement of measurements">
-            <td>{{ measurement }}</td>
+            <td>
+              <a (click)="showDetails(measurement)">{{ measurement }}</a>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
+
     
     <div class="mt-4">
       <h3>Debug Info</h3>
@@ -28,4 +30,3 @@
       </details>
     </div>
   </div>
-  
