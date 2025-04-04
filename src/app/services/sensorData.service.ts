@@ -88,7 +88,7 @@ export class SensorDataService {
     const offset = (page - 1) * pageSize;
     const params = {
       db: 'nexus',
-      q: `SELECT "time", "value" FROM "${measureMentType}" LIMIT ${pageSize} OFFSET ${offset}`
+      q: `SELECT * FROM "${measureMentType}" LIMIT ${pageSize} OFFSET ${offset}`
     };
 
     console.log('Querying Influx with:', params);
@@ -101,13 +101,18 @@ export class SensorDataService {
           if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
             const series = response.results[0].series[0];
             const columns = series.columns;
-            const values = series.values;
+
+            
+          const values = series.values;
+           const positionOfValue = columns.indexOf('value');
+           const positionoOfTime = columns.indexOf('time');
+           const positionOfSensorName = columns.indexOf('device_name');
 
             return values.map((value: any[]) => {
               const measurement: InfluxPoint = {
-                sensorName: series.name || 'Unknown Sensor',
-                value: parseFloat(value[1]),
-                timestamp: value[0]
+                sensorName: value[positionOfSensorName] || 'Unknown Sensor',
+                value: parseFloat(value[positionOfValue]) ,
+                timestamp: value[positionoOfTime]
               };
               return measurement;
             });
