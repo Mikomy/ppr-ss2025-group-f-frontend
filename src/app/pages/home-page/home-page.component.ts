@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 
-import {InfluxMeasurement} from '../../models/InfluxMeasurement';
+import {InfluxPoint} from '../../models/InfluxPoint';
 import {SensorDataService} from '../../services/sensorData.service';
 import {MatCardModule} from '@angular/material/card';
 import {CommonModule} from '@angular/common';
