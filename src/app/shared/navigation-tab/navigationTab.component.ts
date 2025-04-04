@@ -4,7 +4,7 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
 import {NgForOf} from '@angular/common';
 
 @Component({
-  selector: 'navigationTab',
+  selector: 'app-navigation-tab',
   standalone: true,
   imports: [
     MatTabLink,

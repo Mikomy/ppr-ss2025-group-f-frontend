@@ -1,55 +1,116 @@
 import {Component, OnInit} from '@angular/core';
-import { SensorMeasurement} from '../../models/sensorMeasurement';
-import { InfluxMeasurement } from '../../models/InfluxMeasurement';
-import { SensorDataService } from '../../services/sensorData.service';
-import { MatCardModule, MatCardContent, MatCardHeader} from '@angular/material/card';
-import { CommonModule} from '@angular/common';
 
+import {InfluxMeasurement} from '../../models/InfluxMeasurement';
+import {SensorDataService} from '../../services/sensorData.service';
+import {MatCardModule} from '@angular/material/card';
+import {CommonModule} from '@angular/common';
+import {Measurement} from '../../models/measurement.model';
+import {BackendService} from '../../services/backend.service';
+import {MatGridListModule } from '@angular/material/grid-list';
+import {MatDividerModule} from '@angular/material/divider';
+import {SensorData} from '../../models/sensorData.model';
+
+interface MeasurementDisplay {
+  name: string;
+  latestData: SensorData | null;
+}
 @Component({
   selector: 'app-home-page',
   standalone: true,
   imports: [
     MatCardModule,
-    MatCardHeader,
     CommonModule,
-    MatCardContent
+    MatGridListModule,
+    MatDividerModule
   ],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss'
 })
 
 
-export class HomePageComponent  implements OnInit {
-  measurements:       SensorMeasurement[] = [];
-  influxMeasurement:  InfluxMeasurement[] = [];
+export class HomePageComponent implements OnInit {
+  // This object groups measurements by sensor location.
+  measurementsByLocation: { [location: string]: MeasurementDisplay[] } = {};
 
-  constructor(private sensorDataService: SensorDataService) { }
+  constructor(private backendService: BackendService) {}
 
   ngOnInit(): void {
-    this.fetchMeasurements();
-    this.fetchInfluxMeasurement();
+    this.loadMeasurements();
   }
 
-
-  fetchMeasurements(): void {
-    this.sensorDataService.getLatestMeasurements().subscribe({
-      next: (data: SensorMeasurement[]) => this.measurements = data,
-      error: err => console.error('Error fetching measurements:', err)
-    });
-  }
-
-  fetchInfluxMeasurement(): void {
-    this.sensorDataService.getInfluxMeasurements( "data_Humidity" ).subscribe({
-      next: (data: InfluxMeasurement[]) => {
-        this.influxMeasurement = data;
-        console.log('Fetched Influx Measurement:', this.influxMeasurement);
+  private loadMeasurements(): void {
+    // Subscribe individually and log the data
+    this.backendService.getSoilMoistrue().subscribe({
+      next: data => {
+        console.log('Soil Moisture:', data);
+        this.addMeasurement(data);
       },
-      error: (err) => {
-        console.error('Error fetching influxMeasurement:', err);
-      }
+      error: err => console.error('Error getting soil moisture:', err)
+    });
+
+    this.backendService.getPhosphorData().subscribe({
+      next: data => {
+        console.log('Phosphorus:', data);
+        this.addMeasurement(data);
+      },
+      error: err => console.error('Error getting phosphorus data:', err)
+    });
+
+    this.backendService.getNitrogenData().subscribe({
+      next: data => {
+        console.log('Nitrogen:', data);
+        this.addMeasurement(data);
+      },
+      error: err => console.error('Error getting nitrogen data:', err)
+    });
+
+    this.backendService.getHumidityData().subscribe({
+      next: data => {
+        console.log('Humidity:', data);
+        this.addMeasurement(data);
+      },
+      error: err => console.error('Error getting humidity data:', err)
+    });
+
+    this.backendService.getRoomTemperatureData().subscribe({
+      next: data => {
+        console.log('Room Temperature:', data);
+        this.addMeasurement(data);
+      },
+      error: err => console.error('Error getting room temperature data:', err)
+    });
+
+    // Log the grouped measurements after a short delay for debugging.
+    setTimeout(() => {
+      console.log('Grouped measurements by location:', this.measurementsByLocation);
+    }, 1000);
+  }
+
+  private addMeasurement(measurement: Measurement): void {
+    if (!measurement || !measurement.sensor || !measurement.sensor.location) {
+      console.warn('Invalid measurement received:', measurement);
+      return;
+    }
+    const location = measurement.sensor.location;
+    const latestData = measurement.dataPoints && measurement.dataPoints.length > 0
+      ? this.getLatestData(measurement.dataPoints)
+      : null;
+    if (!this.measurementsByLocation[location]) {
+      this.measurementsByLocation[location] = [];
+    }
+    this.measurementsByLocation[location].push({
+      name: measurement.measurementName,
+      latestData: latestData
     });
   }
 
-
-  
-} // end class HomePageComponent
+  private getLatestData(dataPoints: SensorData[]): SensorData | null {
+    if (!dataPoints || dataPoints.length === 0) {
+      return null;
+    }
+    return dataPoints.reduce((latest, current) =>
+        new Date(current.timestamp) > new Date(latest.timestamp) ? current : latest,
+      dataPoints[0]
+    );
+  }
+}

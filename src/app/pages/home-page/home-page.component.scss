@@ -17,9 +17,11 @@
 }
 
 .cards-container {
+  margin-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  text-align: left;
   gap: 1rem;
   background-color: whitesmoke;
   border-radius: 15px;

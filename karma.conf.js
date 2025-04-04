@@ -1,65 +1,32 @@
-// eslint.config.mjs
-import js from '@eslint/js';
-import { plugin as tsPlugin, configs as tsConfigs } from '@typescript-eslint/eslint-plugin';
-import { parser as tsParser } from '@typescript-eslint/parser';
-import { plugin as angularPlugin, configs as angularConfigs } from '@angular-eslint/eslint-plugin';
-import { parser as angularTemplateParser, configs as angularTemplateConfigs } from '@angular-eslint/template';
-
-export default [
-  {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
+module.exports = function (config) {
+  config.set({
+    basePath: '',
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage'),
+      require('@angular-devkit/build-angular/plugins/karma')
+    ],
+    client: {
+      clearContext: false
     },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      '@angular-eslint': angularPlugin,
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ]
     },
-    rules: {
-      ...js.configs.recommended.rules,
-      ...tsConfigs.recommended.rules,
-      ...tsConfigs.stylistic.rules,
-      ...angularConfigs.recommended.rules,
-      '@angular-eslint/directive-selector': [
-        'error',
-        {
-          type: 'attribute',
-          prefix: 'app',
-          style: 'camelCase',
-        },
-      ],
-      '@angular-eslint/component-selector': [
-        'error',
-        {
-          type: 'element',
-          prefix: 'app',
-          style: 'kebab-case',
-        },
-      ],
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: 'error', // Correctly placed
-    },
-  },
-  {
-    files: ['**/*.html'],
-    languageOptions: {
-      parser: angularTemplateParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      '@angular-eslint/template': angularPlugin,
-    },
-    rules: {
-      ...angularTemplateConfigs.recommended.rules,
-      ...angularTemplateConfigs.accessibility.rules,
-    },
-  },
-];
+    reporters: ['progress', 'kjhtml'],
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
+    browsers: ['ChromeHeadless'],
+    singleRun: false,
+    restartOnFileChange: true
+  });
+};
