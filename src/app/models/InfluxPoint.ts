@@ -1,4 +1,4 @@
-export interface InfluxMeasurement {
+export interface InfluxPoint {
     sensorName: string;
     value:      number;
     timestamp:  string;  // ISO 8601 format timestamp

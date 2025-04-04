@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SensorDataService } from '../../services/sensorData.service';
-import { InfluxMeasurement } from '../../models/InfluxMeasurement';
+import { InfluxPoint } from '../../models/InfluxPoint';
 
 @Component({
   selector: 'app-statistics',
@@ -12,7 +12,7 @@ import { InfluxMeasurement } from '../../models/InfluxMeasurement';
 })
 export class StatisticsComponent implements OnInit {
 
-  measurements: InfluxMeasurement[] = [];
+  measurements: InfluxPoint[] = [];
 
   constructor(private sensorDataService: SensorDataService) {}
 

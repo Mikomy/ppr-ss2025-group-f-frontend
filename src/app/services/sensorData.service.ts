@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { InfluxMeasurement } from '../models/InfluxMeasurement';
+import { InfluxPoint } from '../models/InfluxPoint';
 import {map, Observable, of, catchError} from 'rxjs';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class SensorDataService {
 
   private localInfluxUrl = 'http://localhost:8086/query';
 
-  getInfluxMeasurements(measureMentType: string): Observable<InfluxMeasurement[]> {
+  getInfluxMeasurements(measureMentType: string): Observable<InfluxPoint[]> {
     const params = {
       db: 'test_db',
       q: `SELECT "time", "value" FROM "device_frmpayload_data_${measureMentType}"`
@@ -35,7 +35,7 @@ export class SensorDataService {
 
             // Map the influx data to our InfluxMeasurement model
             return values.map((value: any[]) => {
-              const measurement: InfluxMeasurement = {
+              const measurement: InfluxPoint = {
                 sensorName: series.name || 'Unknown Sensor',
                 value: parseFloat(value[1]),
                 timestamp: value[0]
