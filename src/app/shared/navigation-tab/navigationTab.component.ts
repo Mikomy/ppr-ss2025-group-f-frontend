@@ -23,6 +23,7 @@ export class TabNavigationComponent {
   links = [
     {link: '/', label: 'Actual'},
     {link: '/history', label: 'History'},
-    {link: '/statistics', label: 'Statistics'}
+    {link: '/statistics', label: 'Statistics'},
+    {link: '/measurements', label: 'raw-influx-data'},
   ];
 }

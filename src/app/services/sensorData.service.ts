@@ -13,6 +13,40 @@ export class SensorDataService {
 
   private localInfluxUrl = 'http://localhost:8086/query';
 
+  // http://localhost:8086/query?db=nexus&q=SHOW%20MEASUREMENTS
+  getInfluxMeasurements(): Observable<String[]> {
+    const params = {
+      db: 'nexus',
+      q: 'SHOW MEASUREMENTS'
+    };
+
+    return this.http.get<any>(this.localInfluxUrl, { params }).pipe(
+      map(response => {
+        console.log('Raw Influx response for measurements:', response);
+
+        try {
+          if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
+            const series = response.results[0].series[0];
+            const values: string[] = series.values.flat(); // Flatten to get a string array
+
+            // Return the measurement names directly
+            return values;
+          }
+
+          console.warn('Unexpected Influx response format for measurements:', response);
+          return [];
+        } catch (error) {
+          console.error('Error parsing Influx measurements data:', error);
+          return [];
+        }
+      }),
+      catchError(error => {
+        console.error('HTTP error from Influx for measurements:', error);
+        return of([]);
+      })
+    );
+  }
+
   getInfluxPoints(measureMentType: string): Observable<InfluxPoint[]> {
     const params = {
       db: 'test_db',
@@ -58,5 +92,7 @@ export class SensorDataService {
       })
     );
   }
+
+
 
 }
