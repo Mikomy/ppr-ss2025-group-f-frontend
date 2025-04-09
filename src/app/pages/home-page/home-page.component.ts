@@ -20,7 +20,7 @@ interface MeasurementDisplay {
 })
 export class HomePageComponent implements OnInit {
   // This object groups measurements by sensor location.
-  measurementsByLocation: { [location: string]: MeasurementDisplay[] } = {};
+  measurementsByLocation: Record<string, MeasurementDisplay[]> = {};
 
   constructor(private backendService: BackendService) {}
 
