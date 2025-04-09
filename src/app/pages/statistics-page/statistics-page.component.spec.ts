@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RawPointsComponent } from './raw-points.component';
+import { StatisticsPageComponent } from './statistics-page.component';
 
-describe('RawPointsComponent', () => {
-  let component: RawPointsComponent;
-  let fixture: ComponentFixture<RawPointsComponent>;
+describe('StatisticsPageComponent', () => {
+  let component: StatisticsPageComponent;
+  let fixture: ComponentFixture<StatisticsPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RawPointsComponent],
+      imports: [StatisticsPageComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(RawPointsComponent);
+    fixture = TestBed.createComponent(StatisticsPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

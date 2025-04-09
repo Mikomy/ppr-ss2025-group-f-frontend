@@ -12,9 +12,9 @@ import { NgForOf } from '@angular/common';
 })
 export class TabNavigationComponent {
   links = [
-    { link: '/', label: 'Actual' },
+    { link: '/', label: 'Live-Überblick' },
     { link: '/history', label: 'History' },
     { link: '/statistics', label: 'Statistics' },
-    { link: '/measurements', label: 'raw-influx-data' },
+    { link: '/tableView', label: 'Tabellenansicht' },
   ];
 }

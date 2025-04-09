@@ -25,7 +25,7 @@ describe('TabNavigationComponent', () => {
   it('should have defined links', () => {
     expect(component.links).toBeDefined();
     expect(component.links.length).toBe(4);
-    expect(component.links[0]).toEqual({ link: '/', label: 'Actual' });
+    expect(component.links[0]).toEqual({ link: '/', label: 'Live-Überblick' });
   });
 
   it('should render navigation links in template', () => {

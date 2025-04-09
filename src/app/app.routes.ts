@@ -14,25 +14,22 @@ export const routes: Routes = [
   {
     path: 'history',
     loadComponent: () =>
-      import('./pages/historical-analysis-component/historical-analysis-component.component').then(
-        (m) => m.HistoricalAnalysisComponentComponent
+      import('./pages/historische-analyse-page/historische-analyse-page.component').then(
+        (m) => m.HistorischeAnalysePageComponent
       ),
   },
   {
     path: 'statistics',
     loadComponent: () =>
-      import('./pages/statistics/statistics.component').then((m) => m.StatisticsComponent),
-  },
-  {
-    path: 'measurements',
-    loadComponent: () =>
-      import('./pages/raw-influx-data/raw-influx-data.component').then(
-        (m) => m.RawInfluxDataComponent
+      import('./pages/statistics-page/statistics-page.component').then(
+        (m) => m.StatisticsPageComponent
       ),
   },
   {
-    path: 'raw-points/:id',
+    path: 'tableView',
     loadComponent: () =>
-      import('./pages/raw-points/raw-points.component').then((m) => m.RawPointsComponent),
+      import('./pages/tabellenansicht-page/tabellenansicht-page.component').then(
+        (m) => m.TabellenansichtPageComponent
+      ),
   },
 ];
