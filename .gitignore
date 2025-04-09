@@ -45,4 +45,5 @@ node_modules
 nexus-frontend/.angular/cache
 node_modules/*
 node_modules/.package-lock.json
+* text=auto
 

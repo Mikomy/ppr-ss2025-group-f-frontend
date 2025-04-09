@@ -21,8 +21,8 @@ export class RawPointsComponent implements OnInit {
 
   constructor(
     private sensorDataService: SensorDataService,
-    private route: ActivatedRoute,
-    private router: Router
+    private route: ActivatedRoute
+    //   private router: Router
   ) {}
   ngOnInit(): void {
     const measurementName = this.route.snapshot.paramMap.get('id');
