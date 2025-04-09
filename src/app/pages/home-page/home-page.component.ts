@@ -1,14 +1,11 @@
-import {Component, OnInit} from '@angular/core';
-
-import {InfluxPoint} from '../../models/InfluxPoint';
-import {SensorDataService} from '../../services/sensorData.service';
-import {MatCardModule} from '@angular/material/card';
-import {CommonModule} from '@angular/common';
-import {Measurement} from '../../models/measurement.model';
-import {BackendService} from '../../services/backend.service';
-import {MatGridListModule } from '@angular/material/grid-list';
-import {MatDividerModule} from '@angular/material/divider';
-import {SensorData} from '../../models/sensorData.model';
+import { Component, OnInit } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { CommonModule } from '@angular/common';
+import { Measurement } from '../../models/measurement.model';
+import { BackendService } from '../../services/backend.service';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatDividerModule } from '@angular/material/divider';
+import { SensorData } from '../../models/sensorData.model';
 
 interface MeasurementDisplay {
   name: string;
@@ -17,17 +14,10 @@ interface MeasurementDisplay {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [
-    MatCardModule,
-    CommonModule,
-    MatGridListModule,
-    MatDividerModule
-  ],
+  imports: [MatCardModule, CommonModule, MatGridListModule, MatDividerModule],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.scss'
+  styleUrl: './home-page.component.scss',
 })
-
-
 export class HomePageComponent implements OnInit {
   // This object groups measurements by sensor location.
   measurementsByLocation: { [location: string]: MeasurementDisplay[] } = {};
@@ -41,43 +31,43 @@ export class HomePageComponent implements OnInit {
   private loadMeasurements(): void {
     // Subscribe individually and log the data
     this.backendService.getSoilMoistrue().subscribe({
-      next: data => {
+      next: (data) => {
         console.log('Soil Moisture:', data);
         this.addMeasurement(data);
       },
-      error: err => console.error('Error getting soil moisture:', err)
+      error: (err) => console.error('Error getting soil moisture:', err),
     });
 
     this.backendService.getPhosphorData().subscribe({
-      next: data => {
+      next: (data) => {
         console.log('Phosphorus:', data);
         this.addMeasurement(data);
       },
-      error: err => console.error('Error getting phosphorus data:', err)
+      error: (err) => console.error('Error getting phosphorus data:', err),
     });
 
     this.backendService.getNitrogenData().subscribe({
-      next: data => {
+      next: (data) => {
         console.log('Nitrogen:', data);
         this.addMeasurement(data);
       },
-      error: err => console.error('Error getting nitrogen data:', err)
+      error: (err) => console.error('Error getting nitrogen data:', err),
     });
 
     this.backendService.getHumidityData().subscribe({
-      next: data => {
+      next: (data) => {
         console.log('Humidity:', data);
         this.addMeasurement(data);
       },
-      error: err => console.error('Error getting humidity data:', err)
+      error: (err) => console.error('Error getting humidity data:', err),
     });
 
     this.backendService.getRoomTemperatureData().subscribe({
-      next: data => {
+      next: (data) => {
         console.log('Room Temperature:', data);
         this.addMeasurement(data);
       },
-      error: err => console.error('Error getting room temperature data:', err)
+      error: (err) => console.error('Error getting room temperature data:', err),
     });
 
     // Log the grouped measurements after a short delay for debugging.
@@ -92,15 +82,16 @@ export class HomePageComponent implements OnInit {
       return;
     }
     const location = measurement.sensor.location;
-    const latestData = measurement.dataPoints && measurement.dataPoints.length > 0
-      ? this.getLatestData(measurement.dataPoints)
-      : null;
+    const latestData =
+      measurement.dataPoints && measurement.dataPoints.length > 0
+        ? this.getLatestData(measurement.dataPoints)
+        : null;
     if (!this.measurementsByLocation[location]) {
       this.measurementsByLocation[location] = [];
     }
     this.measurementsByLocation[location].push({
       name: measurement.measurementName,
-      latestData: latestData
+      latestData: latestData,
     });
   }
 
@@ -108,7 +99,8 @@ export class HomePageComponent implements OnInit {
     if (!dataPoints || dataPoints.length === 0) {
       return null;
     }
-    return dataPoints.reduce((latest, current) =>
+    return dataPoints.reduce(
+      (latest, current) =>
         new Date(current.timestamp) > new Date(latest.timestamp) ? current : latest,
       dataPoints[0]
     );

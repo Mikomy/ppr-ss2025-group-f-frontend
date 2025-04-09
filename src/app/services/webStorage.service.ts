@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebStorageService {
-
-
   public get(key: string): string | null {
     return window.localStorage.getItem(key);
   }

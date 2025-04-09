@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 // Mock-Daten für Tests
 const mockMeasurements = [
   { sensorName: 'Temperature Sensor', value: 22, unit: '°C' },
-  { sensorName: 'Humidity Sensor', value: 60, unit: '%' }
+  { sensorName: 'Humidity Sensor', value: 60, unit: '%' },
 ];
 describe('HomePageComponent', () => {
   let component: HomePageComponent;
@@ -36,6 +36,5 @@ describe('HomePageComponent', () => {
 
     fixture.detectChanges();
     expect(component.measurements).toEqual(mockMeasurements);
-  })
-
+  });
 });

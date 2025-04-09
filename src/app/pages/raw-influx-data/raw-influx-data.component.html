@@ -1,32 +1,31 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/jsdatatables@latest" type="text/javascript"></script> -->
 <!-- <link href="https://cdn.jsdelivr.net/npm/jsdatatables@latest/dist/css/jsdatatables.css" rel="stylesheet" type="text/css"> -->
 <div class="container mt-4">
-    <h2>All Measurements in nexus DB</h2>
-    
-    <div *ngIf="measurements.length > 0">
-      <table datatable class="row-border hover table table-striped">
-        <thead>
-          <tr>
-            <th>Measurement Names</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let measurement of measurements">
-            <td>
-              <a (click)="showDetails(measurement)">{{ measurement }}</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <h2>All Measurements in nexus DB</h2>
 
-    
-    <div class="mt-4">
-      <h3>Debug Info</h3>
-      <p>Number of records: {{ measurements.length }}</p>
-      <details>
-        <summary>Raw data (click to expand)</summary>
-        <pre>{{ measurements | json }}</pre>
-      </details>
-    </div>
+  <div *ngIf="measurements.length > 0">
+    <table datatable class="row-border hover table table-striped">
+      <thead>
+        <tr>
+          <th>Measurement Names</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let measurement of measurements">
+          <td>
+            <a (click)="showDetails(measurement)">{{ measurement }}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
+  <div class="mt-4">
+    <h3>Debug Info</h3>
+    <p>Number of records: {{ measurements.length }}</p>
+    <details>
+      <summary>Raw data (click to expand)</summary>
+      <pre>{{ measurements | json }}</pre>
+    </details>
+  </div>
+</div>

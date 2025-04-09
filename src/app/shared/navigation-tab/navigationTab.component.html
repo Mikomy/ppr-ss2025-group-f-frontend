@@ -2,9 +2,10 @@
   <ng-container *ngFor="let link of links">
     <a
       mat-tab-link
-      routerLink="/{{link.link}}"
+      routerLink="/{{ link.link }}"
       routerLinkActive="custom-button"
-      [routerLinkActiveOptions]="{ exact: true }">
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
       {{ link.label }}
     </a>
   </ng-container>

@@ -8,13 +8,14 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './raw-influx-data.component.html',
-  styleUrl: './raw-influx-data.component.scss'
+  styleUrl: './raw-influx-data.component.scss',
 })
-export class RawInfluxDataComponent  implements OnInit {
-  
-    
+export class RawInfluxDataComponent implements OnInit {
   measurements: String[] = [];
-  constructor(private sensorDataService: SensorDataService, private router: Router) {}
+  constructor(
+    private sensorDataService: SensorDataService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.getMeasurements();
@@ -32,7 +33,7 @@ export class RawInfluxDataComponent  implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching data:', error);
-      }
+      },
     });
   }
 
@@ -75,7 +76,7 @@ export class RawInfluxDataComponent  implements OnInit {
       error: (error) => {
         console.error('Error fetching count:', error);
         return 0;
-      }
+      },
     });
   }
 }

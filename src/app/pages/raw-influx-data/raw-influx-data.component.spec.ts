@@ -8,9 +8,8 @@ describe('RawInfluxDataComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RawInfluxDataComponent]
-    })
-    .compileComponents();
+      imports: [RawInfluxDataComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RawInfluxDataComponent);
     component = fixture.componentInstance;

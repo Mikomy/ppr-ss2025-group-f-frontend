@@ -1,4 +1,3 @@
 export interface InfluxMeasurement {
-    name: string;
+  name: string;
 }
-

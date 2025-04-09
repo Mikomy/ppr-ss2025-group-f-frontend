@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { InfluxPoint } from '../models/InfluxPoint';
-import {map, Observable, of, catchError} from 'rxjs';
+import { map, Observable, of, catchError } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SensorDataService {
   constructor(private http: HttpClient) {}
@@ -17,15 +17,21 @@ export class SensorDataService {
   getInfluxMeasurements(): Observable<String[]> {
     const params = {
       db: 'nexus',
-      q: 'SHOW MEASUREMENTS'
+      q: 'SHOW MEASUREMENTS',
     };
 
     return this.http.get<any>(this.localInfluxUrl, { params }).pipe(
-      map(response => {
+      map((response) => {
         console.log('Raw Influx response for measurements:', response);
 
         try {
-          if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
+          if (
+            response &&
+            response.results &&
+            response.results[0] &&
+            response.results[0].series &&
+            response.results[0].series[0]
+          ) {
             const series = response.results[0].series[0];
             const values: string[] = series.values.flat(); // Flatten to get a string array
 
@@ -40,7 +46,7 @@ export class SensorDataService {
           return [];
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('HTTP error from Influx for measurements:', error);
         return of([]);
       })
@@ -50,17 +56,23 @@ export class SensorDataService {
   countInfluxPoints(measurementName: String): Observable<number> {
     const params = {
       db: 'nexus',
-      q: `SELECT COUNT("value") FROM "${measurementName}"`
+      q: `SELECT COUNT("value") FROM "${measurementName}"`,
     };
 
     console.log('Querying Influx for count with:', params);
 
     return this.http.get<any>(this.localInfluxUrl, { params }).pipe(
-      map(response => {
+      map((response) => {
         console.log('Raw Influx response for count:', response);
 
         try {
-          if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
+          if (
+            response &&
+            response.results &&
+            response.results[0] &&
+            response.results[0].series &&
+            response.results[0].series[0]
+          ) {
             const series = response.results[0].series[0];
             const values = series.values;
 
@@ -77,42 +89,51 @@ export class SensorDataService {
           return 0;
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('HTTP error from Influx for count:', error);
         return of(0);
       })
     );
   }
 
-  getInfluxPoints(measureMentType: string, page: number, pageSize: number): Observable<InfluxPoint[]> {
+  getInfluxPoints(
+    measureMentType: string,
+    page: number,
+    pageSize: number
+  ): Observable<InfluxPoint[]> {
     const offset = (page - 1) * pageSize;
     const params = {
       db: 'nexus',
-      q: `SELECT * FROM "${measureMentType}" LIMIT ${pageSize} OFFSET ${offset}`
+      q: `SELECT * FROM "${measureMentType}" LIMIT ${pageSize} OFFSET ${offset}`,
     };
 
     console.log('Querying Influx with:', params);
 
     return this.http.get<any>(this.localInfluxUrl, { params }).pipe(
-      map(response => {
+      map((response) => {
         console.log('Raw Influx response:', response);
 
         try {
-          if (response && response.results && response.results[0] && response.results[0].series && response.results[0].series[0]) {
+          if (
+            response &&
+            response.results &&
+            response.results[0] &&
+            response.results[0].series &&
+            response.results[0].series[0]
+          ) {
             const series = response.results[0].series[0];
             const columns = series.columns;
 
-            
-          const values = series.values;
-           const positionOfValue = columns.indexOf('value');
-           const positionoOfTime = columns.indexOf('time');
-           const positionOfSensorName = columns.indexOf('device_name');
+            const values = series.values;
+            const positionOfValue = columns.indexOf('value');
+            const positionoOfTime = columns.indexOf('time');
+            const positionOfSensorName = columns.indexOf('device_name');
 
             return values.map((value: any[]) => {
               const measurement: InfluxPoint = {
                 sensorName: value[positionOfSensorName] || 'Unknown Sensor',
-                value: parseFloat(value[positionOfValue]) ,
-                timestamp: value[positionoOfTime]
+                value: parseFloat(value[positionOfValue]),
+                timestamp: value[positionoOfTime],
               };
               return measurement;
             });
@@ -125,7 +146,7 @@ export class SensorDataService {
           return [];
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('HTTP error from Influx:', error);
         return of([]);
       })

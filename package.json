@@ -7,7 +7,13 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --code-coverage",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "prepare": "husky install",
+    "precommit": "npm run lint",
+    "format": "npx prettier src --check",
+    "format:fix": "npx prettier src --write",
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
@@ -21,7 +27,7 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
-    "@nx/eslint-plugin": "^20.6.4",
+    "@nx/eslint-plugin": "^19.2.0",
     "bootstrap": "^5.3.3",
     "jsonc-eslint-parser": "^2.4.0",
     "particles.js": "^2.0.0",
@@ -33,11 +39,12 @@
     "@angular-devkit/build-angular": "^19.2.1",
     "@angular/cli": "^19.2.1",
     "@angular/compiler-cli": "^19.2.0",
-    "@eslint/js": "^9.23.0",
+    "@eslint/js": "^9.24.0",
     "@playwright/test": "^1.51.1",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "19.3.0",
     "eslint": "^9.23.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^50.6.9",
     "eslint-plugin-prefer-arrow": "^1.2.3",
@@ -50,9 +57,16 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "karma-spec-reporter": "^0.0.36",
+    "lint-staged": "^15.5.0",
     "playwright": "^1.51.1",
     "prettier": "^3.5.3",
     "typescript": "~5.7.2",
-    "typescript-eslint": "^8.27.0"
+    "typescript-eslint": "8.27.0"
+  },
+  "lint-staged": {
+    "*.{ts,js,html,css,scss,json}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

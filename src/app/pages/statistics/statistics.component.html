@@ -2,8 +2,7 @@
 <!-- <link href="https://cdn.jsdelivr.net/npm/jsdatatables@latest/dist/css/jsdatatables.css" rel="stylesheet" type="text/css"> -->
 <div class="container mt-4">
   <h2>Sensor Statistics</h2>
-  
- 
+
   <div *ngIf="dataPoints.length > 0">
     <table datatable class="row-border hover table table-striped">
       <thead>
@@ -17,12 +16,12 @@
         <tr *ngFor="let point of dataPoints">
           <td>{{ point.sensorName }}</td>
           <td>{{ point.value }}</td>
-          <td>{{ point.timestamp | date:'medium' }}</td>
+          <td>{{ point.timestamp | date: 'medium' }}</td>
         </tr>
       </tbody>
     </table>
   </div>
-  
+
   <div class="mt-4">
     <h3>Debug Info</h3>
     <p>Number of records: {{ dataPoints.length }}</p>

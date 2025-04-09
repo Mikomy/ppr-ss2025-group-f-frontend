@@ -8,9 +8,8 @@ describe('RawPointsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RawPointsComponent]
-    })
-    .compileComponents();
+      imports: [RawPointsComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RawPointsComponent);
     component = fixture.componentInstance;

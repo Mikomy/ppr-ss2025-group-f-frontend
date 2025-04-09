@@ -8,7 +8,10 @@
       <mat-card class="cards-container" *ngFor="let group of measurementsByLocation | keyvalue">
         <h2>{{ group.key }}</h2>
         <div *ngFor="let measurement of group.value">
-          <p>{{ measurement.name }} - {{ measurement.latestData?.timestamp }} - {{ measurement.latestData?.value }}</p>
+          <p>
+            {{ measurement.name }} - {{ measurement.latestData?.timestamp }} -
+            {{ measurement.latestData?.value }}
+          </p>
         </div>
       </mat-card>
     </div>
