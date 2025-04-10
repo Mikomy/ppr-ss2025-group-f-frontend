@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { MatTabsModule } from '@angular/material/tabs';
-import { TabNavigationComponent } from './shared/navigation-tab/navigationTab.component';
+import { Component } from '@angular/core'
+import { RouterOutlet } from '@angular/router'
+import { MatTabsModule } from '@angular/material/tabs'
+import { TabNavigationComponent } from './shared/navigation-tab/navigationTab.component'
 
 @Component({
   selector: 'app-root',
@@ -11,5 +11,5 @@ import { TabNavigationComponent } from './shared/navigation-tab/navigationTab.co
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'nexus-frontend';
+  title = 'nexus-frontend'
 }

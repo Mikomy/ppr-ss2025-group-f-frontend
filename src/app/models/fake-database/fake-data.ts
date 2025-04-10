@@ -1,5 +1,5 @@
 // A simple health check status.
-export const fakeData = 'Service is running';
+export const fakeData = 'Service is running'
 
 // Soil Moisture measurement data.
 export const fakeSoilMoisture = {
@@ -14,7 +14,7 @@ export const fakeSoilMoisture = {
     { timestamp: '2025-03-29T23:00:00Z', value: 29 },
     { timestamp: '2025-03-29T22:40:00Z', value: 28 },
   ],
-};
+}
 
 // Phosphorus measurement data.
 export const fakePhosphorus = {
@@ -29,7 +29,7 @@ export const fakePhosphorus = {
     { timestamp: '2025-03-29T23:00:00Z', value: 1 },
     { timestamp: '2025-03-29T22:40:00Z', value: 1 },
   ],
-};
+}
 
 // Nitrogen measurement data.
 export const fakeNitrogen = {
@@ -44,7 +44,7 @@ export const fakeNitrogen = {
     { timestamp: '2025-03-29T23:00:00Z', value: 1 },
     { timestamp: '2025-03-29T22:40:00Z', value: 1 },
   ],
-};
+}
 
 // Humidity measurement data.
 export const fakeHumidity = {
@@ -59,7 +59,7 @@ export const fakeHumidity = {
     { timestamp: '2025-03-29T23:00:00Z', value: 44.8 },
     { timestamp: '2025-03-29T22:40:00Z', value: 44.3 },
   ],
-};
+}
 
 // Room Temperature measurement data.
 export const fakeRoomTemperature = {
@@ -74,4 +74,4 @@ export const fakeRoomTemperature = {
     { timestamp: '2025-03-29T23:00:00Z', value: 21.3 },
     { timestamp: '2025-03-29T22:40:00Z', value: 21.0 },
   ],
-};
+}

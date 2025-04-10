@@ -1,12 +1,12 @@
 ---
-version: "3.8"
+version: '3.8'
 services:
   frontend:
     build:
       context: ./nexus-frontend
       dockerfile: Dockerfile
     ports:
-      - "4200:80"
+      - '4200:80'
 #
 #  backend:
 #    image: openjdk:17

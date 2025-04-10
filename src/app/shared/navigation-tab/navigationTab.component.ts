@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { NgForOf } from '@angular/common';
+import { Component } from '@angular/core'
+import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs'
+import { RouterLink, RouterLinkActive } from '@angular/router'
+import { NgForOf } from '@angular/common'
 
 @Component({
   selector: 'app-navigation-tab',
@@ -16,5 +16,5 @@ export class TabNavigationComponent {
     { link: '/history', label: 'History' },
     { link: '/statistics', label: 'Statistics' },
     { link: '/tableView', label: 'Tabellenansicht' },
-  ];
+  ]
 }
