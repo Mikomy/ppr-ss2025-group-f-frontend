@@ -15,7 +15,7 @@ describe('HomePageComponent', () => {
     measurementName: 'Soil Moisture',
     sensor: {
       name: 'Senzemo_Senstick_Bodenfeuchtesensor_1',
-      type: 'Bodenfeuchte',
+      id: '00137a1000045594',
       location: 'Beet 1', // Updated so that it is considered valid.
     },
     dataPoints: [
@@ -29,7 +29,7 @@ describe('HomePageComponent', () => {
     measurementName: 'Phosphorus',
     sensor: {
       name: 'Senzemo_Senstick_Phosphor_1',
-      type: 'Phosphorus',
+      id: '00137a1000045593',
       location: 'Beet 1',
     },
     dataPoints: [
@@ -43,7 +43,7 @@ describe('HomePageComponent', () => {
     measurementName: 'Nitrogen',
     sensor: {
       name: 'Senzemo_Senstick_Stickstoff_1',
-      type: 'Stickstoff',
+      id: '00137a1000045592',
       location: 'Beet 1',
     },
     dataPoints: [
@@ -57,7 +57,7 @@ describe('HomePageComponent', () => {
     measurementName: 'Humidity',
     sensor: {
       name: 'Senzemo_Senstick_Luftfeuchtesensor_1',
-      type: 'Luftfeuchte',
+      id: '00137a1000045591',
       location: 'Beet 1',
     },
     dataPoints: [
@@ -71,7 +71,7 @@ describe('HomePageComponent', () => {
     measurementName: 'Room Temperature',
     sensor: {
       name: 'Senzemo_Senstick_Raumtemperatursensor_1',
-      type: 'Temperature',
+      id: '00137a1000045590',
       location: 'Beet 1',
     },
     dataPoints: [
@@ -151,7 +151,7 @@ describe('HomePageComponent', () => {
     // Testing addMeasurement with invalid measurement data.
     const invalidMeasurement: Measurement = {
       measurementName: 'Invalid Measurement',
-      sensor: { name: '', type: '', location: '' },
+      sensor: { name: '', id: '', location: '' },
       dataPoints: [],
     }
     const initialGroupCount = Object.keys(component.measurementsByLocation).length

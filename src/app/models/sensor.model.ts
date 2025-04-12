@@ -1,5 +1,5 @@
 export interface Sensors {
   name: string
-  type: string
+  id: string
   location: string
 }
