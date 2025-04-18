@@ -30,6 +30,7 @@
     "@nx/eslint-plugin": "^19.2.0",
     "bootstrap": "^5.3.3",
     "jsonc-eslint-parser": "^2.4.0",
+    "ngx-material-timepicker": "^13.1.1",
     "particles.js": "^2.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -64,7 +65,7 @@
     "typescript-eslint": "8.27.0"
   },
   "lint-staged": {
-    "*.{ts,js,html,css,scss,json}": [
+    "*.{ts,js,html}": [
       "eslint --fix",
       "prettier --write ."
     ]

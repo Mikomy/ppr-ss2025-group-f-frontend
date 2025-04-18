@@ -1,14 +1,25 @@
-/* You can add global styles to this file, and also import other style files */
-#nav-bar a.mat-tab-link {
-  background-color: #808080 !important;
-  color: #ffffff !important;
-  font-size: 28px !important;
-  border-radius: 0.375rem;
-  padding: 10px 15px;
-  text-transform: uppercase;
+/* styles.scss */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+/* 1. Das Dropdown‑Panel selbst */
+.cdk-overlay-container .cdk-overlay-pane .mat-select-panel {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Optional hover effect */
-#nav-bar a.mat-tab-link:hover {
-  background-color: #6e6e6e !important;
+/* 2. Jede einzelne Option im Dropdown */
+.cdk-overlay-container .cdk-overlay-pane .mat-select-panel .mat-option {
+  background-color: #ffffff !important;
+  color: rgba(0,0,0,0.87) !important;
+}
+
+/* 3. Bei Hover und Auswahl die Farbe korrigieren */
+.cdk-overlay-container .cdk-overlay-pane .mat-select-panel .mat-option:hover,
+.cdk-overlay-container .cdk-overlay-pane .mat-select-panel .mat-option.mat-active {
+  background-color: #e0e0e0 !important;
+}
+
+/* 4. Datepicker‑Overlay */
+.cdk-overlay-container .mat-datepicker-content,
+.cdk-overlay-container .mat-calendar {
+  background-color: #ffffff !important;
 }

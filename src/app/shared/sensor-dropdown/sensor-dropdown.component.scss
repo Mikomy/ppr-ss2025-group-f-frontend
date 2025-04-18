@@ -1,0 +1,54 @@
+mat-card {
+  width: 100%;
+  margin: 1rem auto;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+:host ::ng-deep .white-select-panel {
+  background-color: #ffffff !important;
+}
+
+/* Title Styling */
+.dropdown-title {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  color: #3f51b5;
+  margin-bottom: 1rem;
+  background-color: grey !important;
+}
+
+/* Form Field Styling */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+  background-color: grey !important;
+}
+
+/* Spinner Styling */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+/* Error Message Styling */
+.error-message {
+  color: #d32f2f;
+  font-weight: bold;
+  text-align: center;
+  padding: 1rem;
+  background-color: #fdecea;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+}
+
+/* Dropdown Toggle Styling */
+.dropdown-toggle {
+  margin-top: 1rem;
+  background-color: #ffffff !important;
+}

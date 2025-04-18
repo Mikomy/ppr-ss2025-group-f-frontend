@@ -1,0 +1,32 @@
+<mat-card>
+  <mat-card-title class="dropdown-titel">
+    Measurement-Auswahl mit Filterfunktion nach Eingabe
+  </mat-card-title>
+  <mat-card-content>
+    <div *ngIf="currentState === 'loading'" class="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div *ngIf="currentState === 'error'" class="error-message">
+      Fehler beim Laden. Bitte später erneut versuchen.
+    </div>
+    <mat-form-field *ngIf="currentState === 'complete'" class="full-width" appearance="fill">
+      <mat-label>Measurement eingeben und auswählen</mat-label>
+      <input
+        matInput
+        [formControl]="sensorControl"
+        [matAutocomplete]="auto"
+        placeholder="z.B. Soil Moisture"
+      />
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        [displayWith]="displayFn.bind(this)"
+        (optionSelected)="onOptionSelected($event.option.value)"
+      >
+        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+          {{ option.measurementName }} – {{ option.sensor.name }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>
