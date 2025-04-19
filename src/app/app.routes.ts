@@ -28,8 +28,8 @@ export const routes: Routes = [
   {
     path: 'tableView',
     loadComponent: () =>
-      import('./pages/tabellenansicht-page/tabellenansicht-page.component').then(
-        (m) => m.TabellenansichtPageComponent
+      import('./pages/tableView-page/tableView-page.component').then(
+        (m) => m.TableViewPageComponent
       ),
   },
 ]

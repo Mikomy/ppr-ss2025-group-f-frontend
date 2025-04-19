@@ -17,15 +17,14 @@ import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatNativeDateModule } from '@angular/material/core'
 import { CdkDrag } from '@angular/cdk/drag-drop'
 import { MeasurementTableComponent } from '../../shared/measurement-table/measurement-table.component'
+import { SavedTable } from '../../models/savedTable.model'
 
-interface SavedTable {
-  id: string
-  name: string
-  from?: string
-  to?: string
-  data: Measurement
-}
-
+/**
+ * Component for displaying and managing sensor measurement tables.
+ * Users can select a sensor and date/time range, load detailed measurements,
+ * and display multiple draggable tables. Persisted tables are stored in local
+ * web storage under a configurable key.
+ */
 @Component({
   selector: 'app-tabellenansicht-page',
   standalone: true,
@@ -44,31 +43,58 @@ interface SavedTable {
     CdkDrag,
     MeasurementTableComponent,
   ],
-  templateUrl: './tabellenansicht-page.component.html',
-  styleUrls: ['./tabellenansicht-page.component.scss'],
+  templateUrl: './tableView-page.component.html',
+  styleUrls: ['./tableView-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TabellenansichtPageComponent implements OnInit {
+export class TableViewPageComponent implements OnInit {
+  /** Currently selected dropdown option containing sensor and measurement info */
   selectedOption?: DropdownOptionModel
+
+  /** Start date for filtering measurement data */
   fromDate?: Date
+
+  /** Start time (HH:mm) for filtering measurement data */
   fromTime?: string
+
+  /** End date for filtering measurement data */
   toDate?: Date
+
+  /** End time (HH:mm) for filtering measurement data */
   toTime?: string
+
+  /** Holds error messages to display in the view */
   errorMessage?: string
 
+  /** Array of saved table configurations, loaded from web storage */
   savedTables: SavedTable[] = []
+
+  /** Key used for persisting saved tables in web storage */
   private storageKey = 'saved-sensor-tables'
 
+  /**
+   * @param backendService Service to fetch measurement data from the server
+   * @param storage        Web storage service for persisting table configurations
+   */
   constructor(
     private backendService: BackendService,
     private storage: WebStorageService
   ) {}
 
+  /**
+   * Lifecycle hook: initializes the component by loading any saved tables
+   * from web storage into the `savedTables` array.
+   */
   ngOnInit(): void {
     const raw = this.storage.get(this.storageKey)
-    this.savedTables = raw ? JSON.parse(raw) : []
+    this.savedTables = raw ? (JSON.parse(raw) as SavedTable[]) : []
   }
 
+  /**
+   * Handler for sensor dropdown selection change.
+   * Resets all date, time, and error fields.
+   * @param selected The new dropdown option selected by the user
+   */
   onSelectionChange(selected: DropdownOptionModel): void {
     this.selectedOption = selected
     this.fromDate = undefined
@@ -78,18 +104,28 @@ export class TabellenansichtPageComponent implements OnInit {
     this.errorMessage = undefined
   }
 
+  /**
+   * Validates user input and, if valid, requests detailed measurement data
+   * from the backend service and adds a new table to `savedTables`.
+   * Displays error messages on invalid input or request failure.
+   */
   loadDetailedMeasurement(): void {
     if (!this.selectedOption || !this.fromDate || !this.fromTime || !this.toDate || !this.toTime) {
       this.errorMessage = 'Bitte wählen Sie Sensor, Datum und Uhrzeit aus.'
       return
     }
+
+    // Combine date and time into ISO strings
     const from = new Date(this.fromDate)
-    from.setHours(+this.fromTime.split(':')[0], +this.fromTime.split(':')[1])
+    const [fromH, fromM] = this.fromTime.split(':').map(Number)
+    from.setHours(fromH, fromM)
     const to = new Date(this.toDate)
-    to.setHours(+this.toTime.split(':')[0], +this.toTime.split(':')[1])
+    const [toH, toM] = this.toTime.split(':').map(Number)
+    to.setHours(toH, toM)
     const fromIso = from.toISOString()
     const toIso = to.toISOString()
 
+    // Fetch measurement data and handle response
     this.backendService
       .getMeasurement(this.selectedOption.measurementName, fromIso, toIso)
       .pipe(take(1))
@@ -99,6 +135,12 @@ export class TabellenansichtPageComponent implements OnInit {
       })
   }
 
+  /**
+   * Adds a new table configuration to the savedTables and persists it.
+   * @param data Measurement data returned from backend
+   * @param from ISO string representing start of data range
+   * @param to   ISO string representing end of data range
+   */
   private addTable(data: Measurement, from: string, to: string): void {
     const id = Date.now().toString()
     this.savedTables = [
@@ -108,6 +150,10 @@ export class TabellenansichtPageComponent implements OnInit {
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
   }
 
+  /**
+   * Removes a table configuration by id and updates persisted storage.
+   * @param id Unique identifier of the table to remove
+   */
   removeTable(id: string): void {
     this.savedTables = this.savedTables.filter((t) => t.id !== id)
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
