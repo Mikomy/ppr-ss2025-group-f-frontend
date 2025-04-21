@@ -1,1 +1,47 @@
-<p>historische-analyse-page works!</p>
+<mat-card>
+  <mat-card-title>Wähle bis zu drei Measurements und erstelle ein Diagramm.</mat-card-title>
+  <mat-card-content>
+    <!-- Schleife über Deine drei Config‑Objekte -->
+    <div class="config-rows">
+      <app-chart-config-row
+        *ngFor="let cfg of configs; let i = index"
+        [config]="cfg"
+        (configChange)="onConfigChange(i, $event)"
+      >
+      </app-chart-config-row>
+    </div>
+
+    <div class="time-controls">
+      <mat-form-field appearance="fill">
+        <mat-label>Von (Datum)</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Von (Uhrzeit)</mat-label>
+        <input matInput type="time" [(ngModel)]="fromTime" />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Bis (Datum)</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Bis (Uhrzeit)</mat-label>
+        <input matInput type="time" [(ngModel)]="toTime" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="loadCharts()">
+        Neue Charts hinzufügen
+      </button>
+      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="charts-container">
+  <div *ngFor="let chart of savedCharts" cdkDrag>
+    <app-chart-panel [config]="chart" (remove)="removeChart($event)"></app-chart-panel>
+  </div>
+</div>

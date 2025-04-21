@@ -30,6 +30,8 @@
     "@nx/eslint-plugin": "^19.2.0",
     "bootstrap": "^5.3.3",
     "jsonc-eslint-parser": "^2.4.0",
+    "ng2-charts": "^8.0.0",
+    "ngx-echarts": "^19.0.0",
     "ngx-material-timepicker": "^13.1.1",
     "particles.js": "^2.0.0",
     "rxjs": "~7.8.0",

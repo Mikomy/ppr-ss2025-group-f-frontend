@@ -1,0 +1,7 @@
+<ng-container [ngSwitch]="chartType">
+  <app-line-chart *ngSwitchCase="'line'" [dataSeries]="dataSeries"> </app-line-chart>
+  <app-bar-chart *ngSwitchCase="'bar'" [dataSeries]="dataSeries"> </app-bar-chart>
+  <app-heatmap-chart *ngSwitchCase="'heatmap'" [dataSeries]="dataSeries">
+    [zones]="chartType==='heatmap' ? defaultZones : []">
+  </app-heatmap-chart>
+</ng-container>

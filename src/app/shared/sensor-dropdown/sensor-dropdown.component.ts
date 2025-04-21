@@ -1,4 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { Observable, of } from 'rxjs'
@@ -29,12 +37,12 @@ import { DropdownOptionModel } from '../../models/dropdown.option.model'
   templateUrl: './sensor-dropdown.component.html',
   styleUrls: ['./sensor-dropdown.component.scss'],
 })
-export class SensorDropdownComponent implements OnInit {
+export class SensorDropdownComponent implements OnInit, OnChanges {
   sensorControl = new FormControl<DropdownOptionModel | string | null>(null)
   dropdownOptions: DropdownOptionModel[] = []
   filteredOptions: Observable<DropdownOptionModel[]> = of([])
   currentState: 'loading' | 'error' | 'complete' = 'loading'
-
+  @Input() selectedOption?: DropdownOptionModel
   @Output() selectionChange = new EventEmitter<DropdownOptionModel>()
 
   constructor(private backendService: BackendService) {}
@@ -71,7 +79,14 @@ export class SensorDropdownComponent implements OnInit {
   displayFn = (option: DropdownOptionModel | string | null): string =>
     typeof option === 'object' && option ? option.measurementName : (option as string) || ''
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedOption'] && this.selectedOption) {
+      // setzt den Control‑Wert, wenn Parent einen Wert reinschiebt
+      this.sensorControl.setValue(this.selectedOption)
+    }
+  }
   onOptionSelected(option: DropdownOptionModel): void {
+    this.sensorControl.setValue(option)
     this.selectionChange.emit(option)
   }
 }

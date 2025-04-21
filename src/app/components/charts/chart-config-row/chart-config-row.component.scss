@@ -1,0 +1,21 @@
+/* chart-config-row.component.scss */
+.config-row {
+  display: flex;
+  width: 30rem;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+
+.color-picker {
+  width: 10rem;
+  font-size: 15px;
+  bottom: 5px;
+  margin: 1rem;
+}
+
+.type-toggle {
+  margin-left: auto;
+  margin-bottom: 1rem;
+}

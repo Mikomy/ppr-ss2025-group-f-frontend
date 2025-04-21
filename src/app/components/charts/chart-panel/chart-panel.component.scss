@@ -1,0 +1,17 @@
+.chart-card {
+  position: relative;
+  margin-top: 1rem;
+  background: #fff;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(255,255,255,0.8);
+}
+.remove-txt {
+  font-size: 15px;
+  top: -6px;
+  left: -11px;
+}

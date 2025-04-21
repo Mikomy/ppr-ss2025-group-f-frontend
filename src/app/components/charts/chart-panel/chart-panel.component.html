@@ -1,0 +1,12 @@
+<mat-card class="chart-card" cdkDrag>
+  <button mat-icon-button class="remove-btn" aria-label="Entfernen" (click)="onRemove()">
+    <mat-icon class="remove-txt"><strong>x</strong></mat-icon>
+  </button>
+  <mat-card-header>
+    <mat-card-title>{{ config.titles.join(' / ') }}</mat-card-title>
+    <mat-card-subtitle>{{ config.from }} – {{ config.to }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <app-chart-host [dataSeries]="config.series" [chartType]="config.chartType"> </app-chart-host>
+  </mat-card-content>
+</mat-card>
