@@ -1,20 +1,46 @@
 /* chart-config-row.component.scss */
 .config-row {
   display: flex;
-  width: 30rem;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
+app-sensor-dropdown {
+  flex: 1 1 30%;
+  min-width: 8rem;
+}
 
-.color-picker {
-  width: 10rem;
-  font-size: 15px;
-  bottom: 5px;
+
+.color-text {
+  height: 32px;
+  width: 3rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  vertical-align: middle;
+  line-height: 1;
+  position: relative;
+  top: 2px;
+  font-size: 18px;
   margin: 1rem;
 }
 
+
+.color-picker {
+  width: 14rem;
+  height: 6rem;
+  font-size: 15px;
+  bottom: 5px;
+  box-sizing: border-box;
+  margin: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .type-toggle {
-  margin-left: auto;
+  height: 3rem;
   margin-bottom: 1rem;
 }
+
