@@ -97,7 +97,7 @@ export class TableViewPageComponent implements OnInit {
    * @param selected The new dropdown option selected by the user
    */
   onSelectionChange(selected: DropdownOptionModel): void {
-    this.selectedOption = selected
+    this.selectedOption = { ...selected }
     this.fromDate = undefined
     this.fromTime = undefined
     this.toDate = undefined

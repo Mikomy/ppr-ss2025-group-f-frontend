@@ -89,7 +89,7 @@ export class BackendService {
         return of(fakeDataTemperature)
       default:
         // kein passendes Measurement → leeres Array
-        return of([]).pipe(catchError(this.handleError<Measurement>(`${fromTime},${toTime}`)))
+        return of([]).pipe(catchError(this.handleError<Measurement[]>(`${fromTime},${toTime}`)))
     }
   }
 

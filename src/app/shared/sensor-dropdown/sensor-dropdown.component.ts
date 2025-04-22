@@ -53,14 +53,16 @@ export class SensorDropdownComponent implements OnInit, OnChanges {
         this.dropdownOptions = options
         this.currentState = 'complete'
         this.filteredOptions = this.sensorControl.valueChanges.pipe(
-          startWith<string | DropdownOptionModel | null>(null),
+          // startWith: zuerst mit dem aktuellen Wert starten
+          startWith<DropdownOptionModel | string | null>(this.selectedOption ?? null),
           map((value) => {
-            const filterValue =
-              typeof value === 'string'
-                ? value.toLowerCase()
-                : value && typeof value === 'object'
-                  ? value.measurementName.toLowerCase()
-                  : ''
+            // Wenn bereits eine Auswahl (Objekt) im Control steht:
+            if (value && typeof value === 'object' && 'measurementName' in value) {
+              // dann zeige die *ganze* Liste:
+              return this.dropdownOptions.slice()
+            }
+            // Sonst filtere klassisch nach Text
+            const filterValue = typeof value === 'string' ? value.toLowerCase() : ''
             return this.dropdownOptions.filter(
               (option) =>
                 option.measurementName.toLowerCase().includes(filterValue) ||
@@ -69,10 +71,7 @@ export class SensorDropdownComponent implements OnInit, OnChanges {
           })
         )
       },
-      error: (err) => {
-        console.error('Failed loading dropdown options', err)
-        this.currentState = 'error'
-      },
+      error: () => (this.currentState = 'error'),
     })
   }
 

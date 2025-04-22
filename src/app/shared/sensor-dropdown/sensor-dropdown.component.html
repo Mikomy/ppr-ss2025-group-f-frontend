@@ -17,10 +17,12 @@
         [formControl]="sensorControl"
         [matAutocomplete]="auto"
         placeholder="z.B. Soil Moisture"
+        (focus)="sensorControl.setValue(null)"
       />
       <mat-autocomplete
         #auto="matAutocomplete"
         [displayWith]="displayFn.bind(this)"
+        (opened)="sensorControl.setValue(null)"
         (optionSelected)="onOptionSelected($event.option.value)"
       >
         <mat-option *ngFor="let option of filteredOptions | async" [value]="option">

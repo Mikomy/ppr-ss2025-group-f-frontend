@@ -4,7 +4,11 @@
     oben rechts in der Tabelle klicken.
   </mat-card-title>
   <mat-card-content>
-    <app-sensor-dropdown (selectionChange)="onSelectionChange($event)"></app-sensor-dropdown>
+    <app-sensor-dropdown
+      [selectedOption]="selectedOption"
+      (selectionChange)="onSelectionChange($event)"
+    >
+    </app-sensor-dropdown>
 
     <div *ngIf="selectedOption" class="controls">
       <!-- Datum mit Kalender -->
