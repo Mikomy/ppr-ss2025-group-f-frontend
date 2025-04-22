@@ -17,4 +17,6 @@ export class TabNavigationComponent {
     { link: '/statistics', label: 'Statistics' },
     { link: '/tableView', label: 'Tabellenansicht' },
   ]
+
+  nexusLogoImagePath = 'assets/nexus_logo.jpeg'
 }

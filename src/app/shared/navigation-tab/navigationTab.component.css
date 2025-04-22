@@ -1,21 +1,58 @@
-#nav-bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background-color: #ffffff;
+.flex {
+  display: flex;
 }
 
-#nav-bar a.mat-tab-link.mat-tab-label-active {
-  background-color: #808080;
-  color: darkgrey !important;
-  font-size: 28px !important;
+img {
+  width: 100%;
+  height: auto;
+  max-width: 200px;
 }
 
-.custom-button {
-  border-radius: 0.375rem;
-  background-color: #0c7d9d;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: background-color 0.2s ease-in-out;
-  color: #ffffff;
-  font-size: 28px;
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.logo img {
+  height: 50px;
+}
+
+.title {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Navigation link styles */
+.navigation a {
+  color: #333;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 0 2px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect for all navigation links */
+.navigation a:hover {
+  background-color: #f0f0f0;
+  color: #1976d2;
+}
+
+/* Active link style */
+.navigation a.active {
+  background-color: #1976d2;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Active link hover effect */
+.navigation a.active:hover {
+  background-color: #1565c0;
 }
