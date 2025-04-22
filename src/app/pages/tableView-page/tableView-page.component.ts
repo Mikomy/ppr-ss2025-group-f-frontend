@@ -18,6 +18,7 @@ import { MatNativeDateModule } from '@angular/material/core'
 import { CdkDrag } from '@angular/cdk/drag-drop'
 import { MeasurementTableComponent } from '../../shared/measurement-table/measurement-table.component'
 import { SavedTable } from '../../models/savedTable.model'
+import { filterBySensor } from '../../shared/utils/measurement-filter'
 
 /**
  * Component for displaying and managing sensor measurement tables.
@@ -116,23 +117,40 @@ export class TableViewPageComponent implements OnInit {
     }
 
     // Combine date and time into ISO strings
-    const from = new Date(this.fromDate)
-    const [fromH, fromM] = this.fromTime.split(':').map(Number)
-    from.setHours(fromH, fromM)
-    const to = new Date(this.toDate)
-    const [toH, toM] = this.toTime.split(':').map(Number)
-    to.setHours(toH, toM)
-    const fromIso = from.toISOString()
-    const toIso = to.toISOString()
+    const fromIso = this.combineDateAndTime(this.fromDate, this.fromTime)
+    const toIso = this.combineDateAndTime(this.toDate, this.toTime)
 
     // Fetch measurement data and handle response
     this.backendService
       .getMeasurement(this.selectedOption.measurementName, fromIso, toIso)
       .pipe(take(1))
       .subscribe({
-        next: (measurement) => this.addTable(measurement, fromIso, toIso),
+        next: (measurement) => {
+          if (!measurement.length) {
+            this.errorMessage =
+              'Keine Daten für den ausgewählten Measurement im angegebenen Zeitraum vorhanden.'
+            return
+          }
+          const match = filterBySensor(measurement, this.selectedOption!.sensor.name)
+          if (!match) {
+            this.errorMessage = 'Keine Daten für Sensor "${this.selectedOption!.sensor.name}".'
+            return
+          }
+          if (!match.dataPoints.length) {
+            this.errorMessage = 'Keine Messwerte im gewählten Zeitraum vorhanden.'
+          }
+          this.errorMessage = undefined
+          this.addTable(match, fromIso, toIso)
+        },
         error: () => (this.errorMessage = 'Fehler beim Laden der Daten.'),
       })
+  }
+
+  private combineDateAndTime(date: Date, time: string) {
+    const dt = new Date(date)
+    const [h, m] = time.split(':').map(Number)
+    dt.setHours(h, m)
+    return dt.toISOString()
   }
 
   /**

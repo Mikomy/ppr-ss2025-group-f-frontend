@@ -22,6 +22,8 @@ import {
   ChartConfigRowComponent,
 } from '../../components/charts/chart-config-row/chart-config-row.component'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
+import { filterBySensor } from '../../shared/utils/measurement-filter'
+import { Measurement } from '../../models/measurement.model'
 
 @Component({
   selector: 'app-historische-analyse-page',
@@ -91,14 +93,8 @@ export class HistorischeAnalysePageComponent implements OnInit {
     }
 
     // Build ISO strings
-    const from = new Date(this.fromDate)
-    const [fromH, fromM] = this.fromTime.split(':').map(Number)
-    from.setHours(fromH, fromM)
-    const to = new Date(this.toDate)
-    const [toH, toM] = this.toTime.split(':').map(Number)
-    to.setHours(toH, toM)
-    const fromIso = from.toISOString()
-    const toIso = to.toISOString()
+    const fromIso = this.combineDateAndTime(this.fromDate!, this.fromTime!)
+    const toIso = this.combineDateAndTime(this.toDate!, this.toTime!)
 
     // Fetch all series
     const calls = selectedConfigs.map((cfg) =>
@@ -106,12 +102,29 @@ export class HistorischeAnalysePageComponent implements OnInit {
     )
 
     forkJoin(calls).subscribe(
-      (measurements) => {
+      (measurements: Measurement[][]) => {
+        const filtered = measurements.map((arr, i) => {
+          const sensorName = selectedConfigs[i].measurement!.sensor.name
+          return filterBySensor(arr, sensorName)
+        })
+
+        // 6) Prüfen, ob alle erfolgreich waren
+        if (filtered.some((m) => !m)) {
+          this.errorMessage = 'Nicht für jede Messung Daten für den gewählten Sensor gefunden.'
+          return
+        }
+
+        // 7) Prüfen auf Datenpunkte
+        if (filtered.some((m) => m!.dataPoints.length === 0)) {
+          this.errorMessage = 'Mindestens eine Messung enthält keine Datenpunkte im Zeitraum.'
+          return
+        }
+
         const id = Date.now().toString()
         const titles = selectedConfigs.map((cfg) => cfg.measurement!.measurementName)
-        const series = measurements.map((m, i) => ({
+        const series = filtered.map((m, i) => ({
           label: titles[i],
-          data: m.dataPoints.map((dp) => ({ timestamp: dp.timestamp, value: dp.value })),
+          data: m!.dataPoints.map((dp) => ({ timestamp: dp.timestamp, value: dp.value })),
           color: selectedConfigs[i].color,
         }))
         this.savedCharts = [
@@ -129,6 +142,13 @@ export class HistorischeAnalysePageComponent implements OnInit {
       },
       () => (this.errorMessage = 'Fehler beim Laden der Charts.')
     )
+  }
+
+  private combineDateAndTime(date: Date, time: string) {
+    const dt = new Date(date)
+    const [h, m] = time.split(':').map(Number)
+    dt.setHours(h, m)
+    return dt.toISOString()
   }
 
   removeChart(id: string): void {

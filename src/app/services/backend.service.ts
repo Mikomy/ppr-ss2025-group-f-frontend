@@ -2,11 +2,16 @@ import { Injectable } from '@angular/core'
 import { Observable, of, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import {
+  fakeAirHumidity,
+  fakeAirTemperature,
+  fakeCO2Concentration,
   fakeSoilMoisture,
-  fakePhosphorus,
   fakeNitrogen,
-  fakeHumidity,
-  fakeRoomTemperature,
+  fakePhosphorus,
+  fakePotassium,
+  fakeDataHumidity,
+  fakeDataSoilMoisture,
+  fakeDataTemperature,
 } from '../models/fake-database/fake-data'
 import measurementList from '../assets/sensor-measurements.json'
 import { Measurement } from '../models/measurement.model'
@@ -23,46 +28,69 @@ export class BackendService {
     return of(measurementList as DropdownOptionModel[])
   }
   // getStatus(): Observable<string> {
-  //   return of(fakeData).pipe(catchError(this.handleError<string>('getStatus')))
+  //   return of([]).pipe(catchError(this.handleError<string>('getStatus')))
   // }
-
-  getSoilMoistrue(): Observable<Measurement> {
-    return of(fakeSoilMoisture).pipe(catchError(this.handleError<Measurement>('getSoilMoisture')))
-  }
-
-  getPhosphorData(): Observable<Measurement> {
-    return of(fakePhosphorus).pipe(catchError(this.handleError<Measurement>('getPhosphorData')))
-  }
-
-  getNitrogenData(): Observable<Measurement> {
-    return of(fakeNitrogen).pipe(catchError(this.handleError<Measurement>('getNitrogenData')))
-  }
-
-  getHumidityData(): Observable<Measurement> {
-    return of(fakeHumidity).pipe(catchError(this.handleError<Measurement>('getHumidityData')))
-  }
-
-  getRoomTemperatureData(): Observable<Measurement> {
-    return of(fakeRoomTemperature).pipe(
-      catchError(this.handleError<Measurement>('getRoomTemperatureData'))
-    )
-  }
+  //
+  // getSoilMoistrue(): Observable<Measurement[]> {
+  //   return of([]).pipe(catchError(this.handleError<Measurement>('getSoilMoisture')))
+  // }
+  //
+  // getPhosphorData(): Observable<Measurement[]> {
+  //   return of([]).pipe(catchError(this.handleError<Measurement>('getPhosphorData')))
+  // }
+  //
+  // getNitrogenData(): Observable<Measurement[]> {
+  //   return of([]).pipe(catchError(this.handleError<Measurement>('getNitrogenData')))
+  // }
+  //
+  // getHumidityData(): Observable<Measurement[]> {
+  //   return of([]).pipe(catchError(this.handleError<Measurement>('getHumidityData')))
+  // }
+  //
+  // getRoomTemperatureData(): Observable<Measurement[]> {
+  //   return of([]).pipe(
+  //     catchError(this.handleError<Measurement>('getRoomTemperatureData'))
+  //   )
+  // }
+  // //Only for testing noData available
+  // getMeasurement(
+  //   measurementName?: string,
+  //   fromTime?: string,
+  //   toTime?: string
+  // ): Observable<Measurement[]> {
+  //       return of([])
+  //   }
 
   getMeasurement(
     measurementName?: string,
-    fromTime?: string | undefined,
-    toTime?: string | undefined
-  ): Observable<Measurement> {
-    let url = `${this.baseUrl}/measurements/grouped?measurement=${measurementName}`
-    if (fromTime) {
-      url += `&from=${encodeURIComponent(fromTime)}`
+    fromTime?: string,
+    toTime?: string
+  ): Observable<Measurement[]> {
+    switch (measurementName) {
+      case 'device_frmpayload_data_air_humidity_value':
+        return of(fakeAirHumidity)
+      case 'device_frmpayload_data_air_temperature_value':
+        return of(fakeAirTemperature)
+      case 'device_frmpayload_data_co2_concentration_value':
+        return of(fakeCO2Concentration)
+      case 'device_frmpayload_data_soil_moisture':
+        return of(fakeSoilMoisture)
+      case 'device_frmpayload_data_nitrogen':
+        return of(fakeNitrogen)
+      case 'device_frmpayload_data_phosphorus':
+        return of(fakePhosphorus)
+      case 'device_frmpayload_data_potassium':
+        return of(fakePotassium)
+      case 'device_frmpayload_data_data_Humidity':
+        return of(fakeDataHumidity)
+      case 'device_frmpayload_data_data_SoilMoisture':
+        return of(fakeDataSoilMoisture)
+      case 'device_frmpayload_data_data_Temperature':
+        return of(fakeDataTemperature)
+      default:
+        // kein passendes Measurement → leeres Array
+        return of([]).pipe(catchError(this.handleError<Measurement>(`${fromTime},${toTime}`)))
     }
-    if (toTime) {
-      url += `&to=${encodeURIComponent(toTime)}`
-    }
-    return of(fakeRoomTemperature).pipe(
-      catchError(this.handleError<Measurement>('getMeasurement' + url))
-    )
   }
 
   private handleError<T>(operation: string) {
