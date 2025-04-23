@@ -1,8 +1,231 @@
-<div class="home-container">
-  <header class="header">
-    <h1>The Nexus Project</h1>
-    <p>Real-time Sensor Measurements</p>
-  </header>
+<div class="sensor-container">
+  <h1 class="sensor_headline"><i class="fas fa-chart-line"></i>Overview</h1>
+  <p class="sensor_subheadline">Real-time Sensor Measurements</p>
+  <div class="error-message">
+    <span>DAS IST EINE TEST FEHLERMELDUNG</span>
+  </div>
+
+  <div class="notification-overlay">
+    <div class="notification-card">
+      <div class="notification-header">
+        <h3>DAS IST EINE TESTMELDUNG</h3>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="notification-content">
+        <p><strong>EIN GENERISCHE WERT: </strong>22,11</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-temperature-high"></i>
+        </div>
+        <div class="card-content">
+          <h3>Durchschn. Temperatur</h3>
+          <!-- <p class="value">{{ statistics?.averageTemperature | number:'1.1-1' }}°C</p> -->
+          <p class="value">11°C</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-tint"></i>
+        </div>
+        <div class="card-content">
+          <h3>Durchschn. Luftfeuchtigkeit</h3>
+          <!-- <p class="value">{{ statistics?.averageHumidity | number:'1.1-1' }}%</p> -->
+          <p class="value">23%</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="card-content">
+          <h3>Anzahl Messungen</h3>
+          <!-- <p class="value">{{ statistics?.count }}</p> -->
+          <p class="value">1200</p>
+        </div>
+      </div>
+
+      <!-- Älteste/neueste -->
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="card-content">
+          <h3>Älteste Messung</h3>
+          <!-- <p class="value">{{ statistics?.oldestMeasurement?.timestamp | date:'short':'':'de' }}</p> -->
+          <p class="value">22.11.2024</p>
+          <!-- <small>{{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-history"></i>
+        </div>
+        <div class="card-content">
+          <h3>Neueste Messung</h3>
+          <!-- <p class="value">{{ statistics?.newestMeasurement?.timestamp | date:'short':'':'de' }}</p> -->
+          <p class="value">23.04.2025</p>
+          <!-- <small>{{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+
+      <!-- Temperatur -->
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-thermometer-empty"></i>
+        </div>
+        <div class="card-content">
+          <h3>Niedrigste Temperatur</h3>
+          <!-- <p class="value">{{ statistics?.lowestTemperature?.temperature | number:'1.1-1' }}°C</p> -->
+          <p class="value">11°C</p>
+          <!-- <small>{{ statistics?.lowestTemperature?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-thermometer-full"></i>
+        </div>
+        <div class="card-content">
+          <h3>Höchste Temperatur</h3>
+          <!-- <p class="value">{{ statistics?.highestTemperature?.temperature | number:'1.1-1' }}°C</p> -->
+          <p class="value">37°C</p>
+          <!-- <small>{{ statistics?.highestTemperature?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+
+      <!-- Luftfeuchtigkeit -->
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-tint-slash"></i>
+        </div>
+        <div class="card-content">
+          <h3>Niedrigste Luftfeuchtigkeit</h3>
+          <!-- <p class="value">{{ statistics?.lowestHumidity?.humidity | number:'1.1-1' }}%</p> -->
+          <p class="value">20%</p>
+          <!-- <small>{{ statistics?.lowestHumidity?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon">
+          <i class="fas fa-droplet"></i>
+        </div>
+        <div class="card-content">
+          <h3>Höchste Luftfeuchtigkeit</h3>
+          <!-- <p class="value">{{ statistics?.highestHumidity?.humidity | number:'1.1-1' }}% </p> -->
+          <p class="value">65%</p>
+          <!-- <small>{{ statistics?.highestHumidity?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <h2 style="margin-top: 2rem">Test-Tabelle</h2>
+    <div class="stats-grid" style="grid-template-columns: 1fr">
+      <div class="stat-card" style="padding: 0">
+        <table style="width: 100%; border-collapse: collapse">
+          <thead>
+            <tr>
+              <th style="padding: 8px; border-bottom: 1px solid #ddd">Sensor</th>
+              <th style="padding: 8px; border-bottom: 1px solid #ddd">Wert</th>
+              <th style="padding: 8px; border-bottom: 1px solid #ddd">Zeitpunkt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 8px">Temperatur</td>
+              <td style="padding: 8px">21°C</td>
+              <td style="padding: 8px">22.04.2025 12:00</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px">Luftfeuchtigkeit</td>
+              <td style="padding: 8px">45%</td>
+              <td style="padding: 8px">22.04.2025 12:00</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px">CO₂</td>
+              <td style="padding: 8px">400 ppm</td>
+              <td style="padding: 8px">22.04.2025 12:00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Neue Diagramm-Sektion -->
+  <div class="diagramm-container" style="margin-top: 2rem">
+    <h2>Test-Diagramm</h2>
+    <div class="stats-grid" style="grid-template-columns: 1fr">
+      <div class="stat-card" style="padding: 2rem">
+        <!-- Dummy-Balkendiagramm -->
+        <div style="display: flex; align-items: flex-end; height: 200px; gap: 16px">
+          <div
+            style="
+              width: 40px;
+              height: 120px;
+              background: #4e73df;
+              border-radius: 6px 6px 0 0;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+            "
+          >
+            <span style="color: #fff; font-size: 0.9em; margin-bottom: 4px">120</span>
+          </div>
+          <div
+            style="
+              width: 40px;
+              height: 80px;
+              background: #1cc88a;
+              border-radius: 6px 6px 0 0;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+            "
+          >
+            <span style="color: #fff; font-size: 0.9em; margin-bottom: 4px">80</span>
+          </div>
+          <div
+            style="
+              width: 40px;
+              height: 160px;
+              background: #36b9cc;
+              border-radius: 6px 6px 0 0;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+            "
+          >
+            <span style="color: #fff; font-size: 0.9em; margin-bottom: 4px">160</span>
+          </div>
+          <div
+            style="
+              width: 40px;
+              height: 60px;
+              background: #f6c23e;
+              border-radius: 6px 6px 0 0;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+            "
+          >
+            <span style="color: #fff; font-size: 0.9em; margin-bottom: 4px">60</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <mat-grid-list cols="3" gutterSize="16px" rowHeight="fit">
     <div class="home-container">
       <mat-card class="cards-container" *ngFor="let group of measurementsByLocation | keyvalue">

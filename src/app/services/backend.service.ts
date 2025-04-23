@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
 import { Observable, of, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import {
@@ -16,13 +17,21 @@ import {
 import measurementList from '../assets/sensor-measurements.json'
 import { Measurement } from '../models/measurement.model'
 import { DropdownOptionModel } from '../models/dropdown.option.model'
+import { Statistics } from '../models/statistics.model'
 
 @Injectable({
   providedIn: 'root',
 })
 export class BackendService {
+  constructor(private http: HttpClient) {}
+
   private baseUrl = '/api/influx'
   //constructor(private http: HttpClient) {}
+
+  // http://localhost:8080/sensormodule/measurements/get_statistics
+  getStatistics(): Observable<Statistics> {
+    return this.http.get<Statistics>(`${this.baseUrl}/measurements/get_statistics`)
+  }
 
   getDropdownOption(): Observable<DropdownOptionModel[]> {
     return of(measurementList as DropdownOptionModel[])

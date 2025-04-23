@@ -13,9 +13,9 @@ import { NgForOf } from '@angular/common'
 export class TabNavigationComponent {
   links = [
     { link: '/', label: 'Live-Überblick' },
-    { link: '/history', label: 'History' },
-    { link: '/statistics', label: 'Statistics' },
-    { link: '/tableView', label: 'Tabellenansicht' },
+    { link: '/history', label: 'Historische Analyse' },
+    { link: '/statistics', label: 'Statistik' },
+    { link: '/tableView', label: 'Tabelle nach Sensorenauswahl' },
   ]
 
   nexusLogoImagePath = 'assets/nexus_logo.jpeg'

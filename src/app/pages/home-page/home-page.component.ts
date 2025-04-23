@@ -5,6 +5,7 @@ import { BackendService } from '../../services/backend.service'
 import { MatGridListModule } from '@angular/material/grid-list'
 import { MatDividerModule } from '@angular/material/divider'
 import { SensorData } from '../../models/sensorData.model'
+import { Statistics } from '../../models/statistics.model'
 
 interface MeasurementDisplay {
   name: string
@@ -18,6 +19,8 @@ interface MeasurementDisplay {
   styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent implements OnInit {
+  statistics: Statistics | undefined
+
   // This object groups measurements by sensor location.
   measurementsByLocation: Record<string, MeasurementDisplay[]> = {}
 
@@ -25,7 +28,17 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMeasurements()
+    // this.loadStatistics();
   }
+
+  // loadStatistics() {
+  //   this.backendService.getStatistics().subscribe({
+  //     next: (data: Statistics) => {
+  //       this.statistics = data;
+  //     },
+  //     error: (error) => console.error('Error loading statistics', error)
+  //   });
+  // }
 
   private loadMeasurements(): void {
     //   // Subscribe individually and log the data

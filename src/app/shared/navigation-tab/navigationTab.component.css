@@ -19,6 +19,9 @@ header {
 
 .logo img {
   height: 50px;
+  width: 50px;
+  border-radius:5px;
+  box-shadow: 0px 0px 19px #ee79a69e;
 }
 
 .title {
@@ -29,6 +32,13 @@ header {
 }
 
 /* Navigation link styles */
+.navigation {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
 .navigation a {
   color: #333;
   text-decoration: none;
@@ -36,6 +46,18 @@ header {
   margin: 0 2px;
   border-radius: 4px;
   transition: all 0.3s ease;
+}
+
+
+@media (max-width: 600px) {
+  .navigation {
+    flex-wrap: wrap;
+  }
+  .navigation a {
+    padding: 6px 10px;
+    flex: 1 1 40%;
+    margin: 2px 2px;
+  }
 }
 
 /* Hover effect for all navigation links */

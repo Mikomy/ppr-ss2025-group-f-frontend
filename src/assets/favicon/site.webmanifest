@@ -1,0 +1,14 @@
+{
+  "name": "The Nexus Project",
+  "short_name": "Nexus",
+  "icons": [
+    {
+      "src": "/assets/favicon/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
