@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import {
+  FormGroup,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms'
 import { MatCardModule } from '@angular/material/card'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
@@ -53,16 +59,16 @@ export class HistorischeAnalysePageComponent implements OnInit {
   configs: ChartConfig[] = Array(3)
     .fill({ color: '#3366cc', chartType: 'line' })
     .map((c) => ({ ...c }))
-  fromDate?: Date
-  fromTime?: string
-  toDate?: Date
-  toTime?: string
+  timeForm!: FormGroup
+
+  timeError?: string
   errorMessage?: string
 
   savedCharts: SavedChart[] = []
   private storageKey = 'saved-sensor-charts'
 
   constructor(
+    private fb: FormBuilder,
     private backend: BackendService,
     private storage: WebStorageService
   ) {}
@@ -70,6 +76,12 @@ export class HistorischeAnalysePageComponent implements OnInit {
   ngOnInit(): void {
     const raw = this.storage.get(this.storageKey)
     this.savedCharts = raw ? JSON.parse(raw) : []
+    this.timeForm = this.fb.group({
+      fromDate: [null, Validators.required],
+      fromTime: [null, Validators.required],
+      toDate: [null, Validators.required],
+      toTime: [null, Validators.required],
+    })
   }
 
   onConfigChange(index: number, config: ChartConfig): void {
@@ -80,21 +92,25 @@ export class HistorischeAnalysePageComponent implements OnInit {
   loadCharts(): void {
     // Validate at least one measurement and full interval
     const selectedConfigs = this.configs.filter((cfg) => cfg.measurement)
-    if (
-      !selectedConfigs.length ||
-      !this.fromDate ||
-      !this.fromTime ||
-      !this.toDate ||
-      !this.toTime
-    ) {
-      this.errorMessage =
-        'Bitte mindestens eine Messung und das vollständige Zeitintervall auswählen.'
+    if (!selectedConfigs.length) {
+      this.errorMessage = 'Bitte mindestens eine Messung auswählen.'
+      return
+    }
+    if (this.timeForm.invalid) {
+      this.timeError = 'Bitte komplettes Zeitintervall auswählen.'
       return
     }
 
+    // Reset Errors
+    this.errorMessage = undefined
+    this.timeError = undefined
+
     // Build ISO strings
-    const fromIso = this.combineDateAndTime(this.fromDate!, this.fromTime!)
-    const toIso = this.combineDateAndTime(this.toDate!, this.toTime!)
+    const fromIso = this.combineDateAndTime(
+      this.timeForm.value.fromDate,
+      this.timeForm.value.fromTime
+    )
+    const toIso = this.combineDateAndTime(this.timeForm.value.toDate, this.timeForm.value.toTime)
 
     // Fetch all series
     const calls = selectedConfigs.map((cfg) =>
