@@ -36,39 +36,6 @@ export class BackendService {
   getDropdownOption(): Observable<DropdownOptionModel[]> {
     return of(measurementList as DropdownOptionModel[])
   }
-  // getStatus(): Observable<string> {
-  //   return of([]).pipe(catchError(this.handleError<string>('getStatus')))
-  // }
-  //
-  // getSoilMoistrue(): Observable<Measurement[]> {
-  //   return of([]).pipe(catchError(this.handleError<Measurement>('getSoilMoisture')))
-  // }
-  //
-  // getPhosphorData(): Observable<Measurement[]> {
-  //   return of([]).pipe(catchError(this.handleError<Measurement>('getPhosphorData')))
-  // }
-  //
-  // getNitrogenData(): Observable<Measurement[]> {
-  //   return of([]).pipe(catchError(this.handleError<Measurement>('getNitrogenData')))
-  // }
-  //
-  // getHumidityData(): Observable<Measurement[]> {
-  //   return of([]).pipe(catchError(this.handleError<Measurement>('getHumidityData')))
-  // }
-  //
-  // getRoomTemperatureData(): Observable<Measurement[]> {
-  //   return of([]).pipe(
-  //     catchError(this.handleError<Measurement>('getRoomTemperatureData'))
-  //   )
-  // }
-  // //Only for testing noData available
-  // getMeasurement(
-  //   measurementName?: string,
-  //   fromTime?: string,
-  //   toTime?: string
-  // ): Observable<Measurement[]> {
-  //       return of([])
-  //   }
 
   getMeasurement(
     measurementName?: string,

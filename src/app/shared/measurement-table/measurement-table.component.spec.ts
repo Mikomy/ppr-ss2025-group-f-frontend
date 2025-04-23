@@ -1,121 +1,98 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { TableViewPageComponent } from '../../pages/tableView-page/tableView-page.component'
-import { BackendService } from '../../services/backend.service'
-import { WebStorageService } from '../../services/webStorage.service'
-import { DropdownOptionModel } from '../../models/dropdown.option.model'
-import { Measurement } from '../../models/measurement.model'
-import { of, throwError } from 'rxjs'
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { MatTableModule } from '@angular/material/table'
+import { MatPaginatorModule } from '@angular/material/paginator'
 import { FormsModule } from '@angular/forms'
 
-describe('TabellenansichtPageComponent', () => {
-  let fixture: ComponentFixture<TableViewPageComponent>
-  let component: TableViewPageComponent
-  let backendSpy: jasmine.SpyObj<BackendService>
-  let storageSpy: jasmine.SpyObj<WebStorageService>
+import { MeasurementTableComponent } from './measurement-table.component'
+import { SensorData } from '../../models/sensorData.model'
+import { SavedTable } from '../../models/savedTable.model'
 
-  const dummyOption: DropdownOptionModel = {
-    measurementName: 'Soil Moisture',
-    sensor: { id: '1', name: 'Sensor A', location: 'Field' },
-  }
-  const dummyMeasurement: Measurement = {
-    measurementName: 'Soil Moisture',
-    sensor: dummyOption.sensor,
-    dataPoints: [{ timestamp: '2025-04-01T00:00:00Z', value: 42 }],
+describe('MeasurementTableComponent', () => {
+  let component: MeasurementTableComponent
+  let fixture: ComponentFixture<MeasurementTableComponent>
+
+  const mockTable: SavedTable = {
+    id: 't1',
+    name: 'Test Table',
+    from: '2025-04-01T00:00:00Z',
+    to: '2025-04-01T01:00:00Z',
+    data: {
+      measurementName: 'Test',
+      sensor: { id: 's1', name: 'Sensor1', location: 'Loc' },
+      dataPoints: [
+        { timestamp: '2025-04-01T00:00:00Z', value: 10 },
+        { timestamp: '2025-04-01T00:30:00Z', value: 20 },
+      ],
+    },
   }
 
   beforeEach(async () => {
-    const bSpy = jasmine.createSpyObj('BackendService', ['getMeasurement', 'getDropdownOption'])
-    bSpy.getDropdownOption.and.returnValue(of([]))
-
-    const sSpy = jasmine.createSpyObj('WebStorageService', ['get', 'set'])
-
     await TestBed.configureTestingModule({
-      imports: [FormsModule, TableViewPageComponent],
-      providers: [
-        { provide: BackendService, useValue: bSpy },
-        { provide: WebStorageService, useValue: sSpy },
-      ],
+      imports: [MeasurementTableComponent, MatTableModule, MatPaginatorModule, FormsModule],
     }).compileComponents()
 
-    backendSpy = TestBed.inject(BackendService) as jasmine.SpyObj<BackendService>
-    storageSpy = TestBed.inject(WebStorageService) as jasmine.SpyObj<WebStorageService>
-  })
-
-  beforeEach(() => {
-    storageSpy.get.and.returnValue(null)
-    fixture = TestBed.createComponent(TableViewPageComponent)
+    fixture = TestBed.createComponent(MeasurementTableComponent)
     component = fixture.componentInstance
+    component.table = mockTable
     fixture.detectChanges()
   })
 
-  it('lädt savedTables aus Storage', () => {
-    expect(storageSpy.get).toHaveBeenCalledWith('saved-sensor-tables')
-    expect(component.savedTables).toEqual([])
+  it('should initialize dataSource and filterPredicate on init', () => {
+    component.ngOnInit()
+    expect(component.dataSource.data).toEqual(mockTable.data.dataPoints)
+    expect(typeof component.dataSource.filterPredicate).toBe('function')
   })
 
-  it('onSelectionChange setzt Felder zurück', () => {
-    component.fromDate = new Date()
-    component.toTime = '12:00'
-    component.errorMessage = 'Foo'
-    component.onSelectionChange(dummyOption)
-
-    expect(component.selectedOption).toBe(dummyOption)
-    expect(component.fromDate).toBeUndefined()
-    expect(component.toTime).toBeUndefined()
-    expect(component.errorMessage).toBeUndefined()
+  it('should assign paginator after view init', () => {
+    component.ngAfterViewInit()
+    expect(component.dataSource.paginator).toBeDefined()
   })
 
-  it('zeigt Fehlermeldung, wenn Eingaben fehlen', () => {
-    component.loadDetailedMeasurement()
-    expect(component.errorMessage).toBe('Bitte wählen Sie Sensor, Datum und Uhrzeit aus.')
+  describe('applyFilter', () => {
+    beforeEach(() => component.ngOnInit())
+
+    it('applies > filter correctly', () => {
+      component.filterOperator = '>'
+      component.filterValue = '15'
+      component.applyFilter()
+
+      expect(component.dataSource.filteredData).toEqual([
+        { timestamp: '2025-04-01T00:30:00Z', value: 20 },
+      ] as SensorData[])
+    })
+
+    it('applies < filter correctly', () => {
+      component.filterOperator = '<'
+      component.filterValue = '15'
+      component.applyFilter()
+
+      expect(component.dataSource.filteredData).toEqual([
+        { timestamp: '2025-04-01T00:00:00Z', value: 10 },
+      ] as SensorData[])
+    })
+
+    it('applies = filter correctly', () => {
+      component.filterOperator = '='
+      component.filterValue = '10'
+      component.applyFilter()
+
+      expect(component.dataSource.filteredData).toEqual([
+        { timestamp: '2025-04-01T00:00:00Z', value: 10 },
+      ] as SensorData[])
+    })
+
+    it('clears filter if incomplete', () => {
+      component.filterOperator = ''
+      component.filterValue = ''
+      component.applyFilter()
+
+      expect(component.dataSource.filteredData.length).toBe(2)
+    })
   })
 
-  it('lädt Messung und fügt Tabelle hinzu (Erfolg)', fakeAsync(() => {
-    component.selectedOption = dummyOption
-    component.fromDate = new Date('2025-04-10')
-    component.fromTime = '08:30'
-    component.toDate = new Date('2025-04-10')
-    component.toTime = '09:30'
-    backendSpy.getMeasurement.and.returnValue(of(dummyMeasurement))
-
-    component.loadDetailedMeasurement()
-    tick()
-
-    expect(component.savedTables.length).toBe(1)
-    expect(component.savedTables[0].data).toEqual(dummyMeasurement)
-    expect(storageSpy.set).toHaveBeenCalledWith(
-      'saved-sensor-tables',
-      JSON.stringify(component.savedTables)
-    )
-  }))
-
-  it('setzt Fehlermeldung bei Backend‑Fehler', fakeAsync(() => {
-    component.selectedOption = dummyOption
-    component.fromDate = new Date('2025-04-10')
-    component.fromTime = '08:30'
-    component.toDate = new Date('2025-04-10')
-    component.toTime = '09:30'
-    backendSpy.getMeasurement.and.returnValue(throwError(() => new Error('X')))
-
-    component.loadDetailedMeasurement()
-    tick()
-
-    expect(component.errorMessage).toBe('Fehler beim Laden der Daten.')
-    expect(component.savedTables).toEqual([])
-  }))
-
-  it('removeTable löscht Eintrag und updated Storage', () => {
-    component.savedTables = [
-      { id: '1', name: 'A', from: '', to: '', data: dummyMeasurement },
-      { id: '2', name: 'B', from: '', to: '', data: dummyMeasurement },
-    ]
-
-    component.removeTable('1')
-
-    expect(component.savedTables).toEqual([jasmine.objectContaining({ id: '2' })])
-    expect(storageSpy.set).toHaveBeenCalledWith(
-      'saved-sensor-tables',
-      JSON.stringify(component.savedTables)
-    )
+  it('removeTable emits remove event with table id', () => {
+    spyOn(component.remove, 'emit')
+    component.removeTable()
+    expect(component.remove.emit).toHaveBeenCalledWith(mockTable.id)
   })
 })

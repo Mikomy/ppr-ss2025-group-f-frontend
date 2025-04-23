@@ -20,7 +20,6 @@ describe('TableViewPageComponent', () => {
     measurementName: 'Soil Moisture',
     sensor: { id: '1', name: 'Sensor A', location: 'Field' },
   }
-
   const dummyMeasurement: Measurement = {
     measurementName: 'Soil Moisture',
     sensor: dummyOption.sensor,
@@ -28,29 +27,23 @@ describe('TableViewPageComponent', () => {
   }
 
   beforeEach(async () => {
-    const bSpy = jasmine.createSpyObj('BackendService', ['getMeasurement', 'getDropdownOption'])
-    const sSpy = jasmine.createSpyObj('WebStorageService', ['get', 'set'])
+    backendSpy = jasmine.createSpyObj('BackendService', ['getMeasurement', 'getDropdownOption'])
+    backendSpy.getDropdownOption.and.returnValue(of([]))
+    storageSpy = jasmine.createSpyObj('WebStorageService', ['get', 'set'])
+    storageSpy.get.and.returnValue(null)
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, TableViewPageComponent],
       providers: [
-        { provide: BackendService, useValue: bSpy },
-        { provide: WebStorageService, useValue: sSpy },
+        { provide: BackendService, useValue: backendSpy },
+        { provide: WebStorageService, useValue: storageSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents()
 
-    backendSpy = TestBed.inject(BackendService) as jasmine.SpyObj<BackendService>
-    storageSpy = TestBed.inject(WebStorageService) as jasmine.SpyObj<WebStorageService>
-  })
-
-  beforeEach(() => {
-    storageSpy.get.and.returnValue(null)
-    backendSpy.getDropdownOption.and.returnValue(of([]))
-
     fixture = TestBed.createComponent(TableViewPageComponent)
     component = fixture.componentInstance
-    fixture.detectChanges() // ngOnInit
+    fixture.detectChanges() // triggers ngOnInit and dropdown initialization
   })
 
   it('should load savedTables from storage on init', () => {
@@ -67,7 +60,7 @@ describe('TableViewPageComponent', () => {
 
     component.onSelectionChange(dummyOption)
 
-    expect(component.selectedOption).toBe(dummyOption)
+    expect(component.selectedOption).toEqual(dummyOption)
     expect(component.fromDate).toBeUndefined()
     expect(component.fromTime).toBeUndefined()
     expect(component.toDate).toBeUndefined()
@@ -76,8 +69,6 @@ describe('TableViewPageComponent', () => {
   })
 
   it('loadDetailedMeasurement should set errorMessage if inputs are missing', () => {
-    component.selectedOption = undefined
-
     component.loadDetailedMeasurement()
 
     expect(component.errorMessage).toBe('Bitte wählen Sie Sensor, Datum und Uhrzeit aus.')
@@ -91,7 +82,7 @@ describe('TableViewPageComponent', () => {
     component.toDate = new Date('2025-04-10')
     component.toTime = '09:30'
 
-    backendSpy.getMeasurement.and.returnValue(of(dummyMeasurement))
+    backendSpy.getMeasurement.and.returnValue(of([dummyMeasurement]))
 
     component.loadDetailedMeasurement()
     tick()
@@ -104,6 +95,7 @@ describe('TableViewPageComponent', () => {
       'saved-sensor-tables',
       JSON.stringify(component.savedTables)
     )
+    expect(component.errorMessage).toBeUndefined()
   }))
 
   it('loadDetailedMeasurement should set errorMessage on backend error', fakeAsync(() => {
