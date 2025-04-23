@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { NgxEchartsModule } from 'ngx-echarts'
 import * as echarts from 'echarts'
+import { format, parseISO } from 'date-fns'
 
 export interface Zone {
   start: number
@@ -45,7 +46,7 @@ export class HeatmapChartComponent implements OnChanges {
 
   private updateHeatmap(): void {
     const usedZones = this.zones.length > 0 ? this.zones : DEFAULT_TEMPERATURE_ZONES
-    const labels = this.dataSeries[0]?.data.map((pt) => pt.timestamp) || []
+    const rawLabels = this.dataSeries[0]?.data.map((pt) => pt.timestamp) || []
     const yLabels = this.dataSeries.map((s) => s.label)
 
     // Flatten data: [xIndex, yIndex, value]
@@ -59,13 +60,27 @@ export class HeatmapChartComponent implements OnChanges {
     this.chartOption = {
       tooltip: { position: 'top' },
       grid: { height: '70%', top: '10%' },
-      xAxis: [{ type: 'category', data: labels, name: 'Zeit' }],
+      xAxis: [
+        {
+          type: 'category',
+          data: rawLabels,
+          name: 'Zeit',
+          axisLabel: {
+            rotate: 45,
+            formatter: (value: string) => {
+              const date = parseISO(value)
+              return format(date, 'dd.MM. HH:mm')
+            },
+            interval: 0,
+          },
+        },
+      ],
       yAxis: [{ type: 'category', data: yLabels, name: 'Messung' }],
       visualMap: {
         type: 'piecewise',
         orient: 'horizontal',
         left: 'center',
-        bottom: '5%',
+        top: '0%',
         pieces: usedZones.map((z) => ({
           gt: z.start,
           lt: z.end,

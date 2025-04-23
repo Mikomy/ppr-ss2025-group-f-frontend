@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { BaseChartDirective } from 'ng2-charts'
 import { ChartConfiguration } from 'chart.js'
-
+import 'chartjs-adapter-date-fns'
 /**
  * Line-Chart-Komponente, visualisiert mehrere Messreihen mit unterschiedlichen Farben.
  * https://valor-software.com/ng2-charts/line
@@ -26,7 +26,18 @@ export class LineChartComponent implements OnChanges {
   public chartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     scales: {
-      x: { title: { display: true, text: 'Zeit' } },
+      x: {
+        type: 'time',
+        time: {
+          tooltipFormat: 'PPpp',
+          displayFormats: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+            day: 'MMM d',
+          },
+        },
+        title: { display: true, text: 'Zeit' },
+      },
       y: { title: { display: true, text: 'Wert' } },
     },
     plugins: { tooltip: { mode: 'nearest', intersect: false }, legend: { position: 'top' } },

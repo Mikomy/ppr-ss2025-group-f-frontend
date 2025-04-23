@@ -1,12 +1,12 @@
 import { Component } from '@angular/core'
-import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs'
+import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
 import { NgForOf } from '@angular/common'
 
 @Component({
   selector: 'app-navigation-tab',
   standalone: true,
-  imports: [MatTabLink, MatTabNav, MatTabNavPanel, RouterLink, RouterLinkActive, NgForOf],
+  imports: [CommonModule, RouterLink, RouterLinkActive, NgForOf],
   templateUrl: './navigationTab.component.html',
   styleUrls: ['./navigationTab.component.css'],
 })

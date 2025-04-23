@@ -5,6 +5,7 @@ import { BarChartComponent } from '../bar-chart/bar-chart.component'
 import { HeatmapChartComponent } from '../heatmap-chart/heatmap-chart.component'
 import { ChartType } from '../chart-config-row/chart-config-row.component'
 import { Chart, registerables } from 'chart.js'
+import 'chartjs-adapter-date-fns'
 /**
  * Host-Komponente, die basierend auf dem ChartType die jeweilige Chart-Komponente rendert.
  */

@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { BaseChartDirective } from 'ng2-charts'
 import { ChartConfiguration } from 'chart.js'
+import 'chartjs-adapter-date-fns'
 
 /**
  * Bar-Chart-Komponente, visualisiert mehrere Messreihen als gruppierte Balken.
@@ -26,7 +27,18 @@ export class BarChartComponent implements OnChanges {
   public chartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     scales: {
-      x: { title: { display: true, text: 'Zeit' } },
+      x: {
+        type: 'time',
+        time: {
+          tooltipFormat: 'PPpp',
+          displayFormats: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+            day: 'MMM d',
+          },
+        },
+        title: { display: true, text: 'Zeit' },
+      },
       y: { title: { display: true, text: 'Wert' } },
     },
     plugins: { tooltip: { mode: 'index', intersect: false }, legend: { position: 'top' } },
