@@ -31,7 +31,6 @@
   width: 300px;
 }
 
-
 .sensor-container {
   padding: 20px;
   padding: 2rem;
@@ -53,7 +52,9 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .stat-card:hover {
