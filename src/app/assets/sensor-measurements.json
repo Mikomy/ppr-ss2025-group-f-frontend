@@ -1,5 +1,9 @@
 [
   {
+    "sensor": { "name": "SCRUM24-TC02-AC01: Negativer Test" },
+    "measurementName": " Keine Daten führt zu einer Fehlermeldung."
+  },
+  {
     "sensor": { "name": "Decentlab DL-LP8P Multisensor" },
     "measurementName": "device_frmpayload_data_air_humidity_value"
   },

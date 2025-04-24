@@ -43,6 +43,8 @@ export class BackendService {
     toTime?: string
   ): Observable<Measurement[]> {
     switch (measurementName) {
+      case 'SCRUM24-TC02-AC01: Negativer Test':
+        return of([])
       case 'device_frmpayload_data_air_humidity_value':
         return of(fakeAirHumidity)
       case 'device_frmpayload_data_air_temperature_value':
