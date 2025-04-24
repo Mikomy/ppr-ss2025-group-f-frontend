@@ -17,9 +17,37 @@
     </div>
   </div>
 
-  <div *ngIf="!statistics" class="dashboard_error">
-    <h2>Keine Daten verfügbar</h2>
-    <p>Bitte überprüfen Sie Ihre Verbindung oder die Sensoren.</p>
+  <!-- <div *ngIf="!statistics" class="dashboard_error"> -->
+  <div
+    *ngIf="statistics"
+    class="dashboard_error"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeeba;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+      justify-content: center;
+    "
+  >
+    <span style="font-size: 2rem; margin-right: 1rem; color: #ff9800">
+      <i class="fas fa-exclamation-triangle"></i>
+    </span>
+    <div style="text-align: center">
+      <h2 style="margin: 0; font-size: 1.3rem; color: #d35400">&#9888; Keine Daten verfügbar</h2>
+      <h3 style="margin: 0.2em 0 0.5em 0; font-size: 1rem; color: #b9770e">
+        DAS IST EINE TESTMELDUNG DIE ANGEZEIGT WIRD, WENN KEINE SENSORDATEN DA SIND!
+      </h3>
+      <p style="margin: 0; font-size: 1em">
+        Bitte überprüfen Sie Ihre Verbindung oder die Sensoren.
+      </p>
+    </div>
   </div>
   <div *ngIf="statistics" class="dashboard-container">
     <div class="stats-grid">
