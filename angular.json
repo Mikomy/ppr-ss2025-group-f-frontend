@@ -92,6 +92,17 @@
           "options": {
             "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
+        },
+        "e2e": {
+          "builder": "playwright-ng-schematics:playwright",
+          "options": {
+            "devServerTarget": "nexus-frontend:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "nexus-frontend:serve:production"
+            }
+          }
         }
       }
     }
