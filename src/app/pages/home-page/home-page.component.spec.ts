@@ -158,4 +158,54 @@ describe('HomePageComponent', () => {
     component['addMeasurement'](invalidMeasurement)
     expect(Object.keys(component.measurementsByLocation).length).toBe(initialGroupCount)
   })
+
+  describe('Unit: loadStatistics', () => {
+    it('should set statistics with random values', () => {
+      component.loadStatistics()
+      expect(component.statistics).toBeDefined()
+      expect(typeof component.statistics!.averageTemperature).toBe('number')
+      expect(typeof component.statistics!.averageHumidity).toBe('number')
+      expect(component.statistics!.oldestMeasurement.dataPoints.length).toBeGreaterThan(0)
+      expect(component.statistics!.newestMeasurement.dataPoints.length).toBeGreaterThan(0)
+    })
+
+    it('should set statisticsError and reset statistics on error', () => {
+      // Fehler im Code provozieren, indem Math.random einen Fehler wirft
+      const originalRandom = Math.random
+      Math.random = () => {
+        throw new Error('Testfehler')
+      }
+      component.loadStatistics()
+      Math.random = originalRandom
+      expect(component.statistics).toBeUndefined()
+      expect(component.statisticsError).toContain('Fehler beim Laden der Statistiken')
+    })
+  })
+
+  describe('Integration: ngOnInit', () => {
+    it('should call loadStatistics and set statistics', () => {
+      spyOn(component, 'loadStatistics').and.callThrough()
+      component.ngOnInit()
+      expect(component.loadStatistics).toHaveBeenCalled()
+      expect(component.statistics).toBeDefined()
+    })
+  })
+
+  describe('Template: Fehleranzeige', () => {
+    it('should show dashboard_error when statistics is undefined', () => {
+      // Fehler provozieren, damit statistics undefined ist
+      const originalRandom = Math.random
+      Math.random = () => {
+        throw new Error('Testfehler')
+      }
+      component.loadStatistics()
+      Math.random = originalRandom
+      fixture.detectChanges()
+
+      const compiled = fixture.nativeElement as HTMLElement
+      const errorDiv = compiled.querySelector('.dashboard_error')
+      expect(errorDiv).toBeTruthy()
+      expect(errorDiv?.textContent).toContain('Keine Daten verfügbar')
+    })
+  })
 })

@@ -17,7 +17,11 @@
     </div>
   </div>
 
-  <div class="dashboard-container">
+  <div *ngIf="!statistics" class="dashboard_error">
+    <h2>Keine Daten verfügbar</h2>
+    <p>Bitte überprüfen Sie Ihre Verbindung oder die Sensoren.</p>
+  </div>
+  <div *ngIf="statistics" class="dashboard-container">
     <div class="stats-grid">
       <div class="stat-card">
         <div class="card-icon">
@@ -25,8 +29,8 @@
         </div>
         <div class="card-content">
           <h3>Durchschn. Temperatur</h3>
-          <!-- <p class="value">{{ statistics?.averageTemperature | number:'1.1-1' }}°C</p> -->
-          <p class="value">11°C</p>
+          <p class="value">{{ statistics?.averageTemperature | number: '1.1-1' }}°C</p>
+          <!-- <p class="value">11°C</p> -->
         </div>
       </div>
 
@@ -36,8 +40,8 @@
         </div>
         <div class="card-content">
           <h3>Durchschn. Luftfeuchtigkeit</h3>
-          <!-- <p class="value">{{ statistics?.averageHumidity | number:'1.1-1' }}%</p> -->
-          <p class="value">23%</p>
+          <p class="value">{{ statistics?.averageHumidity | number: '1.1-1' }}%</p>
+          <!-- <p class="value">23%</p> -->
         </div>
       </div>
 
@@ -47,8 +51,8 @@
         </div>
         <div class="card-content">
           <h3>Anzahl Messungen</h3>
-          <!-- <p class="value">{{ statistics?.count }}</p> -->
-          <p class="value">1200</p>
+          <p class="value">{{ statistics?.count }}</p>
+          <!--          <p class="value">1200</p>-->
         </div>
       </div>
 
@@ -59,9 +63,14 @@
         </div>
         <div class="card-content">
           <h3>Älteste Messung</h3>
-          <!-- <p class="value">{{ statistics?.oldestMeasurement?.timestamp | date:'short':'':'de' }}</p> -->
-          <p class="value">22.11.2024</p>
-          <!-- <small>{{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{
+              statistics?.oldestMeasurement?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+          </p>
+          <small>
+            {{ statistics?.oldestMeasurement?.sensor?.name }}
+          </small>
         </div>
       </div>
 
@@ -71,9 +80,13 @@
         </div>
         <div class="card-content">
           <h3>Neueste Messung</h3>
-          <!-- <p class="value">{{ statistics?.newestMeasurement?.timestamp | date:'short':'':'de' }}</p> -->
-          <p class="value">23.04.2025</p>
-          <!-- <small>{{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{
+              statistics?.newestMeasurement?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+          </p>
+          <!--          <p class="value">23.04.2025</p>-->
+          <small>{{ statistics?.highestHumidity?.sensor?.name }}</small>
         </div>
       </div>
 
@@ -84,9 +97,15 @@
         </div>
         <div class="card-content">
           <h3>Niedrigste Temperatur</h3>
-          <!-- <p class="value">{{ statistics?.lowestTemperature?.temperature | number:'1.1-1' }}°C</p> -->
-          <p class="value">11°C</p>
-          <!-- <small>{{ statistics?.lowestTemperature?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{ statistics?.lowestTemperature?.dataPoints?.[0]?.value | number: '1.1-1' }}°C
+          </p>
+          <small
+            >{{
+              statistics?.lowestTemperature?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+            | {{ statistics?.highestHumidity?.sensor?.name }}</small
+          >
         </div>
       </div>
 
@@ -96,9 +115,16 @@
         </div>
         <div class="card-content">
           <h3>Höchste Temperatur</h3>
-          <!-- <p class="value">{{ statistics?.highestTemperature?.temperature | number:'1.1-1' }}°C</p> -->
-          <p class="value">37°C</p>
-          <!-- <small>{{ statistics?.highestTemperature?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{ statistics?.highestTemperature?.dataPoints?.[0]?.value | number: '1.1-1' }}°C
+          </p>
+          <!--          <p class="value">37°C</p>-->
+          <small
+            >{{
+              statistics?.highestTemperature?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+            | {{ statistics?.highestHumidity?.sensor?.name }}</small
+          >
         </div>
       </div>
 
@@ -109,9 +135,16 @@
         </div>
         <div class="card-content">
           <h3>Niedrigste Luftfeuchtigkeit</h3>
-          <!-- <p class="value">{{ statistics?.lowestHumidity?.humidity | number:'1.1-1' }}%</p> -->
-          <p class="value">20%</p>
-          <!-- <small>{{ statistics?.lowestHumidity?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{ statistics?.lowestHumidity?.dataPoints?.[0]?.value | number: '1.1-1' }}%
+          </p>
+          <!--          <p class="value">20%</p>-->
+          <small
+            >{{
+              statistics?.lowestHumidity?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+            | {{ statistics?.highestHumidity?.sensor?.name }}</small
+          >
         </div>
       </div>
 
@@ -121,9 +154,16 @@
         </div>
         <div class="card-content">
           <h3>Höchste Luftfeuchtigkeit</h3>
-          <!-- <p class="value">{{ statistics?.highestHumidity?.humidity | number:'1.1-1' }}% </p> -->
-          <p class="value">65%</p>
-          <!-- <small>{{ statistics?.highestHumidity?.timestamp | date:'short':'':'de' }} | {{ statistics?.highestHumidity?.sensor?.location }}</small> -->
+          <p class="value">
+            {{ statistics?.highestHumidity?.dataPoints?.[0]?.value | number: '1.1-1' }}%
+          </p>
+          <!--          <p class="value">65%</p>-->
+          <small
+            >{{
+              statistics?.highestHumidity?.dataPoints?.[0]?.timestamp | date: 'short' : '' : 'de'
+            }}
+            | {{ statistics?.highestHumidity?.sensor?.name }}</small
+          >
         </div>
       </div>
     </div>
