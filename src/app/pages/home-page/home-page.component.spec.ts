@@ -21,7 +21,6 @@ describe('HomePageComponent', () => {
 
     fixture = TestBed.createComponent(HomePageComponent)
     component = fixture.componentInstance
-    backendServiceSpy = TestBed.inject(BackendService) as jasmine.SpyObj<BackendService>
   })
 
   it('should create the component', () => {
