@@ -1,0 +1,17 @@
+<mat-card>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>{{ label }}</mat-label>
+    <mat-select
+      multiple
+      [value]="selectedOptions"
+      [disabled]="disabled"
+      (selectionChange)="onSelectionChange($event.value)"
+      (blur)="onBlur()"
+      [compareWith]="compareWithFn"
+    >
+      <mat-option *ngFor="let opt of options; trackBy: trackBySensor" [value]="opt">
+        {{ opt.display }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-card>

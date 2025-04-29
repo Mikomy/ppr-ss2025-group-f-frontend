@@ -38,23 +38,16 @@ export class BackendService {
 
   getMeasurement(
     measurementName: string,
-    fromTime?: string,
-    toTime?: string
+    fromIso?: string,
+    toIso?: string
   ): Observable<Measurement[]> {
     let params = new HttpParams().set('measurement', measurementName)
-    if (fromTime) {
-      params = params.set('from', fromTime)
-    }
-    if (toTime) {
-      params = params.set('to', toTime)
-    }
+    if (fromIso) params = params.set('from', fromIso)
+    if (toIso) params = params.set('to', toIso)
     return this.http.get<Measurement[]>(`${this.baseUrl}/measurements/grouped`, { params }).pipe(
-      catchError((error) => {
-        console.error(
-          `Error fetching measurement '${measurementName}' with interval [${fromTime},${toTime}]:`,
-          error
-        )
-        return throwError(() => new Error('Fehler beim Laden der Sensordaten vom Server.'))
+      catchError((err) => {
+        console.error(err)
+        return throwError(() => new Error('Fehler beim Laden der Sensordaten.'))
       })
     )
   }
