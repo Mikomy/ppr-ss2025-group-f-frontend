@@ -8,7 +8,6 @@ import {
   Validators,
   ValidationErrors,
 } from '@angular/forms'
-import { DateRangePickerComponent } from '../../shared/date-range-picker/date-range-picker.component'
 import { StatsService } from '../../components/statistics/stats.service'
 import { SensorGroup, StatisticResult } from '../../models/stats.model'
 import { StatisticsDisplayComponent } from '../../components/statistics/statistics-display/statistics-display.component'
@@ -19,6 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatNativeDateModule } from '@angular/material/core'
+import { forkJoin } from 'rxjs'
 
 @Component({
   selector: 'app-statistics-page',
@@ -26,7 +26,6 @@ import { MatNativeDateModule } from '@angular/material/core'
   imports: [
     MatCardModule,
     ReactiveFormsModule,
-    DateRangePickerComponent,
     StatisticsDisplayComponent,
     CommonModule,
     MatButtonModule,
@@ -98,24 +97,28 @@ export class StatisticsPageComponent implements OnInit {
   }
 
   onCompute(): void {
-    const fromDate = this.fromDateCtrl.value!
-    const [h1, m1] = this.fromTimeCtrl.value!.split(':').map(Number)
-    fromDate.setHours(h1, m1, 0, 0)
+    const fromDate = this.combineDateTime(this.fromDateCtrl.value!, this.fromTimeCtrl.value!)
+    const toDate = this.combineDateTime(this.toDateCtrl.value!, this.toTimeCtrl.value!)
 
-    const toDate = this.toDateCtrl.value!
-    const [h2, m2] = this.toTimeCtrl.value!.split(':').map(Number)
-    toDate.setHours(h2, m2, 0, 0)
-
-    this.stats
-      .computeStats(this.group1Ctrl.value, fromDate, toDate)
-      .subscribe((r) => (this.results1 = r))
-
-    this.stats
-      .computeStats(this.group1Ctrl.value, fromDate, toDate)
-      .subscribe((r) => (this.results2 = r))
-
-    this.stats
-      .computeCorrelation(this.group1Ctrl.value, this.group2Ctrl.value, fromDate, toDate)
-      .subscribe((c) => (this.correlation = c))
+    forkJoin({
+      r1: this.stats.computeStats(this.group1Ctrl.value, fromDate, toDate),
+      r2: this.stats.computeStats(this.group2Ctrl.value, fromDate, toDate),
+      corr: this.stats.computeCorrelation(
+        this.group1Ctrl.value,
+        this.group2Ctrl.value,
+        fromDate,
+        toDate
+      ),
+    }).subscribe(({ r1, r2, corr }) => {
+      this.results1 = r1
+      this.results2 = r2
+      this.correlation = corr
+    })
+  }
+  private combineDateTime(date: Date, time: string): Date {
+    const [h, m] = time.split(':').map(Number)
+    const d = new Date(date)
+    d.setHours(h, m, 0, 0)
+    return d
   }
 }

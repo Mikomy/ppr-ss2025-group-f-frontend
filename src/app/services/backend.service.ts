@@ -36,6 +36,11 @@ export class BackendService {
     return of(measurementList as DropdownOptionModel[])
   }
 
+  /**
+   * @param measurementName  z.B. 'device_frmpayload_data_nitrogen'
+   * @param fromIso          z.B. '2025-04-29T12:12:00.000Z'
+   * @param toIso            z.B. '2025-04-29T13:12:00.000Z'
+   */
   getMeasurement(
     measurementName: string,
     fromIso?: string,

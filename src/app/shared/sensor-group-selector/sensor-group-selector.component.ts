@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select'
 import { CommonModule } from '@angular/common'
 
 interface SensorOption {
+  key: string
   measurementName: string
   sensorId: string
   display: string
@@ -29,8 +30,9 @@ interface SensorOption {
 })
 export class SensorGroupSelectorComponent implements ControlValueAccessor, OnInit {
   @Input() label = 'Sensorgruppe'
+
   options: SensorOption[] = []
-  selectedOptions: SensorOption[] = []
+  selectedKeys: string[] = []
   disabled = false
   private onChange: (group: SensorGroup) => void = () => {
     /* noop */
@@ -39,30 +41,31 @@ export class SensorGroupSelectorComponent implements ControlValueAccessor, OnIni
     /* noop */
   }
 
-  compareWithFn = (o1: SensorOption, o2: SensorOption) =>
-    o1?.sensorId === o2?.sensorId && o1?.measurementName === o2?.measurementName
-
   constructor(private backend: BackendService) {}
 
   ngOnInit(): void {
     this.backend.getDropdownOption().subscribe((opts) => {
-      this.options = opts.map((o) => ({
-        measurementName: o.measurementName,
+      this.options = opts.map((o, i) => ({
+        key: i.toString(), // eindeutiger Key pro Option
         sensorId: o.sensor.id,
+        measurementName: o.measurementName,
         display: `${o.measurementName} – ${o.sensor.name}`,
       }))
     })
   }
 
   writeValue(group: SensorGroup | null): void {
-    if (group && group.sensors) {
-      this.selectedOptions = this.options.filter((opt) =>
-        group.sensors.some(
-          (s) => s.sensorId === opt.sensorId && s.measurementName === opt.measurementName
-        )
-      )
+    if (group?.sensors) {
+      this.selectedKeys = group.sensors
+        .map((s) => {
+          const match = this.options.find(
+            (opt) => opt.sensorId === s.sensorId && opt.measurementName === s.measurementName
+          )
+          return match ? match.key : null
+        })
+        .filter((k): k is string => k !== null)
     } else {
-      this.selectedOptions = []
+      this.selectedKeys = []
     }
   }
 
@@ -78,21 +81,24 @@ export class SensorGroupSelectorComponent implements ControlValueAccessor, OnIni
     this.disabled = isDisabled
   }
 
-  trackBySensor(_: number, opt: SensorOption): string {
-    return `${opt.sensorId}|${opt.measurementName}`
+  trackByKey(_: number, opt: SensorOption): string {
+    return opt.key
   }
-  onSelectionChange(opts: SensorOption[]): void {
-    this.selectedOptions = opts
+
+  onSelectionChange(keys: string[]): void {
+    this.selectedKeys = keys
     const group: SensorGroup = {
-      sensors: opts.map((o) => ({
-        measurementName: o.measurementName,
-        sensorId: o.sensorId,
-      })),
+      sensors: keys
+        .map((key) => this.options.find((opt) => opt.key === key))
+        .filter((o): o is SensorOption => !!o)
+        .map((o) => ({
+          sensorId: o.sensorId,
+          measurementName: o.measurementName,
+        })),
     }
     this.onChange(group)
   }
 
-  /** Blurring signalisiert touched */
   onBlur(): void {
     this.onTouched()
   }
