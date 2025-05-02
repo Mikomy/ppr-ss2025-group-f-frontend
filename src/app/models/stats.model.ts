@@ -14,7 +14,7 @@ export interface StatisticResult {
   trend: number
   p25: number
   p75: number
-  points: DataPoint[]
+  // points: DataPoint[]
 }
 
 export interface SensorGroup {
