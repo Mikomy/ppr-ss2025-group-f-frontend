@@ -66,25 +66,43 @@ export class StatsService {
 
   /** Aggregiert DataPoint[] zu Kennzahlen */
   private aggregate(points: DataPoint[]): StatisticResult {
-    const values = points.map((p) => p.value)
+    const values = points.map((p) => p.value).sort((a, b) => a - b)
     const n = values.length
-    const mean = values.reduce((a, b) => a + b, 0) / n
-    const min = Math.min(...values)
-    const max = Math.max(...values)
+    const mean = values.reduce((sum, v) => sum + v, 0) / n
+    const median = this.quantile(values, 0.5)
+    const min = values[0] ?? 0
+    const max = values[n - 1] ?? 0
     const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / n
     const stdDev = Math.sqrt(variance)
-    const trend = this.trend(values)
-    return { mean, min, max, stdDev, trend }
+    const p25 = this.quantile(values, 0.25)
+    const p75 = this.quantile(values, 0.75)
+    const iqr = p75 - p25
+    const trend = this.computeTrend(values)
+
+    return { count: n, mean, median, min, max, variance, stdDev, iqr, p25, p75, trend }
+  }
+  /** Berechnet Perzentile (Lineare Interpolation) */
+  private quantile(sorted: number[], q: number): number {
+    const n = sorted.length
+    if (n === 0) return 0
+    const pos = (n - 1) * q
+    const base = Math.floor(pos)
+    const rest = pos - base
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base])
+    }
+    return sorted[base]
   }
 
   /** Lineare Trend-Steigung */
-  private trend(vals: number[]): number {
+  private computeTrend(vals: number[]): number {
     const n = vals.length
+    if (n < 2) return 0
     const xMean = (n - 1) / 2
-    const yMean = vals.reduce((a, b) => a + b, 0) / n
+    const yMean = vals.reduce((sum, v) => sum + v, 0) / n
     const num = vals.reduce((sum, y, i) => sum + (i - xMean) * (y - yMean), 0)
     const den = vals.reduce((sum, _, i) => sum + (i - xMean) ** 2, 0)
-    return num / den
+    return den === 0 ? 0 : num / den
   }
 
   /** Pearson-Koeffizient */

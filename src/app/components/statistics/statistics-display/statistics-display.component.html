@@ -1,10 +1,28 @@
 <ng-container *ngIf="stats; else noData">
   <mat-list>
-    <mat-list-item>Durchschnitt: {{ stats.mean | number: '1.2-2' }}</mat-list-item>
-    <mat-list-item>Min: {{ stats.min | number: '1.2-2' }}</mat-list-item>
-    <mat-list-item>Max: {{ stats.max | number: '1.2-2' }}</mat-list-item>
-    <mat-list-item>StdAbw: {{ stats.stdDev | number: '1.2-2' }}</mat-list-item>
-    <mat-list-item>Trend: {{ stats.trend | number: '1.2-2' }}</mat-list-item>
+    <mat-list-item><strong>Anzahl der Messwerte:</strong> {{ stats.count }}</mat-list-item>
+    <mat-list-item
+      ><strong>Durchschnitt (Mittelwert):</strong> {{ stats.mean | number: '1.2-2' }}</mat-list-item
+    >
+    <mat-list-item><strong>Median:</strong> {{ stats.median | number: '1.2-2' }}</mat-list-item>
+    <mat-list-item
+      ><strong>25 %-Perzentil:</strong> {{ stats.p25 | number: '1.2-2' }}</mat-list-item
+    >
+    <mat-list-item
+      ><strong>75 %-Perzentil:</strong> {{ stats.p75 | number: '1.2-2' }}</mat-list-item
+    >
+    <mat-list-item
+      ><strong>Interquartilsabstand (IQR):</strong> {{ stats.iqr | number: '1.2-2' }}</mat-list-item
+    >
+    <mat-list-item><strong>Minimum:</strong> {{ stats.min | number: '1.2-2' }}</mat-list-item>
+    <mat-list-item><strong>Maximum:</strong> {{ stats.max | number: '1.2-2' }}</mat-list-item>
+    <mat-list-item><strong>Varianz:</strong> {{ stats.variance | number: '1.2-2' }}</mat-list-item>
+    <mat-list-item
+      ><strong>Standardabweichung:</strong> {{ stats.stdDev | number: '1.2-2' }}</mat-list-item
+    >
+    <mat-list-item
+      ><strong>Trend (Steigung):</strong> {{ stats.trend | number: '1.2-2' }}</mat-list-item
+    >
   </mat-list>
 </ng-container>
 <ng-template #noData>
