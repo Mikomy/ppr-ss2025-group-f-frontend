@@ -1,6 +1,17 @@
+import { ScatterDataPoint } from 'chart.js'
+
 export interface DataPoint {
   timestamp: string
   value: number
+}
+export interface ScatterPoint {
+  x: number // timestamp in ms
+  y: number
+}
+export interface Series {
+  measurementName: string
+  sensorName: string
+  points: ScatterDataPoint[]
 }
 export interface StatisticResult {
   count: number
@@ -14,7 +25,7 @@ export interface StatisticResult {
   trend: number
   p25: number
   p75: number
-  // points: DataPoint[]
+  series: Series[]
 }
 
 export interface SensorGroup {

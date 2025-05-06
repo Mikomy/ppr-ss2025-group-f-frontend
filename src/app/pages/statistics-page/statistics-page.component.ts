@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import {
   FormBuilder,
@@ -7,6 +7,8 @@ import {
   ReactiveFormsModule,
   Validators,
   ValidationErrors,
+  AbstractControl,
+  ValidatorFn,
 } from '@angular/forms'
 import { StatsService } from '../../components/statistics/stats.service'
 import { SensorGroup, StatisticResult } from '../../models/stats.model'
@@ -19,6 +21,7 @@ import { MatInputModule } from '@angular/material/input'
 import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatNativeDateModule } from '@angular/material/core'
 import { forkJoin } from 'rxjs'
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'app-statistics-page',
@@ -34,17 +37,18 @@ import { forkJoin } from 'rxjs'
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatIconModule,
   ],
 
   templateUrl: './statistics-page.component.html',
   styleUrl: './statistics-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatisticsPageComponent implements OnInit {
   form!: FormGroup
-  results1?: StatisticResult
-  results2?: StatisticResult
+  resultsGroup1?: StatisticResult
+  resultsGroup2?: StatisticResult
   correlation?: number
+  errorMessage?: string
 
   constructor(
     private fb: FormBuilder,
@@ -63,6 +67,55 @@ export class StatisticsPageComponent implements OnInit {
       },
       { validators: this.dateRangeValidator }
     )
+  }
+
+  onCompute(): void {
+    this.errorMessage = undefined
+    this.resultsGroup1 = this.resultsGroup2 = undefined
+    this.correlation = undefined
+
+    this.form.updateValueAndValidity({ onlySelf: false, emitEvent: true })
+    this.form.markAllAsTouched()
+
+    // if (this.form.invalid) {
+    //   this.errorMessage = 'Bitte komplettes Zeitintervall auswählen und Gruppen füllen.';
+    //   return;
+    // }
+
+    if (!this.validateGroups() || !this.validateForm()) {
+      return
+    }
+    const { from, to } = this.getIsoRange()
+    this.fetchStatisticsAndCorrelation(from, to)
+  }
+
+  /**
+   * Fetch both statistics and correlation in parallel.
+   */
+  private fetchStatisticsAndCorrelation(fromIso: string, toIso: string): void {
+    forkJoin({
+      s1: this.stats.computeStats(this.group1Ctrl.value, new Date(fromIso), new Date(toIso)),
+      s2: this.stats.computeStats(this.group2Ctrl.value, new Date(fromIso), new Date(toIso)),
+      corr: this.stats.computeCorrelation(
+        this.group1Ctrl.value,
+        this.group2Ctrl.value,
+        new Date(fromIso),
+        new Date(toIso)
+      ),
+    }).subscribe({
+      next: ({ s1, s2, corr }) => this.onResults(s1, s2, corr),
+      error: () => (this.errorMessage = 'Fehler beim Abrufen der Statistik-Daten.'),
+    })
+  }
+  private onResults(s1: StatisticResult, s2: StatisticResult, corr: number): void {
+    if (!s1.count || !s2.count) {
+      this.errorMessage =
+        'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
+      return
+    }
+    this.resultsGroup1 = s1
+    this.resultsGroup2 = s2
+    this.correlation = corr
   }
 
   get fromDateCtrl() {
@@ -87,38 +140,60 @@ export class StatisticsPageComponent implements OnInit {
     return this.form.get('group2') as FormControl<SensorGroup>
   }
 
-  private dateRangeValidator(group: FormGroup): ValidationErrors | null {
-    const from = group.get('from')?.value as Date | string | null
-    const to = group.get('to')?.value as Date | string | null
-    if (from && to && new Date(from) > new Date(to)) {
-      return { dateRangeInvalid: true }
+  /**
+   * Validator: ensures from-date/time ≤ to-date/time.
+   */
+  private dateRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const g = group as FormGroup
+    const fromDate = g.get('fromDate')!.value as Date | null
+    const fromTime = g.get('fromTime')!.value as string | null
+    const toDate = g.get('toDate')!.value as Date | null
+    const toTime = g.get('toTime')!.value as string | null
+
+    if (fromDate && fromTime && toDate && toTime) {
+      const from = this.combineDateTime(fromDate, fromTime)
+      const to = this.combineDateTime(toDate, toTime)
+      if (from > to) {
+        return { dateRangeInvalid: true }
+      }
     }
     return null
   }
 
-  onCompute(): void {
-    const fromDate = this.combineDateTime(this.fromDateCtrl.value!, this.fromTimeCtrl.value!)
-    const toDate = this.combineDateTime(this.toDateCtrl.value!, this.toTimeCtrl.value!)
-
-    forkJoin({
-      r1: this.stats.computeStats(this.group1Ctrl.value, fromDate, toDate),
-      r2: this.stats.computeStats(this.group2Ctrl.value, fromDate, toDate),
-      corr: this.stats.computeCorrelation(
-        this.group1Ctrl.value,
-        this.group2Ctrl.value,
-        fromDate,
-        toDate
-      ),
-    }).subscribe(({ r1, r2, corr }) => {
-      this.results1 = r1
-      this.results2 = r2
-      this.correlation = corr
-    })
-  }
   private combineDateTime(date: Date, time: string): Date {
     const [h, m] = time.split(':').map(Number)
-    const d = new Date(date)
-    d.setHours(h, m, 0, 0)
-    return d
+    const copy = new Date(date)
+    copy.setHours(h, m, 0, 0)
+    return copy
+  }
+
+  /** Ensure both groups have at least one measurement selected */
+  private validateGroups(): boolean {
+    if (this.group1Ctrl.value.sensors.length === 0 || this.group2Ctrl.value.sensors.length === 0) {
+      this.errorMessage = 'Bitte mindestens einen Measurement pro Gruppe auswählen.'
+      return false
+    }
+    return true
+  }
+
+  /** Ensure all date/time fields are valid and in correct order */
+  private validateForm(): boolean {
+    if (this.form.invalid) {
+      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen'
+      return false
+    }
+    return true
+  }
+
+  /** Returns ISO strings for “from” and “to” combined date/time */
+  private getIsoRange(): { from: string; to: string } {
+    const fromDate = this.fromDateCtrl.value!
+    const fromTime = this.fromTimeCtrl.value!
+    const toDate = this.toDateCtrl.value!
+    const toTime = this.toTimeCtrl.value!
+    return {
+      from: this.combineDateTime(fromDate, fromTime).toISOString(),
+      to: this.combineDateTime(toDate, toTime).toISOString(),
+    }
   }
 }
