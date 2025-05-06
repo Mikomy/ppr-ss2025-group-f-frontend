@@ -19,6 +19,13 @@ import { Measurement } from '../models/measurement.model'
 import { DropdownOptionModel } from '../models/dropdown.option.model'
 import { Statistics } from '../models/statistics.model'
 
+/**
+ * This service handles communication with the backend API to
+ * retrieve sensor measurements and related data.
+ * It uses Angular's HttpClient to make HTTP requests and
+ * provides observables for components to subscribe to.
+ */
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,6 +44,8 @@ export class BackendService {
   }
 
   /**
+   * Fetches sensor measurement data for the specified measurementName and
+   * optional time range (fromIso and toIso).
    * @param measurementName  z.B. 'device_frmpayload_data_nitrogen'
    * @param fromIso          z.B. '2025-04-29T12:12:00.000Z'
    * @param toIso            z.B. '2025-04-29T13:12:00.000Z'
