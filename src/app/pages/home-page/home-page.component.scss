@@ -171,7 +171,7 @@
   min-height: 2px;
 }
 
-.legend-color-min{
+.legend-color-min {
   display: inline-block;
 }
 
@@ -180,14 +180,14 @@
   // min-width: 100px;
   display: inline-block;
   color: #000;
-  padding:5px;
+  padding: 5px;
 }
 .legend-color-max + span {
   // background-color: #1cc88a;
   // min-width: 100px;
   display: inline-block;
   color: #000;
-  padding:5px;
+  padding: 5px;
 }
 
 .chart-legend {
@@ -229,7 +229,7 @@
   .chart-grid {
     gap: 16px;
   }
-  
+
   .chart-column {
     width: calc(50% - 16px); // Two columns on medium screens
   }
