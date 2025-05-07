@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, OnDestroy } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import { CommonModule } from '@angular/common'
 import { BackendService } from '../../services/backend.service'
@@ -6,135 +6,269 @@ import { MatGridListModule } from '@angular/material/grid-list'
 import { MatDividerModule } from '@angular/material/divider'
 import { SensorData } from '../../models/sensorData.model'
 import { Statistics } from '../../models/statistics.model'
+import { Measurement } from '../../models/measurement.model'
 
 // DEUTSCH Übersetzung ermöglichen
 import localeDe from '@angular/common/locales/de'
-import { LOCALE_ID, OnDestroy } from '@angular/core'
+import { LOCALE_ID } from '@angular/core'
 import { registerLocaleData } from '@angular/common'
 registerLocaleData(localeDe)
 // DEUTSCH Übersetzung ermöglichen
+
+// Typisierung für globale Window Properties
+interface NexusWindow extends Window {
+  __nexusOpenAiCalled?: boolean
+  __nexusOpenAiSynopsis?: string
+}
 
 interface MeasurementDisplay {
   name: string
   latestData: SensorData | null
 }
+
+interface MeasurementConfig {
+  key: string
+  label: string
+  unit: string
+  scaleFactor: number
+  icon: string
+}
+
 @Component({
   selector: 'app-home-page',
   standalone: true,
   imports: [MatCardModule, CommonModule, MatGridListModule, MatDividerModule],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.scss',
-  providers: [{ provide: LOCALE_ID, useValue: 'de-DE' }], // DEUTSCH Übersetzung ermöglichen
+  styleUrls: ['./home-page.component.scss'],
+  providers: [{ provide: LOCALE_ID, useValue: 'de-DE' }], // Enable German locale
 })
 export class HomePageComponent implements OnInit, OnDestroy {
+  /**
+   * Holds the current statistics data for the dashboard.
+   */
   statistics: Statistics | undefined
-  measurementsByLocation: Record<string, MeasurementDisplay[]> = {}
-  private statisticsIntervalId: ReturnType<typeof setInterval> | undefined // Timer-ID speichern
-  statisticsError: string | null = null // Fehlernachricht
 
+  /**
+   * Holds the OpenAI synopsis/analysis text.
+   */
+  openAiSynopsis: string | undefined
+
+  /**
+   * Stores measurements grouped by location.
+   */
+  measurementsByLocation: Record<string, MeasurementDisplay[]> = {}
+
+  /**
+   * Timer ID for the statistics refresh interval.
+   */
+  private statisticsIntervalId: ReturnType<typeof setInterval> | undefined
+
+  /**
+   * Holds the latest error message for statistics loading.
+   */
+  statisticsError: string | null = null
+
+  /**
+   * Global flag in the window object to ensure OpenAI call is only made once per browser session.
+   */
+  private static get openAiCalledOnce(): boolean {
+    return (window as NexusWindow).__nexusOpenAiCalled === true
+  }
+  private static set openAiCalledOnce(val: boolean) {
+    ;(window as NexusWindow).__nexusOpenAiCalled = val
+  }
+
+  /**
+   * Globally stored OpenAI synopsis (persists across navigation).
+   */
+  private static get globalOpenAiSynopsis(): string | undefined {
+    return (window as NexusWindow).__nexusOpenAiSynopsis
+  }
+  private static set globalOpenAiSynopsis(val: string | undefined) {
+    ;(window as NexusWindow).__nexusOpenAiSynopsis = val
+  }
+
+  /**
+   * Returns the formatted OpenAI synopsis with line breaks as <br>.
+   * @returns {string} The formatted synopsis or a fallback message.
+   */
+  getFormattedSynopsis(): string {
+    return (this.openAiSynopsis || 'Keine KI-Analyse verfügbar').replace(/\n/g, '<br>')
+  }
+
+  /**
+   * List of measurement configurations for the dashboard.
+   */
+  measurements: MeasurementConfig[] = [
+    {
+      key: 'device_frmpayload_data_data_air_temperature_value',
+      label: 'Temperatur °C',
+      unit: '°C',
+      scaleFactor: 4,
+      icon: 'temperature-high',
+    },
+    {
+      key: 'device_frmpayload_data_air_humidity_value',
+      label: 'Luftfeuchte %',
+      unit: '%',
+      scaleFactor: 2,
+      icon: 'tint',
+    },
+    {
+      key: 'device_frmpayload_data_data_Humidity',
+      label: 'Luftfeuchte 2 %',
+      unit: '%',
+      scaleFactor: 2,
+      icon: 'tint',
+    },
+    {
+      key: 'device_frmpayload_data_co2_concentration_value',
+      label: 'CO₂ ppm',
+      unit: 'ppm',
+      scaleFactor: 0.125, // 1/8
+      icon: 'cloud',
+    },
+    {
+      key: 'device_frmpayload_data_phosphorus',
+      label: 'Phosphor',
+      unit: '',
+      scaleFactor: 0.02,
+      icon: 'flask',
+    },
+    {
+      key: 'device_frmpayload_data_nitrogen',
+      label: 'Stickstoff',
+      unit: '',
+      scaleFactor: 0.1,
+      icon: 'flask',
+    },
+    {
+      key: 'device_frmpayload_data_potassium',
+      label: 'Kalium',
+      unit: '',
+      scaleFactor: 0.02,
+      icon: 'flask',
+    },
+    {
+      key: 'device_frmpayload_data_data_SoilMoisture',
+      label: 'Bodenfeuchtigkeit %',
+      unit: '%',
+      scaleFactor: 2,
+      icon: 'water',
+    },
+  ]
+
+  /**
+   * Holds the latest measurement data.
+   */
+  latestMeasurement: Measurement | null = null
+
+  /**
+   * Constructor injecting the backend service.
+   * @param backendService The backend service for API calls.
+   */
   constructor(private backendService: BackendService) {}
 
+  /**
+   * Angular lifecycle hook: Called after component initialization.
+   * Loads statistics and triggers OpenAI analysis only once per session.
+   */
   ngOnInit(): void {
     this.loadStatistics()
-    // Alle 30 Sekunden loadStatistics erneut ausführen
+
+    // Load OpenAI synopsis from global storage (persists across navigation)
+    this.openAiSynopsis = HomePageComponent.globalOpenAiSynopsis
+
+    // Only call OpenAI once per browser session
+    if (!HomePageComponent.openAiCalledOnce) {
+      HomePageComponent.openAiCalledOnce = true
+      this.loadOpenAiSynopsis()
+    }
+
     this.statisticsIntervalId = setInterval(() => {
       this.loadStatistics()
     }, 3000)
     console.table(this.statistics)
+    console.log('Statistics:', this.statistics)
   }
 
-  // Optional: Timer beim Zerstören der Komponente aufräumen
+  /**
+   * Angular lifecycle hook: Called when the component is destroyed.
+   * Clears the statistics refresh interval.
+   */
   ngOnDestroy(): void {
     if (this.statisticsIntervalId) {
       clearInterval(this.statisticsIntervalId)
     }
   }
 
+  /**
+   * Loads dashboard statistics from the backend and updates the component state.
+   * Handles errors and sets the error message if loading fails.
+   */
   loadStatistics() {
-    try {
-      // Hilfsfunktion für Zufallsdaten
-      function generateRandomDataPoints(
-        count: number,
-        min: number,
-        max: number,
-        startDate: string
-      ): { timestamp: string; value: number }[] {
-        const points = []
-        const date = new Date(startDate)
-        for (let i = 0; i < count; i++) {
-          points.push({
-            timestamp: date.toISOString(),
-            value: +(Math.random() * (max - min) + min).toFixed(1),
-          })
-          date.setDate(date.getDate() + 1)
-        }
-        return points
-      }
+    this.backendService.getDashboardStatistics().subscribe({
+      next: (stats) => {
+        this.statistics = stats
+        this.statisticsError = null
+        this.latestMeasurement = this.getLatestMeasurement()
+      },
+      error: (error) => {
+        const errMsg = error instanceof Error ? error.message : String(error)
+        this.statisticsError = 'Fehler beim Laden der Daten: ' + errMsg
+        this.statistics = undefined
+      },
+    })
+  }
 
-      this.statistics = {
-        averageTemperature: 21.5,
-        averageHumidity: 45.2,
-        count: 1200,
-        oldestMeasurement: {
-          measurementName: 'device_frmpayload_data_air_humidity_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
+  /**
+   * Loads the OpenAI synopsis by fetching statistics and sending them to the OpenAI endpoint.
+   * Stores the result globally so it persists across navigation.
+   */
+  private loadOpenAiSynopsis() {
+    // Fetch initial statistics for AI analysis
+    this.backendService.getDashboardStatistics().subscribe({
+      next: (stats) => {
+        this.backendService.getOpenAiSynopsis(JSON.stringify(stats)).subscribe({
+          next: (aiSynopsis) => {
+            this.openAiSynopsis = aiSynopsis
+            HomePageComponent.globalOpenAiSynopsis = aiSynopsis // store globally
           },
-          dataPoints: generateRandomDataPoints(1, 20, 60, '2020-01-02T09:00:00Z'),
-        },
-        newestMeasurement: {
-          measurementName: 'device_frmpayload_data_co2_concentration_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
+          error: (error) => {
+            const errMsg = error instanceof Error ? error.message : String(error)
+            this.openAiSynopsis = 'Fehler bei der KI-Analyse: ' + errMsg
+            HomePageComponent.globalOpenAiSynopsis = this.openAiSynopsis
           },
-          dataPoints: generateRandomDataPoints(1, 300, 500, '2025-04-25T09:00:00Z'),
-        },
-        lowestTemperature: {
-          measurementName: 'device_frmpayload_data_air_temperature_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
-          },
-          dataPoints: generateRandomDataPoints(1, 10, 15, '2023-04-03T09:00:00Z'),
-        },
-        highestTemperature: {
-          measurementName: 'device_frmpayload_data_air_temperature_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
-          },
-          dataPoints: generateRandomDataPoints(1, 30, 40, '2022-04-03T09:00:00Z'),
-        },
-        lowestHumidity: {
-          measurementName: 'device_frmpayload_data_air_humidity_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
-          },
-          dataPoints: generateRandomDataPoints(1, 10, 30, '2021-11-02T09:00:00Z'),
-        },
-        highestHumidity: {
-          measurementName: 'device_frmpayload_data_air_humidity_value',
-          sensor: {
-            name: 'Decentlab DL-LP8P Multisensor',
-            id: 'decentlab-dl-lp8p',
-            location: 'Nexus',
-          },
-          dataPoints: generateRandomDataPoints(1, 70, 80, '2025-07-12T09:00:00Z'),
-        },
-      } as Statistics
-      this.statisticsError = null // Fehler zurücksetzen, falls erfolgreich
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : String(error)
-      this.statisticsError = 'Fehler beim Laden der Statistiken: ' + errMsg
-      this.statistics = undefined
+        })
+      },
+      error: (error) => {
+        const errMsg = error instanceof Error ? error.message : String(error)
+        this.openAiSynopsis = 'Fehler beim Laden der Statistik für KI-Analyse: ' + errMsg
+        HomePageComponent.globalOpenAiSynopsis = this.openAiSynopsis
+      },
+    })
+  } // end loadOpenAiSynopsis()
+
+  /**
+   * Gibt das Measurement-Objekt mit dem jüngsten Timestamp aus statistics.latestMeasurements zurück.
+   * @returns Das Measurement-Objekt mit dem neuesten Timestamp oder null.
+   */
+  private getLatestMeasurement(): Measurement | null {
+    if (!this.statistics || !this.statistics.latestMeasurements) {
+      return null
     }
+    let latest: Measurement | null = null
+    let latestTimestamp = 0
+    for (const key in this.statistics.latestMeasurements) {
+      const measurement = this.statistics.latestMeasurements[key]
+      if (measurement.dataPoints && measurement.dataPoints.length > 0) {
+        const ts = new Date(measurement.dataPoints[0].timestamp).getTime()
+        if (ts > latestTimestamp) {
+          latestTimestamp = ts
+          latest = measurement
+        }
+      }
+    }
+    return latest
   }
 }

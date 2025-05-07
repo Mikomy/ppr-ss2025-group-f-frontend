@@ -102,3 +102,141 @@
   font-weight: bold;
   color: #333;
 }
+
+.chart-grid {
+  display: flex;
+  align-items: flex-end;
+  height: auto;
+  min-height: 200px;
+  gap: 32px;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem;
+  overflow: visible;
+  flex-wrap: wrap;
+}
+
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.bar-container {
+  position: relative;
+  width: 84px;
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.chart-bar {
+  position: absolute;
+  bottom: 0;
+  width: 40px;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  &.min {
+    left: 0;
+    background: #4e73df;
+  }
+
+  &.max {
+    right: 0;
+    background: #1cc88a;
+  }
+
+  .bar-label {
+    color: #fff;
+    font-size: 0.9em;
+    padding: 4px;
+    text-shadow: 0 1px 2px rgb(0, 0, 0);
+  }
+}
+
+.chart-label {
+  font-size: 0.8em;
+  text-align: center;
+}
+
+.chart-bar {
+  cursor: pointer;
+  max-height: 100%;
+  min-height: 2px;
+}
+
+.legend-color-min{
+  display: inline-block;
+}
+
+.legend-color-min + span {
+  // background-color: #4e73df;
+  // min-width: 100px;
+  display: inline-block;
+  color: #000;
+  padding:5px;
+}
+.legend-color-max + span {
+  // background-color: #1cc88a;
+  // min-width: 100px;
+  display: inline-block;
+  color: #000;
+  padding:5px;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color-min,
+.legend-color-max {
+  display: block;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.legend-color-min {
+  background-color: #4e73df;
+}
+
+.legend-color-max {
+  background-color: #1cc88a;
+}
+
+.legend-label {
+  color: #666;
+  font-size: 0.9em;
+}
+
+@media (max-width: 600px) {
+  .chart-grid {
+    gap: 16px;
+  }
+  
+  .chart-column {
+    width: calc(50% - 16px); // Two columns on medium screens
+  }
+}
+
+@media (max-width: 400px) {
+  .chart-column {
+    width: 100%; // One column on very small screens
+  }
+}

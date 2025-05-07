@@ -1,13 +1,16 @@
 import { Measurement } from './measurement.model'
 
+interface SensorData {
+  timestamp: string
+  value: number
+}
+
 export interface Statistics {
-  count: number
-  averageHumidity: number
-  averageTemperature: number
-  oldestMeasurement: Measurement
-  newestMeasurement: Measurement
-  lowestHumidity: Measurement
-  highestHumidity: Measurement
-  lowestTemperature: Measurement
-  highestTemperature: Measurement
+  overallTotalPointCount: number
+  averageValues: Record<string, number>
+  latestMeasurements: Record<string, Measurement>
+  measurementPointCount: Record<string, number>
+  minValues: Record<string, SensorData>
+  maxValues: Record<string, SensorData>
+  openAiSynopsis?: string // Optional field for OpenAI analysis
 }
