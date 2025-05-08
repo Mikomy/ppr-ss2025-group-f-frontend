@@ -1,0 +1,10 @@
+.results {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.result {
+  flex: 1 1 0;
+  min-width: 300px;
+}
