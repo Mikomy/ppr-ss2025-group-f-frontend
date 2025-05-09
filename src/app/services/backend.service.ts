@@ -1,26 +1,30 @@
 import { Injectable } from '@angular/core'
-import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http'
 import { Observable, of, throwError } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import {
-  fakeAirHumidity,
-  fakeAirTemperature,
-  fakeCO2Concentration,
-  fakeSoilMoisture,
-  fakeNitrogen,
-  fakePhosphorus,
-  fakePotassium,
-  fakeDataHumidity,
-  fakeDataSoilMoisture,
-  fakeDataTemperature,
-} from '../models/fake-database/fake-data'
+// import {
+//   fakeAirHumidity,
+//   fakeAirTemperature,
+//   fakeCO2Concentration,
+//   fakeSoilMoisture,
+//   fakeNitrogen,
+//   fakePhosphorus,
+//   fakePotassium,
+//   fakeDataHumidity,
+//   fakeDataSoilMoisture,
+//   fakeDataTemperature,
+// } from '../models/fake-database/fake-data'
 import measurementList from '../assets/sensor-measurements.json'
 import { Measurement } from '../models/measurement.model'
 import { DropdownOptionModel } from '../models/dropdown.option.model'
 import { Statistics } from '../models/statistics.model'
 
 /**
- * Service for backend communication, including statistics, measurements, and OpenAI integration.
+ * 09.05.2025
+ * This service handles communication with the backend API to
+ * retrieve sensor measurements and related data.
+ * It uses Angular's HttpClient to make HTTP requests and
+ * provides observables for components to subscribe to.
  */
 @Injectable({
   providedIn: 'root',
@@ -35,7 +39,7 @@ export class BackendService {
   /**
    * Base URL for InfluxDB API endpoints.
    */
-  private baseUrl = '/api/influx'
+  private baseUrl = 'http://localhost:8080/api/influx'
 
   /**
    * Fetches statistics from the backend.
@@ -64,46 +68,27 @@ export class BackendService {
   }
 
   /**
-   * Returns measurement data for a given measurement name and optional time range.
-   * @param measurementName The name of the measurement.
-   * @param fromTime Optional start time.
-   * @param toTime Optional end time.
-   * @returns Observable emitting an array of Measurement.
+   * Fetches sensor measurement data for the specified measurementName and
+   * optional time range (fromIso and toIso).
+   * @param measurementName  z.B. 'device_frmpayload_data_nitrogen'
+   * @param fromIso          z.B. '2025-04-29T12:12:00.000Z'
+   * @param toIso            z.B. '2025-04-29T13:12:00.000Z'
    */
   getMeasurement(
-    measurementName?: string,
-    fromTime?: string,
-    toTime?: string
+    measurementName: string,
+    fromIso?: string,
+    toIso?: string
   ): Observable<Measurement[]> {
-    switch (measurementName) {
-      case 'SCRUM24-TC02-AC01: Negativer Test':
-        return of([])
-      case 'device_frmpayload_data_air_humidity_value':
-        return of(fakeAirHumidity)
-      case 'device_frmpayload_data_air_temperature_value':
-        return of(fakeAirTemperature)
-      case 'device_frmpayload_data_co2_concentration_value':
-        return of(fakeCO2Concentration)
-      case 'device_frmpayload_data_soil_moisture':
-        return of(fakeSoilMoisture)
-      case 'device_frmpayload_data_nitrogen':
-        return of(fakeNitrogen)
-      case 'device_frmpayload_data_phosphorus':
-        return of(fakePhosphorus)
-      case 'device_frmpayload_data_potassium':
-        return of(fakePotassium)
-      case 'device_frmpayload_data_data_Humidity':
-        return of(fakeDataHumidity)
-      case 'device_frmpayload_data_data_SoilMoisture':
-        return of(fakeDataSoilMoisture)
-      case 'device_frmpayload_data_data_Temperature':
-        return of(fakeDataTemperature)
-      default:
-        // No matching measurement → return empty array
-        return of([]).pipe(catchError(this.handleError<Measurement[]>(`${fromTime},${toTime}`)))
-    }
+    let params = new HttpParams().set('measurement', measurementName)
+    if (fromIso) params = params.set('from', fromIso)
+    if (toIso) params = params.set('to', toIso)
+    return this.http.get<Measurement[]>(`${this.baseUrl}/measurements/grouped`, { params }).pipe(
+      catchError((err) => {
+        console.error(err)
+        return throwError(() => new Error('Fehler beim Laden der Sensordaten.'))
+      })
+    )
   }
-
   /**
    * Calls the OpenAI API to get a synopsis/analysis for the given measurements text.
    * @param measurementsText The measurements as a string to be analyzed.
@@ -184,4 +169,38 @@ export class BackendService {
       return throwError(() => error)
     }
   }
+
+  // getMeasurement(
+  //   measurementName?: string,
+  //   fromTime?: string,
+  //   toTime?: string
+  // ): Observable<Measurement[]> {
+  //   switch (measurementName) {
+  //     case 'SCRUM24-TC02-AC01: Negativer Test':
+  //       return of([])
+  //     case 'device_frmpayload_data_air_humidity_value':
+  //       return of(fakeAirHumidity)
+  //     case 'device_frmpayload_data_air_temperature_value':
+  //       return of(fakeAirTemperature)
+  //     case 'device_frmpayload_data_co2_concentration_value':
+  //       return of(fakeCO2Concentration)
+  //     case 'device_frmpayload_data_soil_moisture':
+  //       return of(fakeSoilMoisture)
+  //     case 'device_frmpayload_data_nitrogen':
+  //       return of(fakeNitrogen)
+  //     case 'device_frmpayload_data_phosphorus':
+  //       return of(fakePhosphorus)
+  //     case 'device_frmpayload_data_potassium':
+  //       return of(fakePotassium)
+  //     case 'device_frmpayload_data_data_Humidity':
+  //       return of(fakeDataHumidity)
+  //     case 'device_frmpayload_data_data_SoilMoisture':
+  //       return of(fakeDataSoilMoisture)
+  //     case 'device_frmpayload_data_data_Temperature':
+  //       return of(fakeDataTemperature)
+  //     default:
+  //       // kein passendes Measurement → leeres Array
+  //       return of([]).pipe(catchError(this.handleError<Measurement[]>(`${fromTime},${toTime}`)))
+  //   }
+  // }
 }
