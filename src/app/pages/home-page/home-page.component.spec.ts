@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { of } from 'rxjs'
 import { HomePageComponent } from './home-page.component'
 import { BackendService } from '../../services/backend.service'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
@@ -6,21 +7,53 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 describe('HomePageComponent', () => {
   let component: HomePageComponent
   let fixture: ComponentFixture<HomePageComponent>
+  let backendServiceSpy: jasmine.SpyObj<BackendService>
 
   beforeEach(async () => {
-    // Create a spy for BackendService
-    const spy = jasmine.createSpyObj('BackendService', ['getStatistics'])
+    backendServiceSpy = jasmine.createSpyObj('BackendService', [
+      'getDashboardStatistics',
+      'getOpenAiSynopsis',
+    ])
+    // Mock Statistics with all required nested objects/fields for template
+    backendServiceSpy.getDashboardStatistics.and.returnValue(
+      of({
+        overallTotalPointCount: 0,
+        averageValues: {},
+        latestMeasurements: {},
+        measurementPointCount: {},
+        minValues: {
+          device_frmpayload_data_air_humidity_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_data_air_temperature_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_co2_concentration_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_data_SoilMoisture: { timestamp: '', value: 0 },
+          device_frmpayload_data_nitrogen: { timestamp: '', value: 0 },
+          device_frmpayload_data_phosphorus: { timestamp: '', value: 0 },
+          device_frmpayload_data_potassium: { timestamp: '', value: 0 },
+        },
+        maxValues: {
+          device_frmpayload_data_air_humidity_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_data_air_temperature_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_co2_concentration_value: { timestamp: '', value: 0 },
+          device_frmpayload_data_data_SoilMoisture: { timestamp: '', value: 0 },
+          device_frmpayload_data_nitrogen: { timestamp: '', value: 0 },
+          device_frmpayload_data_phosphorus: { timestamp: '', value: 0 },
+          device_frmpayload_data_potassium: { timestamp: '', value: 0 },
+        },
+      })
+    )
+    backendServiceSpy.getOpenAiSynopsis.and.returnValue(of('KI-Analyse'))
 
     await TestBed.configureTestingModule({
       imports: [
         HomePageComponent, // standalone component imports its Angular Material & CommonModule dependencies
         HttpClientTestingModule, // provide HttpClient for BackendService
       ],
-      providers: [{ provide: BackendService, useValue: spy }],
+      providers: [{ provide: BackendService, useValue: backendServiceSpy }],
     }).compileComponents()
 
     fixture = TestBed.createComponent(HomePageComponent)
     component = fixture.componentInstance
+    fixture.detectChanges()
   })
 
   it('should create the component', () => {
@@ -33,7 +66,7 @@ describe('HomePageComponent', () => {
 
     expect(component.statistics).toBeDefined()
     expect(component.statisticsError).toBeNull()
-    expect(component.statistics?.averageTemperature).toBe(21.5)
+    // expect(component.statistics?.averageTemperature).toBe(21.5) // Entfernen oder anpassen, da averageTemperature nicht existiert
   })
 
   it('ngOnDestroy should clear the interval timer', () => {

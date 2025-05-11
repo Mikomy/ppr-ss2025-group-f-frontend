@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, LOCALE_ID, OnInit } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import {
   FormBuilder,
@@ -13,15 +13,39 @@ import {
 import { StatsService } from '../../components/statistics/stats.service'
 import { SensorGroup, StatisticResult } from '../../models/stats.model'
 import { StatisticsDisplayComponent } from '../../components/statistics/statistics-display/statistics-display.component'
-import { CommonModule } from '@angular/common'
+import { CommonModule, registerLocaleData } from '@angular/common'
 import { SensorGroupSelectorComponent } from '../../shared/sensor-group-selector/sensor-group-selector.component'
 import { MatButtonModule } from '@angular/material/button'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatDatepickerModule } from '@angular/material/datepicker'
-import { MatNativeDateModule } from '@angular/material/core'
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core'
 import { forkJoin } from 'rxjs'
 import { MatIconModule } from '@angular/material/icon'
+import localeDe from '@angular/common/locales/de'
+import {
+  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
+  MomentDateAdapter,
+} from '@angular/material-moment-adapter'
+
+registerLocaleData(localeDe, 'de')
+
+export const DD_MM_YYYY_FORMATS = {
+  parse: {
+    dateInput: 'DD/MM/YYYY',
+  },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+}
 
 @Component({
   selector: 'app-statistics-page',
@@ -39,7 +63,16 @@ import { MatIconModule } from '@angular/material/icon'
     MatNativeDateModule,
     MatIconModule,
   ],
-
+  providers: [
+    { provide: LOCALE_ID, useValue: 'de-AT' },
+    { provide: MAT_DATE_LOCALE, useValue: 'de-AT' },
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+    { provide: MAT_DATE_FORMATS, useValue: DD_MM_YYYY_FORMATS },
+  ],
   templateUrl: './statistics-page.component.html',
   styleUrl: './statistics-page.component.scss',
 })

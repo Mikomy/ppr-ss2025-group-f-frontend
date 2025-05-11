@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
-import { HttpClient, HttpParams } from '@angular/common/http'
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http'
 import { Observable, of, throwError } from 'rxjs'
-import { catchError } from 'rxjs/operators'
+import { catchError, map } from 'rxjs/operators'
 // import {
 //   fakeAirHumidity,
 //   fakeAirTemperature,
@@ -20,6 +20,7 @@ import { DropdownOptionModel } from '../models/dropdown.option.model'
 import { Statistics } from '../models/statistics.model'
 
 /**
+ * 09.05.2025
  * This service handles communication with the backend API to
  * retrieve sensor measurements and related data.
  * It uses Angular's HttpClient to make HTTP requests and
@@ -30,8 +31,15 @@ import { Statistics } from '../models/statistics.model'
   providedIn: 'root',
 })
 export class BackendService {
+  /**
+   * Constructor injecting Angular HttpClient.
+   * @param http Angular HttpClient for HTTP requests.
+   */
   constructor(private http: HttpClient) {}
 
+  /**
+   * Base URL for InfluxDB API endpoints.
+   */
   private baseUrl = 'http://localhost:8080/api/influx'
 
   /**
@@ -60,6 +68,20 @@ export class BackendService {
     return this.http.get<Statistics>(`${this.baseUrl}/measurements/get_statistics`)
   }
 
+  /**
+   * Fetches dashboard statistics from the backend.
+   * @returns Observable emitting Statistics object.
+   */
+  getDashboardStatistics(): Observable<Statistics> {
+    return this.http
+      .get<Statistics>(`http://localhost:8080/api/statistics/dashboard_data`)
+      .pipe(catchError(this.handleError<Statistics>('getStatistics')))
+  }
+
+  /**
+   * Returns dropdown options for sensor measurements.
+   * @returns Observable emitting an array of DropdownOptionModel.
+   */
   getDropdownOption(): Observable<DropdownOptionModel[]> {
     return of(measurementList as DropdownOptionModel[])
   }
@@ -85,6 +107,86 @@ export class BackendService {
         return throwError(() => new Error('Fehler beim Laden der Sensordaten.'))
       })
     )
+  }
+  /**
+   * Calls the OpenAI API to get a synopsis/analysis for the given measurements text.
+   * @param measurementsText The measurements as a string to be analyzed.
+   * @returns Observable emitting the OpenAI analysis as a string.
+   */
+  getOpenAiSynopsis(measurementsText: string): Observable<string> {
+    const apiKey =
+      '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'
+    const url = 'https://api.openai.com/v1/chat/completions'
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    })
+    const body = {
+      model: 'gpt-4.1-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Du bist ein hilfreicher Assistent für die Analyse von Sensordaten und hilfst Wissenschaftlern, die Daten zu verstehen und zu interpretieren.Dabei erzeugst du einen schön formatierten Text, der die Daten zusammenfasst und analysiert. Du bist in der Lage, auch komplexe Daten zu verstehen und zu interpretieren. Deine Antworten sind präzise und informativ. Der Text sol maximal 150 Wörter lang sein. Du bist in der Lage, auch komplexe Daten zu verstehen und zu interpretieren, du gibst keine reinen Zahlen wider, die sind uninteressant, du interpretierst die Werte sofort! Deine Antworten sind präzise und informativ. Der Text soll maximal 100 Wörter lang sein und mindestens 5 Absätze/Leerzeilen enthalten. Als Abschluss der Analyse erzeugst du das Wort "Handlungssaufforderung" und darunter einen Text mit 50 Wörtern, was aufgrund der Sensordaten zu tun ist.',
+        },
+        {
+          role: 'user',
+          content: `Analysiere folgende Messwerte und gib eine kurze Zusammenfassung auf Deutsch:\n${measurementsText}. Die ersten zwei Sätze sollen einen kurzen Überblick verschaffen. Der restliche Text soll nicht die Daten 1:1 wiedergeben, sondern eine Einschätzung zu den Daten liefern.`,
+        },
+      ],
+      temperature: 0.7,
+    }
+    return this.http.post<unknown>(url, body, { headers }).pipe(
+      map((res) => {
+        console.log('OpenAI raw response:', res)
+        // Typ für OpenAI-Response definieren, um TypeScript-Fehler zu vermeiden
+        interface OpenAIResponse {
+          choices?: {
+            message?: {
+              content?:
+                | string
+                | {
+                    content?: string
+                  }
+            }
+          }[]
+        }
+        const response = res as OpenAIResponse
+        if (
+          response &&
+          Array.isArray(response.choices) &&
+          response.choices[0] &&
+          response.choices[0].message
+        ) {
+          const msg = response.choices[0].message
+          // content can be a string or an object with a content field
+          if (typeof msg.content === 'string') {
+            return msg.content
+          }
+          if (msg.content && typeof (msg.content as { content: string }).content === 'string') {
+            return (msg.content as { content: string }).content
+          }
+        }
+        return ''
+      }),
+      catchError(this.handleError<string>('getOpenAiSynopsis'))
+    )
+  }
+
+  /**
+   * Handles HTTP errors for observable streams.
+   * @param operation The name of the operation that failed.
+   * @returns A function that returns an observable error.
+   */
+  private handleError<T>(operation: string) {
+    return (error: unknown): Observable<T> => {
+      if (error instanceof Error) {
+        console.error(`${operation} failed: ${error.message}`)
+      } else {
+        console.error(`${operation} failed:`, error)
+      }
+      return throwError(() => error)
+    }
   }
 
   // getMeasurement(
@@ -118,17 +220,6 @@ export class BackendService {
   //     default:
   //       // kein passendes Measurement → leeres Array
   //       return of([]).pipe(catchError(this.handleError<Measurement[]>(`${fromTime},${toTime}`)))
-  //   }
-  // }
-
-  // private handleError<T>(operation: string) {
-  //   return (error: unknown): Observable<T> => {
-  //     if (error instanceof Error) {
-  //       console.error(`${operation} failed: ${error.message}`)
-  //     } else {
-  //       console.error(`${operation} failed:`, error)
-  //     }
-  //     return throwError(() => error)
   //   }
   // }
 }
