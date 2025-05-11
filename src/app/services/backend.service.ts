@@ -34,6 +34,27 @@ export class BackendService {
 
   private baseUrl = 'http://localhost:8080/api/influx'
 
+  /**
+   * Fetch all sensor-grouped data for a given measurement alias.
+   * Returns one Measurement[] per sensor.
+   */
+  getGroupedByAlias(alias: string, from?: string, to?: string): Observable<Measurement[]> {
+    let params = new HttpParams()
+    if (from) params = params.set('from', from)
+    if (to) params = params.set('to', to)
+
+    return this.http
+      .get<
+        Measurement[]
+      >(`${this.baseUrl}/measurements/grouped/${encodeURIComponent(alias)}`, { params })
+      .pipe(
+        catchError((err) => {
+          console.error(`Error loading grouped/${alias}`, err)
+          return throwError(() => new Error('Fehler beim Laden der Sensordaten.'))
+        })
+      )
+  }
+
   // http://localhost:8080/sensormodule/measurements/get_statistics
   getStatistics(): Observable<Statistics> {
     return this.http.get<Statistics>(`${this.baseUrl}/measurements/get_statistics`)

@@ -10,7 +10,8 @@ import { CommonModule } from '@angular/common'
 interface SensorOption {
   key: string
   measurementName: string
-  sensorId: string
+  alias: string
+  sensorName: string
   display: string
 }
 @Component({
@@ -46,9 +47,10 @@ export class SensorGroupSelectorComponent implements ControlValueAccessor, OnIni
   ngOnInit(): void {
     this.backend.getDropdownOption().subscribe((opts) => {
       this.options = opts.map((o, i) => ({
-        key: i.toString(), // eindeutiger Key pro Option
-        sensorId: o.sensor.id,
+        key: i.toString(),
+        sensorName: o.sensor.name,
         measurementName: o.measurementName,
+        alias: o.alias!,
         display: `${o.measurementName} – ${o.sensor.name}`,
       }))
     })
@@ -59,7 +61,7 @@ export class SensorGroupSelectorComponent implements ControlValueAccessor, OnIni
       this.selectedKeys = group.sensors
         .map((s) => {
           const match = this.options.find(
-            (opt) => opt.sensorId === s.sensorId && opt.measurementName === s.measurementName
+            (opt) => opt.sensorName === s.sensorName && opt.measurementName === s.measurementName
           )
           return match ? match.key : null
         })
@@ -92,8 +94,9 @@ export class SensorGroupSelectorComponent implements ControlValueAccessor, OnIni
         .map((key) => this.options.find((opt) => opt.key === key))
         .filter((o): o is SensorOption => !!o)
         .map((o) => ({
-          sensorId: o.sensorId,
+          alias: o.alias,
           measurementName: o.measurementName,
+          sensorName: o.sensorName,
         })),
     }
     this.onChange(group)

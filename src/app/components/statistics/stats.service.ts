@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Observable, forkJoin } from 'rxjs'
+import { Observable, forkJoin, of } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { BackendService } from '../../services/backend.service'
 import { SensorGroup, StatisticResult, Series } from '../../models/stats.model'
@@ -28,73 +28,142 @@ export class StatsService {
    * @returns      Observable of the computed StatisticResult
    */
   computeStats(group: SensorGroup, from: Date, to: Date): Observable<StatisticResult> {
+    if (!group.sensors.length) {
+      return of({
+        count: 0,
+        mean: 0,
+        median: 0,
+        min: 0,
+        max: 0,
+        variance: 0,
+        stdDev: 0,
+        p25: 0,
+        p75: 0,
+        iqr: 0,
+        trend: 0,
+        series: [],
+      })
+    }
+
+    const alias = group.sensors[0].alias
     const isoFrom = from.toISOString()
     const isoTo = to.toISOString()
 
-    // Kick off one HTTP call per sensor-measurement combo
-    const calls = group.sensors.map((sensorConfig) =>
-      this.backend.getMeasurement(sensorConfig.measurementName, isoFrom, isoTo)
-    )
-
-    return forkJoin(calls).pipe(
-      map((allMeasurements: Measurement[][]) => {
-        // Build each sensor's series
-        const series: Series[] = group.sensors.map((sensorConfig, idx) => {
-          const measurementsForName = allMeasurements[idx] || []
-          // pick matching sensorId or fallback to first
-          const measurement =
-            measurementsForName.find((m) => m.sensor.id === sensorConfig.sensorId) ??
-            measurementsForName[0]
-
-          const rawPoints = measurement?.dataPoints || []
-          const points: ScatterDataPoint[] = rawPoints.map((dp) => ({
-            x: new Date(dp.timestamp).getTime(),
-            y: dp.value,
-          }))
-
-          return {
-            measurementName: sensorConfig.measurementName,
-            sensorName: sensorConfig.measurementName,
-            points,
-          }
+    // One HTTP call for the whole measurement (all sensors)
+    return this.backend.getGroupedByAlias(alias, isoFrom, isoTo).pipe(
+      map((all: Measurement[]) => {
+        console.log('>>> group.sensors:', group.sensors)
+        console.log('>>> group.alias:', alias)
+        console.log(
+          'geladene Sensor-Namen:',
+          all.map((m) => m.sensor.name)
+        )
+        console.log(
+          'erwartete Sensor-Namen:',
+          group.sensors.map((s) => s.sensorName)
+        )
+        // Build series only for sensors we care about
+        const series: Series[] = group.sensors.map(({ sensorName, measurementName }) => {
+          const m = all.find((x) => x.sensor.name === sensorName)
+          const points: ScatterDataPoint[] =
+            m?.dataPoints.map((dp) => ({
+              x: new Date(dp.timestamp).getTime(),
+              y: dp.value,
+            })) ?? []
+          return { measurementName, sensorName, points }
         })
 
-        // flatten & sort all values to compute statistics
-        const allValues = series
-          .flatMap((serie) => serie.points.map((p) => p.y))
-          .sort((a, b) => a - b)
-
-        const count = allValues.length
-        const mean = count ? allValues.reduce((sum, v) => sum + v, 0) / count : 0
-        const median = this.quantile(allValues, 0.5)
-        const min = count ? allValues[0] : 0
-        const max = count ? allValues[count - 1] : 0
-        const variance = count
-          ? allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / count
-          : 0
-        const stdDev = Math.sqrt(variance)
-        const p25 = this.quantile(allValues, 0.25)
-        const p75 = this.quantile(allValues, 0.75)
-        const iqr = p75 - p25
-        const trend = this.computeTrend(allValues)
+        // flatten & sort
+        const vals = series.flatMap((s) => s.points.map((p) => p.y)).sort((a, b) => a - b)
+        const n = vals.length
+        const mean = n ? vals.reduce((s, v) => s + v, 0) / n : 0
 
         return {
-          count,
+          count: n,
           mean,
-          median,
-          min,
-          max,
-          variance,
-          stdDev,
-          p25,
-          p75,
-          iqr,
-          trend,
+          median: this.quantile(vals, 0.5),
+          min: n ? vals[0] : 0,
+          max: n ? vals[n - 1] : 0,
+          variance: n ? vals.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n : 0,
+          stdDev: Math.sqrt(n ? vals.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n : 0),
+          p25: this.quantile(vals, 0.25),
+          p75: this.quantile(vals, 0.75),
+          iqr: this.quantile(vals, 0.75) - this.quantile(vals, 0.25),
+          trend: this.computeTrend(vals),
           series,
         }
       })
     )
   }
+
+  // computeStats(group: SensorGroup, from: Date, to: Date): Observable<StatisticResult> {
+  //   const isoFrom = from.toISOString()
+  //   const isoTo = to.toISOString()
+  //
+  //   // Kick off one HTTP call per sensor-measurement combo
+  //   const calls = group.sensors.map((sensorConfig) =>
+  //     this.backend.getMeasurement(sensorConfig.measurementName, isoFrom, isoTo)
+  //   )
+  //
+  //   return forkJoin(calls).pipe(
+  //     map((allMeasurements: Measurement[][]) => {
+  //       // Build each sensor's series
+  //       const series: Series[] = group.sensors.map((sensorConfig, idx) => {
+  //         const measurementsForName = allMeasurements[idx] || []
+  //         // pick matching sensorId or fallback to first
+  //         const measurement =
+  //           measurementsForName.find((m) => m.sensor.id === sensorConfig.sensorId) ??
+  //           measurementsForName[0]
+  //
+  //         const rawPoints = measurement?.dataPoints || []
+  //         const points: ScatterDataPoint[] = rawPoints.map((dp) => ({
+  //           x: new Date(dp.timestamp).getTime(),
+  //           y: dp.value,
+  //         }))
+  //
+  //         return {
+  //           measurementName: sensorConfig.measurementName,
+  //           sensorName: sensorConfig.measurementName,
+  //           points,
+  //         }
+  //       })
+  //
+  //       // flatten & sort all values to compute statistics
+  //       const allValues = series
+  //         .flatMap((serie) => serie.points.map((p) => p.y))
+  //         .sort((a, b) => a - b)
+  //
+  //       const count = allValues.length
+  //       const mean = count ? allValues.reduce((sum, v) => sum + v, 0) / count : 0
+  //       const median = this.quantile(allValues, 0.5)
+  //       const min = count ? allValues[0] : 0
+  //       const max = count ? allValues[count - 1] : 0
+  //       const variance = count
+  //         ? allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / count
+  //         : 0
+  //       const stdDev = Math.sqrt(variance)
+  //       const p25 = this.quantile(allValues, 0.25)
+  //       const p75 = this.quantile(allValues, 0.75)
+  //       const iqr = p75 - p25
+  //       const trend = this.computeTrend(allValues)
+  //
+  //       return {
+  //         count,
+  //         mean,
+  //         median,
+  //         min,
+  //         max,
+  //         variance,
+  //         stdDev,
+  //         p25,
+  //         p75,
+  //         iqr,
+  //         trend,
+  //         series,
+  //       }
+  //     })
+  //   )
+  // }
 
   /**
    * Computes the Pearson correlation coefficient between

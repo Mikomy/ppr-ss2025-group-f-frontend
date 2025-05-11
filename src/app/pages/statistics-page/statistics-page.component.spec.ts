@@ -37,7 +37,6 @@ describe('StatisticsPageComponent (shallow)', () => {
       providers: [{ provide: StatsService, useValue: statsSpy }, provideHttpClientTesting()],
       schemas: [NO_ERRORS_SCHEMA],
     })
-      // remove child component imports to avoid HttpClient injection failures
       .overrideComponent(StatisticsPageComponent, {
         set: { template: '' },
       })
@@ -63,19 +62,24 @@ describe('StatisticsPageComponent (shallow)', () => {
   })
 
   it('should set errorMessage if form invalid', () => {
-    // populate groups to pass group validation
-    component.group1Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    component.group2Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    // leave dates empty -> invalid form
+    component.group1Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    component.group2Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
     component.onCompute()
     expect(component.errorMessage).toBe('Bitte komplettes Zeitintervall auswählen')
   })
 
   it('should call StatsService and set results on valid form', fakeAsync(() => {
-    // set valid form values
     const now = new Date('2025-05-01T00:00:00Z')
-    component.group1Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    component.group2Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
+    component.group1Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    component.group2Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
     component.fromDateCtrl.setValue(now)
     component.fromTimeCtrl.setValue('00:00')
     component.toDateCtrl.setValue(now)
@@ -93,9 +97,13 @@ describe('StatisticsPageComponent (shallow)', () => {
 
   it('should set errorMessage if StatsService errors', fakeAsync(() => {
     statsSpy.computeStats.and.returnValue(throwError(() => new Error('fail')))
-    component.group1Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    component.group2Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    const now = new Date()
+    component.group1Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    component.group2Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    const now = new Date('2025-05-01T00:00:00Z')
     component.fromDateCtrl.setValue(now)
     component.fromTimeCtrl.setValue('00:00')
     component.toDateCtrl.setValue(now)
@@ -108,9 +116,13 @@ describe('StatisticsPageComponent (shallow)', () => {
 
   it('should set errorMessage if no data in results', fakeAsync(() => {
     statsSpy.computeStats.and.returnValue(of({ ...dummyResult, count: 0 }))
-    component.group1Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    component.group2Ctrl.setValue({ sensors: [{ measurementName: 'm', sensorId: 's' }] })
-    const now = new Date('2025-05-01')
+    component.group1Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    component.group2Ctrl.setValue({
+      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    })
+    const now = new Date('2025-05-01T00:00:00Z')
     component.fromDateCtrl.setValue(now)
     component.fromTimeCtrl.setValue('00:00')
     component.toDateCtrl.setValue(now)
@@ -124,8 +136,8 @@ describe('StatisticsPageComponent (shallow)', () => {
   }))
 
   it('dateRangeValidator should flag invalid range', () => {
-    const from = new Date('2025-05-02')
-    const to = new Date('2025-05-01')
+    const from = new Date('2025-05-02T00:00:00Z')
+    const to = new Date('2025-05-01T00:00:00Z')
     component.fromDateCtrl.setValue(from)
     component.fromTimeCtrl.setValue('10:00')
     component.toDateCtrl.setValue(to)

@@ -1,98 +1,122 @@
 [
   {
     "sensor": { "name": "SCRUM24-TC02-AC01: Negativer Test" },
-    "measurementName": " Keine Daten führt zu einer Fehlermeldung."
+    "measurementName": "Keine Daten führt zu einer Fehlermeldung.",
+    "alias": null
   },
   {
     "sensor": { "name": "Decentlab DL-LP8P Multisensor" },
-    "measurementName": "device_frmpayload_data_air_humidity_value"
+    "measurementName": "device_frmpayload_data_air_humidity_value",
+    "alias": "air-humidity"
   },
   {
     "sensor": { "name": "Decentlab DL-LP8P Multisensor" },
-    "measurementName": "device_frmpayload_data_air_temperature_value"
+    "measurementName": "device_frmpayload_data_air_temperature_value",
+    "alias": "air-temperature"
   },
   {
     "sensor": { "name": "Decentlab DL-LP8P Multisensor" },
-    "measurementName": "device_frmpayload_data_co2_concentration_value"
+    "measurementName": "device_frmpayload_data_co2_concentration_value",
+    "alias": "co2"
   },
   {
     "sensor": { "name": "Milesight EM500 Bodenfeuchtesensor 1" },
-    "measurementName": "device_frmpayload_data_soil_moisture"
+    "measurementName": "device_frmpayload_data_soil_moisture",
+    "alias": "soil-moisture"
   },
   {
     "sensor": { "name": "Milesight EM500 Bodenfeuchtesensor 2" },
-    "measurementName": "device_frmpayload_data_soil_moisture"
+    "measurementName": "device_frmpayload_data_soil_moisture",
+    "alias": "soil-moisture"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 1" },
-    "measurementName": "device_frmpayload_data_nitrogen"
+    "measurementName": "device_frmpayload_data_nitrogen",
+    "alias": "nitrogen"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 2" },
-    "measurementName": "device_frmpayload_data_nitrogen"
+    "measurementName": "device_frmpayload_data_nitrogen",
+    "alias": "nitrogen"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 3" },
-    "measurementName": "device_frmpayload_data_nitrogen"
+    "measurementName": "device_frmpayload_data_nitrogen",
+    "alias": "nitrogen"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 4" },
-    "measurementName": "device_frmpayload_data_nitrogen"
+    "measurementName": "device_frmpayload_data_nitrogen",
+    "alias": "nitrogen"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 1" },
-    "measurementName": "device_frmpayload_data_phosphorus"
+    "measurementName": "device_frmpayload_data_phosphorus",
+    "alias": "phosphorus"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 2" },
-    "measurementName": "device_frmpayload_data_phosphorus"
+    "measurementName": "device_frmpayload_data_phosphorus",
+    "alias": "phosphorus"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 3" },
-    "measurementName": "device_frmpayload_data_phosphorus"
+    "measurementName": "device_frmpayload_data_phosphorus",
+    "alias": "phosphorus"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 4" },
-    "measurementName": "device_frmpayload_data_phosphorus"
+    "measurementName": "device_frmpayload_data_phosphorus",
+    "alias": "phosphorus"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 1" },
-    "measurementName": "device_frmpayload_data_potassium"
+    "measurementName": "device_frmpayload_data_potassium",
+    "alias": "potassium"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 2" },
-    "measurementName": "device_frmpayload_data_potassium"
+    "measurementName": "device_frmpayload_data_potassium",
+    "alias": "potassium"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 3" },
-    "measurementName": "device_frmpayload_data_potassium"
+    "measurementName": "device_frmpayload_data_potassium",
+    "alias": "potassium"
   },
   {
     "sensor": { "name": "Netvox R72632A NPK-Sensor 4" },
-    "measurementName": "device_frmpayload_data_potassium"
+    "measurementName": "device_frmpayload_data_potassium",
+    "alias": "potassium"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 1" },
-    "measurementName": "device_frmpayload_data_data_Humidity"
+    "measurementName": "device_frmpayload_data_data_Humidity",
+    "alias": "senzemo-humidity"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 3" },
-    "measurementName": "device_frmpayload_data_data_Humidity"
+    "measurementName": "device_frmpayload_data_data_Humidity",
+    "alias": "senzemo-humidity"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 1" },
-    "measurementName": "device_frmpayload_data_data_SoilMoisture"
+    "measurementName": "device_frmpayload_data_data_SoilMoisture",
+    "alias": "senzemo-soilmoisture"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 3" },
-    "measurementName": "device_frmpayload_data_data_SoilMoisture"
+    "measurementName": "device_frmpayload_data_data_SoilMoisture",
+    "alias": "senzemo-soilmoisture"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 1" },
-    "measurementName": "device_frmpayload_data_data_Temperature"
+    "measurementName": "device_frmpayload_data_data_Temperature",
+    "alias": "senzemo-temperature"
   },
   {
     "sensor": { "name": "Senzemo Senstick Bodenfeuchtesensor 3" },
-    "measurementName": "device_frmpayload_data_data_Temperature"
+    "measurementName": "device_frmpayload_data_data_Temperature",
+    "alias": "senzemo-temperature"
   }
 ]

@@ -14,10 +14,12 @@ describe('SensorDropdownComponent', () => {
     {
       measurementName: 'Soil Moisture',
       sensor: { id: '1', name: 'Sensor A', location: 'Nexus' },
+      alias: 'Soil Moisture',
     },
     {
       measurementName: 'Air Temp',
       sensor: { id: '2', name: 'Sensor B', location: 'Nexua' },
+      alias: 'Air Temp',
     },
   ]
 

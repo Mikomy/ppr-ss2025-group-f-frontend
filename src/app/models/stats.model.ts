@@ -29,5 +29,9 @@ export interface StatisticResult {
 }
 
 export interface SensorGroup {
-  sensors: { measurementName: string; sensorId: string }[]
+  sensors: {
+    alias: string
+    measurementName: string
+    sensorName: string
+  }[]
 }

@@ -11,7 +11,7 @@ describe('StatsService', () => {
   let backendSpy: jasmine.SpyObj<BackendService>
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('BackendService', ['getMeasurement'])
+    const spy = jasmine.createSpyObj('BackendService', ['getGroupedByAlias'])
 
     TestBed.configureTestingModule({
       providers: [StatsService, { provide: BackendService, useValue: spy }],
@@ -22,7 +22,7 @@ describe('StatsService', () => {
 
   it('should compute correct statistics for single sensor', (done) => {
     const group: SensorGroup = {
-      sensors: [{ measurementName: 'm1', sensorId: 's1' }],
+      sensors: [{ measurementName: 'm1', sensorName: 's1', alias: 'c' }],
     }
     const now = new Date()
     const dataPoints = [
@@ -31,10 +31,10 @@ describe('StatsService', () => {
       { timestamp: now.toISOString(), value: 30 },
     ]
     const measurements: Measurement[] = [
-      { measurementName: 'm1', sensor: { id: 's1', name: 'Sensor1', location: 'loc' }, dataPoints },
+      { measurementName: 'm1', sensor: { id: 's1', name: 's1', location: '' }, dataPoints },
     ]
 
-    backendSpy.getMeasurement.and.returnValue(of(measurements))
+    backendSpy.getGroupedByAlias.and.returnValue(of(measurements))
 
     service.computeStats(group, now, now).subscribe((result) => {
       // count
@@ -64,25 +64,25 @@ describe('StatsService', () => {
       const yValues = ser.points.map((p: ScatterDataPoint) => p.y)
       expect(yValues).toEqual([10, 20, 30])
 
-      expect(backendSpy.getMeasurement).toHaveBeenCalledTimes(1)
+      expect(backendSpy.getGroupedByAlias).toHaveBeenCalledTimes(1)
       done()
     })
   })
 
   it('should compute correlation of perfectly correlated groups as 1', (done) => {
     const now = new Date()
-    const groupA: SensorGroup = { sensors: [{ measurementName: 'm', sensorId: 'a' }] }
-    const groupB: SensorGroup = { sensors: [{ measurementName: 'm', sensorId: 'a' }] }
+    const groupA: SensorGroup = { sensors: [{ measurementName: 'm', sensorName: 'a', alias: 'c' }] }
+    const groupB: SensorGroup = { sensors: [{ measurementName: 'm', sensorName: 'a', alias: 'c' }] }
     const data = [
       { timestamp: now.toISOString(), value: 5 },
       { timestamp: now.toISOString(), value: 15 },
       { timestamp: now.toISOString(), value: 25 },
     ]
-    const meas: Measurement[] = [
-      { measurementName: 'm', sensor: { id: 'a', name: '', location: '' }, dataPoints: data },
+    const measurements: Measurement[] = [
+      { measurementName: 'm', sensor: { id: 'a', name: 'a', location: '' }, dataPoints: data },
     ]
 
-    backendSpy.getMeasurement.and.returnValue(of(meas))
+    backendSpy.getGroupedByAlias.and.returnValue(of(measurements))
 
     service.computeCorrelation(groupA, groupB, now, now).subscribe((corr) => {
       expect(corr).toBeCloseTo(1, 5)

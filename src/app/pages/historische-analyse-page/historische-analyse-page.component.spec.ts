@@ -13,7 +13,11 @@ import { SavedChart } from '../../models/savedChart.model'
 // Helper to create a valid ChartConfig with measurement
 function createConfig(measurementName: string, sensorName: string): ChartConfig {
   return {
-    measurement: { measurementName, sensor: { id: '1', name: sensorName, location: 'Loc' } },
+    measurement: {
+      measurementName,
+      sensor: { id: '1', name: sensorName, location: 'Loc' },
+      alias: 'c',
+    },
     color: '#123456',
     chartType: 'line',
   }

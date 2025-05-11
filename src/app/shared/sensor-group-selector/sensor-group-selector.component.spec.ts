@@ -5,7 +5,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { SensorGroupSelectorComponent } from './sensor-group-selector.component'
 import { BackendService } from '../../services/backend.service'
 import { DropdownOptionModel } from '../../models/dropdown.option.model'
-import { StatisticsPageComponent } from '../../pages/statistics-page/statistics-page.component'
+import { SensorGroup } from '../../models/stats.model'
 
 describe('SensorGroupSelectorComponent', () => {
   let component: SensorGroupSelectorComponent
@@ -13,39 +13,24 @@ describe('SensorGroupSelectorComponent', () => {
   let backendSpy: jasmine.SpyObj<BackendService>
 
   const fakeOptions: DropdownOptionModel[] = [
-    { measurementName: 'm1', sensor: { id: 's1', name: 'Sensor1', location: 'L1' } },
-    { measurementName: 'm2', sensor: { id: 's2', name: 'Sensor2', location: 'L2' } },
+    { measurementName: 'm1', sensor: { id: 's1', name: 'Sensor1', location: 'L1' }, alias: 'c1' },
+    { measurementName: 'm2', sensor: { id: 's2', name: 'Sensor2', location: 'L2' }, alias: 'c2' },
   ]
 
   beforeEach(async () => {
-    // Create a spy for BackendService
     const spy = jasmine.createSpyObj('BackendService', ['getDropdownOption'])
     spy.getDropdownOption.and.returnValue(of(fakeOptions))
 
-    // Configure TestBed
     await TestBed.configureTestingModule({
-      imports: [
-        SensorGroupSelectorComponent, // Standalone component
-        HttpClientTestingModule, // Provides HttpClient mock
-      ],
-      providers: [
-        { provide: BackendService, useValue: spy }, // Override BackendService with spy
-      ],
+      imports: [SensorGroupSelectorComponent, HttpClientTestingModule],
+      providers: [{ provide: BackendService, useValue: spy }],
       schemas: [NO_ERRORS_SCHEMA],
-    })
-      // remove child component imports to avoid HttpClient injection failures
-      .overrideComponent(StatisticsPageComponent, {
-        set: { template: '' },
-      })
-      .compileComponents()
+    }).compileComponents()
 
-    // Inject the spy for verification
     backendSpy = TestBed.inject(BackendService) as jasmine.SpyObj<BackendService>
-
-    // Create component instance
     fixture = TestBed.createComponent(SensorGroupSelectorComponent)
     component = fixture.componentInstance
-    fixture.detectChanges() // Trigger ngOnInit and option loading
+    fixture.detectChanges()
   })
 
   it('should create', () => {
@@ -59,7 +44,8 @@ describe('SensorGroupSelectorComponent', () => {
       jasmine.objectContaining({
         key: '0',
         measurementName: 'm1',
-        sensorId: 's1',
+        sensorName: 'Sensor1',
+        alias: 'c1',
         display: 'm1 – Sensor1',
       })
     )
@@ -67,9 +53,14 @@ describe('SensorGroupSelectorComponent', () => {
   })
 
   it('writeValue should set selectedKeys for matching group or clear when null', () => {
-    component.writeValue({ sensors: [{ measurementName: 'm2', sensorId: 's2' }] })
+    // Matching option c2 → key '1'
+    component.writeValue({
+      sensors: [{ measurementName: 'm2', sensorName: 'Sensor2', alias: 'c2' }],
+    })
     expect(component.selectedKeys).toEqual(['1'])
-    component.writeValue(null!)
+
+    // Null group → clear
+    component.writeValue(null)
     expect(component.selectedKeys).toEqual([])
   })
 
@@ -82,6 +73,20 @@ describe('SensorGroupSelectorComponent', () => {
   it('trackByKey should return the key', () => {
     const option = component.options[0]
     expect(component.trackByKey(0, option)).toBe(option.key)
+  })
+
+  it('onSelectionChange should emit correct SensorGroup', () => {
+    const changeSpy: (group: SensorGroup) => void = jasmine.createSpy('onChange')
+    component.registerOnChange(changeSpy)
+
+    component.onSelectionChange(['0', '1'])
+    expect(component.selectedKeys).toEqual(['0', '1'])
+    expect(changeSpy).toHaveBeenCalledWith({
+      sensors: [
+        { measurementName: 'm1', sensorName: 'Sensor1', alias: 'c1' },
+        { measurementName: 'm2', sensorName: 'Sensor2', alias: 'c2' },
+      ],
+    })
   })
 
   it('onBlur should call onTouched', () => {
