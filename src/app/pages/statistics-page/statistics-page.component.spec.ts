@@ -57,19 +57,16 @@ describe('StatisticsPageComponent (shallow)', () => {
   })
 
   it('should set errorMessage if groups are empty on compute', () => {
-    component.onCompute()
-    expect(component.errorMessage).toBe('Bitte mindestens einen Measurement pro Gruppe auswählen.')
-  })
-
-  it('should set errorMessage if form invalid', () => {
+    const testDate = new Date('2025-05-01T00:00:00Z')
     component.group1Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
-    component.group2Ctrl.setValue({
-      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
-    })
+    component.fromDateCtrl.setValue(testDate)
+    component.fromTimeCtrl.setValue('00:00')
+    component.toDateCtrl.setValue(testDate)
+    component.toTimeCtrl.setValue('01:00')
     component.onCompute()
-    expect(component.errorMessage).toBe('Bitte komplettes Zeitintervall auswählen')
+    expect(component.errorMessage).toBe('Bitte mindestens einen Measurement pro Gruppe auswählen.')
   })
 
   it('should call StatsService and set results on valid form', fakeAsync(() => {

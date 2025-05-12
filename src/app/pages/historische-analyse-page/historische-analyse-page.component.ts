@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import {
   FormGroup,
   FormBuilder,
@@ -28,8 +28,6 @@ import {
   ChartConfigRowComponent,
 } from '../../components/charts/chart-config-row/chart-config-row.component'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
-import { filterBySensor } from '../../shared/utils/measurement-filter'
-import { Measurement } from '../../models/measurement.model'
 
 @Component({
   selector: 'app-historische-analyse-page',
@@ -53,7 +51,6 @@ import { Measurement } from '../../models/measurement.model'
   ],
   templateUrl: './historische-analyse-page.component.html',
   styleUrl: './historische-analyse-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistorischeAnalysePageComponent implements OnInit {
   configs: ChartConfig[] = Array(3)
@@ -114,50 +111,44 @@ export class HistorischeAnalysePageComponent implements OnInit {
 
     // Fetch all series
     const calls = selectedConfigs.map((cfg) =>
-      this.backend.getMeasurement(cfg.measurement!.measurementName, fromIso, toIso).pipe(take(1))
+      this.backend.getGroupedByAlias(cfg.measurement!.alias!, fromIso, toIso).pipe(take(1))
     )
 
-    forkJoin(calls).subscribe(
-      (measurements: Measurement[][]) => {
-        const filtered = measurements.map((arr, i) => {
-          const sensorName = selectedConfigs[i].measurement!.sensor.name
-          return filterBySensor(arr, sensorName)
-        })
+    forkJoin(calls).subscribe({
+      next: (groups) => {
+        try {
+          const series = groups.map((measurements, idx) => {
+            const sensor = selectedConfigs[idx].measurement!.sensor.name
+            const m = measurements.find((x) => x.sensor.name === sensor)
+            if (!m || !m.dataPoints.length) {
+              throw new Error(`Keine Daten für Sensor ${sensor}`)
+            }
+            return {
+              label: selectedConfigs[idx].measurement!.measurementName,
+              data: m.dataPoints.map((dp) => ({ timestamp: dp.timestamp, value: dp.value })),
+              color: selectedConfigs[idx].color,
+            }
+          })
 
-        // 6) Prüfen, ob alle erfolgreich waren
-        if (filtered.some((m) => !m)) {
-          this.errorMessage = 'Nicht für jede Messung Daten für den gewählten Sensor gefunden.'
-          return
-        }
-
-        // 7) Prüfen auf Datenpunkte
-        if (filtered.some((m) => m!.dataPoints.length === 0)) {
-          this.errorMessage = 'Mindestens eine Messung enthält keine Datenpunkte im Zeitraum.'
-          return
-        }
-
-        const id = Date.now().toString()
-        const titles = selectedConfigs.map((cfg) => cfg.measurement!.measurementName)
-        const series = filtered.map((m, i) => ({
-          label: titles[i],
-          data: m!.dataPoints.map((dp) => ({ timestamp: dp.timestamp, value: dp.value })),
-          color: selectedConfigs[i].color,
-        }))
-        this.savedCharts = [
-          ...this.savedCharts,
-          {
+          const id = Date.now().toString()
+          const newChart: SavedChart = {
             id,
-            titles,
+            titles: selectedConfigs.map((c) => c.measurement!.measurementName),
             from: fromIso,
             to: toIso,
             series,
             chartType: selectedConfigs[0].chartType,
-          },
-        ]
-        this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
+          }
+          this.savedCharts = [...this.savedCharts, newChart]
+          this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
+        } catch (error) {
+          if (error instanceof Error) {
+            this.errorMessage = error.message
+          }
+        }
       },
-      () => (this.errorMessage = 'Fehler beim Laden der Charts.')
-    )
+      error: () => (this.errorMessage = 'Fehler beim Laden der Charts.'),
+    })
   }
 
   private combineDateAndTime(date: Date, time: string) {

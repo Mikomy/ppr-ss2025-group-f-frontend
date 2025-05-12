@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import { FormsModule } from '@angular/forms'
 import { SensorDropdownComponent } from '../../shared/sensor-dropdown/sensor-dropdown.component'
@@ -18,7 +18,6 @@ import { MatNativeDateModule } from '@angular/material/core'
 import { CdkDrag } from '@angular/cdk/drag-drop'
 import { MeasurementTableComponent } from '../../shared/measurement-table/measurement-table.component'
 import { SavedTable } from '../../models/savedTable.model'
-import { filterBySensor } from '../../shared/utils/measurement-filter'
 
 /**
  * Component for displaying and managing sensor measurement tables.
@@ -46,7 +45,6 @@ import { filterBySensor } from '../../shared/utils/measurement-filter'
   ],
   templateUrl: './tableView-page.component.html',
   styleUrls: ['./tableView-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableViewPageComponent implements OnInit {
   /** Currently selected dropdown option containing sensor and measurement info */
@@ -119,10 +117,11 @@ export class TableViewPageComponent implements OnInit {
     // Combine date and time into ISO strings
     const fromIso = this.combineDateAndTime(this.fromDate, this.fromTime)
     const toIso = this.combineDateAndTime(this.toDate, this.toTime)
+    const alias = this.selectedOption.alias
 
     // Fetch measurement data and handle response
     this.backendService
-      .getMeasurement(this.selectedOption.measurementName, fromIso, toIso)
+      .getGroupedByAlias(alias, fromIso, toIso)
       .pipe(take(1))
       .subscribe({
         next: (measurement) => {
@@ -131,8 +130,9 @@ export class TableViewPageComponent implements OnInit {
               'Keine Daten für den ausgewählten Measurement im angegebenen Zeitraum vorhanden.'
             return
           }
-          const match = filterBySensor(measurement, this.selectedOption!.sensor.name)
-          if (!match) {
+          const sensorName = this.selectedOption!.sensor.name
+          const match = measurement.find((m) => m.sensor.name === sensorName)
+          if (!match || !match.dataPoints.length) {
             this.errorMessage = 'Keine Daten für Sensor "${this.selectedOption!.sensor.name}".'
             return
           }

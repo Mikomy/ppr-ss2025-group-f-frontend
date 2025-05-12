@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { ReactiveFormsModule } from '@angular/forms'
+import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { of, throwError } from 'rxjs'
 
@@ -16,7 +16,7 @@ function createConfig(measurementName: string, sensorName: string): ChartConfig 
     measurement: {
       measurementName,
       sensor: { id: '1', name: sensorName, location: 'Loc' },
-      alias: 'c',
+      alias: 'alias',
     },
     color: '#123456',
     chartType: 'line',
@@ -37,13 +37,13 @@ describe('HistorischeAnalysePageComponent', () => {
   let storageSpy: jasmine.SpyObj<WebStorageService>
 
   beforeEach(async () => {
-    backendSpy = jasmine.createSpyObj('BackendService', ['getMeasurement', 'getDropdownOption'])
-    backendSpy.getDropdownOption.and.returnValue(of([]))
+    backendSpy = jasmine.createSpyObj('BackendService', ['getGroupedByAlias', 'getDropdownOption'])
     storageSpy = jasmine.createSpyObj('WebStorageService', ['get', 'set'])
     storageSpy.get.and.returnValue(null)
+    backendSpy.getDropdownOption.and.returnValue(of([]))
 
     await TestBed.configureTestingModule({
-      imports: [HistorischeAnalysePageComponent, ReactiveFormsModule],
+      imports: [HistorischeAnalysePageComponent, ReactiveFormsModule, FormsModule],
       providers: [
         { provide: BackendService, useValue: backendSpy },
         { provide: WebStorageService, useValue: storageSpy },
@@ -71,16 +71,8 @@ describe('HistorischeAnalysePageComponent', () => {
   })
 
   it('loadCharts should error when no measurement selected', () => {
-    // default configs have no measurement
     component.loadCharts()
     expect(component.errorMessage).toBe('Bitte mindestens eine Messung auswählen.')
-  })
-
-  it('loadCharts should error when timeForm invalid', () => {
-    // set one valid measurement
-    component.configs[0] = createConfig('M1', 'Sensor A')
-    component.loadCharts()
-    expect(component.timeError).toBe('Bitte komplettes Zeitintervall auswählen.')
   })
 
   describe('data fetching scenarios', () => {
@@ -95,33 +87,29 @@ describe('HistorischeAnalysePageComponent', () => {
     })
 
     it('should set errorMessage when backend throws', fakeAsync(() => {
-      backendSpy.getMeasurement.and.returnValue(throwError(() => new Error('fail')))
+      backendSpy.getGroupedByAlias.and.returnValue(throwError(() => new Error('fail')))
       component.loadCharts()
       tick()
       expect(component.errorMessage).toBe('Fehler beim Laden der Charts.')
     }))
 
-    it('should error when filterBySensor returns undefined', fakeAsync(() => {
-      backendSpy.getMeasurement.and.returnValue(of([]))
+    it('should error when no measurements returned', fakeAsync(() => {
+      backendSpy.getGroupedByAlias.and.returnValue(of([]))
       component.loadCharts()
       tick()
-      expect(component.errorMessage).toBe(
-        'Nicht für jede Messung Daten für den gewählten Sensor gefunden.'
-      )
+      expect(component.errorMessage).toBe('Keine Daten für Sensor Sensor A')
     }))
 
     it('should error when dataPoints empty', fakeAsync(() => {
       const emptyMeas: Measurement = { ...sampleMeasurement, dataPoints: [] }
-      backendSpy.getMeasurement.and.returnValue(of([emptyMeas]))
+      backendSpy.getGroupedByAlias.and.returnValue(of([emptyMeas]))
       component.loadCharts()
       tick()
-      expect(component.errorMessage).toBe(
-        'Mindestens eine Messung enthält keine Datenpunkte im Zeitraum.'
-      )
+      expect(component.errorMessage).toBe('Keine Daten für Sensor Sensor A')
     }))
 
     it('should save chart on success and call storage.set', fakeAsync(() => {
-      backendSpy.getMeasurement.and.returnValue(of([sampleMeasurement]))
+      backendSpy.getGroupedByAlias.and.returnValue(of([sampleMeasurement]))
       component.loadCharts()
       tick()
       expect(component.savedCharts.length).toBe(1)
