@@ -44,6 +44,7 @@
       </mat-error>
 
       <button mat-raised-button color="primary" type="submit">Berechnen</button>
+      <button mat-raised-button (click)="onClear()">Ergebnisse löschen</button>
     </form>
     <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
 

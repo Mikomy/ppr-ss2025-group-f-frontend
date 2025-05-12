@@ -32,6 +32,7 @@ import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
   MomentDateAdapter,
 } from '@angular/material-moment-adapter'
+import { WebStorageService } from '../../services/webStorage.service'
 
 registerLocaleData(localeDe, 'de')
 
@@ -82,10 +83,12 @@ export class StatisticsPageComponent implements OnInit {
   resultsGroup2?: StatisticResult
   correlation?: number
   errorMessage?: string
+  private storageKey = 'statisticsResult'
 
   constructor(
     private fb: FormBuilder,
-    private stats: StatsService
+    private stats: StatsService,
+    private storage: WebStorageService
   ) {}
 
   ngOnInit(): void {
@@ -100,6 +103,7 @@ export class StatisticsPageComponent implements OnInit {
       },
       { validators: this.dateRangeValidator }
     )
+    this.loadFromStorage()
   }
 
   onCompute(): void {
@@ -149,6 +153,7 @@ export class StatisticsPageComponent implements OnInit {
     this.resultsGroup1 = s1
     this.resultsGroup2 = s2
     this.correlation = corr
+    this.saveToStorage(s1, s2, corr)
   }
 
   get fromDateCtrl() {
@@ -173,6 +178,10 @@ export class StatisticsPageComponent implements OnInit {
     return this.form.get('group2') as FormControl<SensorGroup>
   }
 
+  onClear(): void {
+    this.storage.set(this.storageKey, '')
+    this.resetResults()
+  }
   /**
    * Validator: ensures from-date/time ≤ to-date/time.
    */
@@ -228,5 +237,31 @@ export class StatisticsPageComponent implements OnInit {
       from: this.combineDateTime(fromDate, fromTime).toISOString(),
       to: this.combineDateTime(toDate, toTime).toISOString(),
     }
+  }
+
+  private loadFromStorage() {
+    const raw = this.storage.get(this.storageKey)
+    if (raw) {
+      try {
+        const stored = JSON.parse(raw) as { s1: StatisticResult; s2: StatisticResult; corr: number }
+        this.resultsGroup1 = stored.s1
+        this.resultsGroup2 = stored.s2
+        this.correlation = stored.corr
+      } catch {
+        this.storage.set(this.storageKey, '')
+      }
+    }
+  }
+
+  private resetResults() {
+    this.resultsGroup1 = undefined
+    this.resultsGroup2 = undefined
+    this.correlation = undefined
+    this.errorMessage = undefined
+  }
+
+  private saveToStorage(s1: StatisticResult, s2: StatisticResult, corr: number) {
+    const payload = JSON.stringify({ s1, s2, corr })
+    this.storage.set(this.storageKey, payload)
   }
 }
