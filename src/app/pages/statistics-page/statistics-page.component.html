@@ -1,50 +1,29 @@
 <mat-card>
   <mat-card-title>Statistische Kurzanalysen</mat-card-title>
   <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="onCompute()" class="controls">
+    <form [formGroup]="timeForm" (ngSubmit)="onCompute()" class="controls">
       <div class="groups">
-        <app-sensor-group-selector [formControl]="group1Ctrl" label="Gruppe 1">
-        </app-sensor-group-selector>
-
-        <app-sensor-group-selector [formControl]="group2Ctrl" label="Gruppe 2">
-        </app-sensor-group-selector>
+        <app-sensor-group-selector
+          formControlName="group1"
+          label="Gruppe 1"
+        ></app-sensor-group-selector>
+        <app-sensor-group-selector
+          formControlName="group2"
+          label="Gruppe 2"
+        ></app-sensor-group-selector>
       </div>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Von (Datum)</mat-label>
-        <input matInput [matDatepicker]="fromDp" [formControl]="fromDateCtrl" />
-        <mat-datepicker-toggle matSuffix [for]="fromDp"></mat-datepicker-toggle>
-        <mat-datepicker #fromDp></mat-datepicker>
-        <mat-error *ngIf="fromDateCtrl.hasError('required')">Datum erforderlich</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Von (Uhrzeit)</mat-label>
-        <input matInput type="time" [formControl]="fromTimeCtrl" />
-        <mat-error *ngIf="fromTimeCtrl.hasError('required')">Uhrzeit erforderlich</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Bis (Datum)</mat-label>
-        <input matInput [matDatepicker]="toDp" [formControl]="toDateCtrl" />
-        <mat-datepicker-toggle matSuffix [for]="toDp"></mat-datepicker-toggle>
-        <mat-datepicker #toDp></mat-datepicker>
-        <mat-error *ngIf="toDateCtrl.hasError('required')">Datum erforderlich</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Bis (Uhrzeit)</mat-label>
-        <input matInput type="time" [formControl]="toTimeCtrl" />
-        <mat-error *ngIf="toTimeCtrl.hasError('required')">Uhrzeit erforderlich</mat-error>
-      </mat-form-field>
-
-      <!-- Cross-Field-Error -->
-      <mat-error *ngIf="form.hasError('dateRangeInvalid')">
+      <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('required')">
+        Bitte komplettes Zeitintervall auswählen.
+      </mat-error>
+      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('rangeInvalid')">
         „Von“ darf nicht nach „Bis“ liegen.
       </mat-error>
 
       <button mat-raised-button color="primary" type="submit">Berechnen</button>
-      <button mat-raised-button (click)="onClear()">Ergebnisse löschen</button>
+
+      <button mat-raised-button type="button" (click)="onClear()">Ergebnisse löschen</button>
     </form>
     <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
 

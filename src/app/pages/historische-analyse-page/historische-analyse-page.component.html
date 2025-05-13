@@ -1,6 +1,6 @@
 <mat-card>
   <mat-card-title>Wähle bis zu drei Measurements und erstelle ein Diagramm.</mat-card-title>
-  <mat-card-content>
+  <mat-card-content [formGroup]="timeForm">
     <!-- Schleife über Deine drei Config‑Objekte -->
     <div class="config-rows">
       <app-chart-config-row
@@ -12,47 +12,10 @@
       <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
     </div>
 
-    <form [formGroup]="timeForm" class="time-controls">
-      <mat-form-field appearance="fill">
-        <mat-label>Von (Datum)</mat-label>
-        <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" />
-        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fromPicker></mat-datepicker>
-        <mat-error *ngIf="timeForm.get('fromDate')?.hasError('required')">
-          Datum erforderlich
-        </mat-error>
-      </mat-form-field>
+    <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Von (Uhrzeit)</mat-label>
-        <input matInput type="time" formControlName="fromTime" />
-        <mat-error *ngIf="timeForm.get('fromTime')?.hasError('required')">
-          Uhrzeit erforderlich
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Bis (Datum)</mat-label>
-        <input matInput [matDatepicker]="toPicker" formControlName="toDate" />
-        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-        <mat-datepicker #toPicker></mat-datepicker>
-        <mat-error *ngIf="timeForm.get('toDate')?.hasError('required')">
-          Datum erforderlich
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="fill">
-        <mat-label>Bis (Uhrzeit)</mat-label>
-        <input matInput type="time" formControlName="toTime" />
-        <mat-error *ngIf="timeForm.get('toTime')?.hasError('required')">
-          Uhrzeit erforderlich
-        </mat-error>
-      </mat-form-field>
-
-      <button mat-raised-button color="primary" (click)="loadCharts()">
-        Neue Charts hinzufügen
-      </button>
-      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
-    </form>
+    <button mat-raised-button color="primary" (click)="loadCharts()">Neue Charts hinzufügen</button>
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
   </mat-card-content>
 </mat-card>
 

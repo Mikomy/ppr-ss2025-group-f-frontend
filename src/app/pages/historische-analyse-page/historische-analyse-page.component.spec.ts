@@ -24,10 +24,14 @@ function createConfig(measurementName: string, sensorName: string): ChartConfig 
 }
 
 // Sample measurement data
+interface DP {
+  timestamp: string
+  value: number
+}
 const sampleMeasurement: Measurement = {
   measurementName: 'Test',
   sensor: { id: '1', name: 'Sensor A', location: 'Loc' },
-  dataPoints: [{ timestamp: '2025-04-01T00:00:00Z', value: 100 }],
+  dataPoints: [{ timestamp: '2025-04-01T00:00:00Z', value: 100 } as DP],
 }
 
 describe('HistorischeAnalysePageComponent', () => {
@@ -75,14 +79,23 @@ describe('HistorischeAnalysePageComponent', () => {
     expect(component.errorMessage).toBe('Bitte mindestens eine Messung auswählen.')
   })
 
+  it('loadCharts should error when dateTimeRange invalid', () => {
+    // select a config but leave dateTimeRange invalid
+    component.configs[0] = createConfig('Test', 'Sensor A')
+    component.loadCharts()
+    expect(component.errorMessage).toBe('Bitte komplettes Zeitintervall auswählen.')
+  })
+
   describe('data fetching scenarios', () => {
     beforeEach(() => {
       component.configs[0] = createConfig('Test', 'Sensor A')
       component.timeForm.setValue({
-        fromDate: new Date('2025-04-01'),
-        fromTime: '00:00',
-        toDate: new Date('2025-04-01'),
-        toTime: '01:00',
+        dateTimeRange: {
+          fromDate: new Date('2025-04-01'),
+          fromTime: '00:00',
+          toDate: new Date('2025-04-01'),
+          toTime: '01:00',
+        },
       })
     })
 

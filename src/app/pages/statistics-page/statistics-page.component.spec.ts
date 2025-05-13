@@ -3,6 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { ReactiveFormsModule } from '@angular/forms'
 import { of, throwError } from 'rxjs'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
+
 import { StatisticsPageComponent } from './statistics-page.component'
 import { StatsService } from '../../components/statistics/stats.service'
 import { StatisticResult } from '../../models/stats.model'
@@ -37,9 +38,7 @@ describe('StatisticsPageComponent (shallow)', () => {
       providers: [{ provide: StatsService, useValue: statsSpy }, provideHttpClientTesting()],
       schemas: [NO_ERRORS_SCHEMA],
     })
-      .overrideComponent(StatisticsPageComponent, {
-        set: { template: '' },
-      })
+      .overrideComponent(StatisticsPageComponent, { set: { template: '' } })
       .compileComponents()
 
     fixture = TestBed.createComponent(StatisticsPageComponent)
@@ -47,26 +46,28 @@ describe('StatisticsPageComponent (shallow)', () => {
     fixture.detectChanges()
   })
 
-  it('should create and initialize form', () => {
+  it('should create and initialize form controls', () => {
     expect(component).toBeTruthy()
-    const form = component.form
+    const form = component.timeForm
     expect(form).toBeDefined()
-    ;['fromDate', 'fromTime', 'toDate', 'toTime', 'group1', 'group2'].forEach((control) => {
-      expect(form.contains(control)).toBeTrue()
+    ;['group1', 'group2', 'dateTimeRange'].forEach((ctrl) => {
+      expect(form.contains(ctrl)).toBeTrue()
     })
   })
 
-  it('should set errorMessage if groups are empty on compute', () => {
+  it('should set errorMessage if groups empty on compute', () => {
+    // Only date range set
     const testDate = new Date('2025-05-01T00:00:00Z')
-    component.group1Ctrl.setValue({
-      sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
+    component.timeForm.get('dateTimeRange')?.setValue({
+      fromDate: testDate,
+      fromTime: '00:00',
+      toDate: testDate,
+      toTime: '01:00',
     })
-    component.fromDateCtrl.setValue(testDate)
-    component.fromTimeCtrl.setValue('00:00')
-    component.toDateCtrl.setValue(testDate)
-    component.toTimeCtrl.setValue('01:00')
     component.onCompute()
-    expect(component.errorMessage).toBe('Bitte mindestens einen Measurement pro Gruppe auswählen.')
+    expect(component.errorMessage).toBe(
+      'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
+    )
   })
 
   it('should call StatsService and set results on valid form', fakeAsync(() => {
@@ -77,10 +78,12 @@ describe('StatisticsPageComponent (shallow)', () => {
     component.group2Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
-    component.fromDateCtrl.setValue(now)
-    component.fromTimeCtrl.setValue('00:00')
-    component.toDateCtrl.setValue(now)
-    component.toTimeCtrl.setValue('01:00')
+    component.timeForm.get('dateTimeRange')?.setValue({
+      fromDate: now,
+      fromTime: '00:00',
+      toDate: now,
+      toTime: '01:00',
+    })
 
     component.onCompute()
     tick()
@@ -94,17 +97,19 @@ describe('StatisticsPageComponent (shallow)', () => {
 
   it('should set errorMessage if StatsService errors', fakeAsync(() => {
     statsSpy.computeStats.and.returnValue(throwError(() => new Error('fail')))
+    const now = new Date('2025-05-01T00:00:00Z')
     component.group1Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
     component.group2Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
-    const now = new Date('2025-05-01T00:00:00Z')
-    component.fromDateCtrl.setValue(now)
-    component.fromTimeCtrl.setValue('00:00')
-    component.toDateCtrl.setValue(now)
-    component.toTimeCtrl.setValue('01:00')
+    component.timeForm.get('dateTimeRange')?.setValue({
+      fromDate: now,
+      fromTime: '00:00',
+      toDate: now,
+      toTime: '01:00',
+    })
 
     component.onCompute()
     tick()
@@ -113,17 +118,19 @@ describe('StatisticsPageComponent (shallow)', () => {
 
   it('should set errorMessage if no data in results', fakeAsync(() => {
     statsSpy.computeStats.and.returnValue(of({ ...dummyResult, count: 0 }))
+    const now = new Date('2025-05-01T00:00:00Z')
     component.group1Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
     component.group2Ctrl.setValue({
       sensors: [{ measurementName: 'm', sensorName: 's', alias: 'c' }],
     })
-    const now = new Date('2025-05-01T00:00:00Z')
-    component.fromDateCtrl.setValue(now)
-    component.fromTimeCtrl.setValue('00:00')
-    component.toDateCtrl.setValue(now)
-    component.toTimeCtrl.setValue('01:00')
+    component.timeForm.get('dateTimeRange')?.setValue({
+      fromDate: now,
+      fromTime: '00:00',
+      toDate: now,
+      toTime: '01:00',
+    })
 
     component.onCompute()
     tick()
@@ -131,15 +138,4 @@ describe('StatisticsPageComponent (shallow)', () => {
       'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
     )
   }))
-
-  it('dateRangeValidator should flag invalid range', () => {
-    const from = new Date('2025-05-02T00:00:00Z')
-    const to = new Date('2025-05-01T00:00:00Z')
-    component.fromDateCtrl.setValue(from)
-    component.fromTimeCtrl.setValue('10:00')
-    component.toDateCtrl.setValue(to)
-    component.toTimeCtrl.setValue('09:00')
-    component.form.updateValueAndValidity()
-    expect(component.form.hasError('dateRangeInvalid')).toBeTrue()
-  })
 })

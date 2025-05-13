@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
-import { FormsModule } from '@angular/forms'
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { SensorDropdownComponent } from '../../shared/sensor-dropdown/sensor-dropdown.component'
 import { BackendService } from '../../services/backend.service'
 import { Measurement } from '../../models/measurement.model'
@@ -12,12 +12,13 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { WebStorageService } from '../../services/webStorage.service'
 import { MatFormFieldModule } from '@angular/material/form-field'
-import { MatInputModule } from '@angular/material/input'
-import { MatDatepickerModule } from '@angular/material/datepicker'
-import { MatNativeDateModule } from '@angular/material/core'
 import { CdkDrag } from '@angular/cdk/drag-drop'
 import { MeasurementTableComponent } from '../../shared/measurement-table/measurement-table.component'
 import { SavedTable } from '../../models/savedTable.model'
+import {
+  DateTimePickerComponent,
+  DateTimeRange,
+} from '../../shared/date-time-picker/date-time-picker.component'
 
 /**
  * Component for displaying and managing sensor measurement tables.
@@ -30,18 +31,16 @@ import { SavedTable } from '../../models/savedTable.model'
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
+    MatFormFieldModule,
     SensorDropdownComponent,
-    CdkDrag,
     MeasurementTableComponent,
+    DateTimePickerComponent,
+    CdkDrag,
   ],
   templateUrl: './tableView-page.component.html',
   styleUrls: ['./tableView-page.component.scss'],
@@ -70,12 +69,14 @@ export class TableViewPageComponent implements OnInit {
 
   /** Key used for persisting saved tables in web storage */
   private storageKey = 'saved-sensor-tables'
+  timeForm!: FormGroup
 
   /**
    * @param backendService Service to fetch measurement data from the server
    * @param storage        Web storage service for persisting table configurations
    */
   constructor(
+    private fb: FormBuilder,
     private backendService: BackendService,
     private storage: WebStorageService
   ) {}
@@ -87,6 +88,9 @@ export class TableViewPageComponent implements OnInit {
   ngOnInit(): void {
     const raw = this.storage.get(this.storageKey)
     this.savedTables = raw ? (JSON.parse(raw) as SavedTable[]) : []
+    this.timeForm = this.fb.group({
+      dateTimeRange: [null, Validators.required],
+    })
   }
 
   /**
@@ -96,10 +100,6 @@ export class TableViewPageComponent implements OnInit {
    */
   onSelectionChange(selected: DropdownOptionModel): void {
     this.selectedOption = { ...selected }
-    this.fromDate = undefined
-    this.fromTime = undefined
-    this.toDate = undefined
-    this.toTime = undefined
     this.errorMessage = undefined
   }
 
@@ -109,14 +109,22 @@ export class TableViewPageComponent implements OnInit {
    * Displays error messages on invalid input or request failure.
    */
   loadDetailedMeasurement(): void {
-    if (!this.selectedOption || !this.fromDate || !this.fromTime || !this.toDate || !this.toTime) {
-      this.errorMessage = 'Bitte wählen Sie Sensor, Datum und Uhrzeit aus.'
+    if (!this.selectedOption) {
+      this.errorMessage = 'Bitte Sensor auswählen.'
+      return
+    }
+    const dateTimeCtrl = this.timeForm.value.dateTimeRange as DateTimeRange
+    if (!dateTimeCtrl) {
+      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
+      return
+    }
+    if (!this.selectedOption) {
+      this.errorMessage = 'Bitte einen Measurement auswählen.'
       return
     }
 
-    // Combine date and time into ISO strings
-    const fromIso = this.combineDateAndTime(this.fromDate, this.fromTime)
-    const toIso = this.combineDateAndTime(this.toDate, this.toTime)
+    const fromIso = this.combineDateAndTime(dateTimeCtrl.fromDate!, dateTimeCtrl.fromTime!)
+    const toIso = this.combineDateAndTime(dateTimeCtrl.toDate!, dateTimeCtrl.toTime!)
     const alias = this.selectedOption.alias
 
     // Fetch measurement data and handle response

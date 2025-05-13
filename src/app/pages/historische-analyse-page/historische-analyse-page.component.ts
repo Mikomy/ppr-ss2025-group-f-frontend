@@ -28,6 +28,11 @@ import {
   ChartConfigRowComponent,
 } from '../../components/charts/chart-config-row/chart-config-row.component'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
+import {
+  DateTimePickerComponent,
+  DateTimeRange,
+} from '../../shared/date-time-picker/date-time-picker.component'
+import { FormControl } from '@angular/forms'
 
 @Component({
   selector: 'app-historische-analyse-page',
@@ -48,6 +53,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle'
     ChartConfigRowComponent,
     ChartPanelComponent,
     MatButtonToggleModule,
+    DateTimePickerComponent,
   ],
   templateUrl: './historische-analyse-page.component.html',
   styleUrl: './historische-analyse-page.component.scss',
@@ -74,10 +80,10 @@ export class HistorischeAnalysePageComponent implements OnInit {
     const raw = this.storage.get(this.storageKey)
     this.savedCharts = raw ? JSON.parse(raw) : []
     this.timeForm = this.fb.group({
-      fromDate: [null, Validators.required],
-      fromTime: [null, Validators.required],
-      toDate: [null, Validators.required],
-      toTime: [null, Validators.required],
+      dateTimeRange: this.fb.control<DateTimeRange>(
+        { fromDate: null, fromTime: null, toDate: null, toTime: null },
+        Validators.required
+      ),
     })
   }
 
@@ -93,8 +99,15 @@ export class HistorischeAnalysePageComponent implements OnInit {
       this.errorMessage = 'Bitte mindestens eine Messung auswählen.'
       return
     }
-    if (this.timeForm.invalid) {
-      this.timeError = 'Bitte komplettes Zeitintervall auswählen.'
+
+    const dateTimeCtrl = this.timeForm.get('dateTimeRange') as FormControl
+    if (dateTimeCtrl.invalid) {
+      const errors = dateTimeCtrl.errors || {}
+      this.errorMessage = errors['required']
+        ? 'Bitte komplettes Zeitintervall auswählen.'
+        : errors['required']
+          ? '„Von“ darf nicht nach „Bis“ liegen.'
+          : undefined
       return
     }
 
@@ -103,11 +116,9 @@ export class HistorischeAnalysePageComponent implements OnInit {
     this.timeError = undefined
 
     // Build ISO strings
-    const fromIso = this.combineDateAndTime(
-      this.timeForm.value.fromDate,
-      this.timeForm.value.fromTime
-    )
-    const toIso = this.combineDateAndTime(this.timeForm.value.toDate, this.timeForm.value.toTime)
+    const { fromDate, fromTime, toDate, toTime } = dateTimeCtrl.value as DateTimeRange
+    const fromIso = this.combineDateAndTime(fromDate!, fromTime!)
+    const toIso = this.combineDateAndTime(toDate!, toTime!)
 
     // Fetch all series
     const calls = selectedConfigs.map((cfg) =>

@@ -11,35 +11,15 @@
     </app-sensor-dropdown>
 
     <div *ngIf="selectedOption" class="controls">
-      <!-- Datum mit Kalender -->
-      <mat-form-field appearance="fill">
-        <mat-label>Datum Von</mat-label>
-        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
-        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fromPicker></mat-datepicker>
-      </mat-form-field>
-      <!-- Uhrzeit -->
-      <mat-form-field appearance="fill">
-        <mat-label>Uhrzeit Von</mat-label>
-        <input matInput type="time" [(ngModel)]="fromTime" />
-      </mat-form-field>
+      <form [formGroup]="timeForm">
+        <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Datum Bis</mat-label>
-        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
-        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-        <mat-datepicker #toPicker></mat-datepicker>
-      </mat-form-field>
-      <mat-form-field appearance="fill">
-        <mat-label>Uhrzeit Bis</mat-label>
-        <input matInput type="time" [(ngModel)]="toTime" />
-      </mat-form-field>
-
-      <button mat-raised-button color="primary" (click)="loadDetailedMeasurement()">
-        Neue Tabelle hinzufügen
-      </button>
+        <button mat-raised-button color="primary" type="button" (click)="loadDetailedMeasurement()">
+          Neue Tabelle hinzufügen
+        </button>
+      </form>
+      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
     </div>
-    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
   </mat-card-content>
 </mat-card>
 <!-- Gespeicherte Tabellen, draggable -->
