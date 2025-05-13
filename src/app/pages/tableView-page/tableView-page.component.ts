@@ -72,6 +72,7 @@ export class TableViewPageComponent implements OnInit {
   timeForm!: FormGroup
 
   /**
+   * @param fb
    * @param backendService Service to fetch measurement data from the server
    * @param storage        Web storage service for persisting table configurations
    */
