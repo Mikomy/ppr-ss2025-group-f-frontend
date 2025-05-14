@@ -113,7 +113,9 @@ describe('StatisticsPageComponent (shallow)', () => {
 
     component.onCompute()
     tick()
-    expect(component.errorMessage).toBe('Fehler beim Abrufen der Statistik-Daten.')
+    expect(component.errorMessage).toBe(
+      'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
+    )
   }))
 
   it('should set errorMessage if no data in results', fakeAsync(() => {

@@ -151,7 +151,9 @@ export class TableViewPageComponent implements OnInit {
           this.errorMessage = undefined
           this.addTable(match, fromIso, toIso)
         },
-        error: () => (this.errorMessage = 'Fehler beim Laden der Daten.'),
+        error: () =>
+          (this.errorMessage =
+            'Keine Daten im gewählten Zeitraum für gewählte Measurement vorhanden.'),
       })
   }
 

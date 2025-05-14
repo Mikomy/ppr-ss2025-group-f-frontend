@@ -45,11 +45,15 @@ export class BackendService {
   /**
    * Fetch all sensor-grouped data for a given measurement alias.
    * Returns one Measurement[] per sensor.
+   * optional time range (fromIso and toIso).
+   * @param alias  z.B. 'device_frmpayload_data_nitrogen'
+   * @param fromIso          z.B. '2025-04-29T12:12:00.000Z'
+   * @param toIso            z.B. '2025-04-29T13:12:00.000Z'
    */
-  getGroupedByAlias(alias: string, from?: string, to?: string): Observable<Measurement[]> {
+  getGroupedByAlias(alias: string, fromIso?: string, toIso?: string): Observable<Measurement[]> {
     let params = new HttpParams()
-    if (from) params = params.set('from', from)
-    if (to) params = params.set('to', to)
+    if (fromIso) params = params.set('from', fromIso)
+    if (toIso) params = params.set('to', toIso)
 
     return this.http
       .get<

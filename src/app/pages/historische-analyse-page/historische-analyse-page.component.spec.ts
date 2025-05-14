@@ -103,7 +103,9 @@ describe('HistorischeAnalysePageComponent', () => {
       backendSpy.getGroupedByAlias.and.returnValue(throwError(() => new Error('fail')))
       component.loadCharts()
       tick()
-      expect(component.errorMessage).toBe('Fehler beim Laden der Charts.')
+      expect(component.errorMessage).toBe(
+        'Für mindestens eine Measurement wurden keine Daten im gewählten Zeitraum gefunden.'
+      )
     }))
 
     it('should error when no measurements returned', fakeAsync(() => {

@@ -158,7 +158,9 @@ export class HistorischeAnalysePageComponent implements OnInit {
           }
         }
       },
-      error: () => (this.errorMessage = 'Fehler beim Laden der Charts.'),
+      error: () =>
+        (this.errorMessage =
+          'Für mindestens eine Measurement wurden keine Daten im gewählten Zeitraum gefunden.'),
     })
   }
 

@@ -124,7 +124,9 @@ describe('TableViewPageComponent', () => {
     component.loadDetailedMeasurement()
     tick()
 
-    expect(component.errorMessage).toBe('Fehler beim Laden der Daten.')
+    expect(component.errorMessage).toBe(
+      'Keine Daten im gewählten Zeitraum für gewählte Measurement vorhanden.'
+    )
     expect(component.savedTables).toEqual([])
   }))
 

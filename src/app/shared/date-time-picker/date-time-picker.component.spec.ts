@@ -61,7 +61,11 @@ describe('DateTimePickerComponent', () => {
 
   it('combine should merge date and time correctly', () => {
     const date = new Date(2025, 4, 13)
-    const result = (component as unknown)(date, '08:30')
+    interface Combiner {
+      combine(date: Date, time: string): Date
+    }
+    const combiner = component as unknown as Combiner
+    const result = combiner.combine(date, '08:30')
     expect(result.getFullYear()).toBe(2025)
     expect(result.getMonth()).toBe(4)
     expect(result.getDate()).toBe(13)

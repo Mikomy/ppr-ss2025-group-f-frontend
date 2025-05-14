@@ -108,7 +108,9 @@ export class StatisticsPageComponent implements OnInit {
       ),
     }).subscribe({
       next: ({ s1, s2, corr }) => this.onResults(s1, s2, corr),
-      error: () => (this.errorMessage = 'Fehler beim Abrufen der Statistik-Daten.'),
+      error: () =>
+        (this.errorMessage =
+          'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'),
     })
   }
   private onResults(s1: StatisticResult, s2: StatisticResult, corr: number): void {

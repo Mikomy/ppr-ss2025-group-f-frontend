@@ -171,4 +171,46 @@ describe('BackendService - getMeasurement', () => {
     const req = httpMock.expectOne('https://api.openai.com/v1/chat/completions')
     req.flush({}) // Leere Response
   })
+
+  describe('getGroupedByAlias', () => {
+    it('should request correct URL and parameters when both from and to provided', () => {
+      const alias = 'nitrogen'
+      const from = '2025-05-01T00:00:00Z'
+      const to = '2025-05-02T00:00:00Z'
+      const mockResponse: Measurement[] = [
+        { measurementName: 'm', sensor: { id: '1', name: 's', location: 'l' }, dataPoints: [] },
+      ]
+
+      service.getGroupedByAlias(alias, from, to).subscribe((res) => {
+        expect(res).toEqual(mockResponse)
+      })
+
+      const encoded = encodeURIComponent(alias)
+      const req = httpMock.expectOne(
+        (request) =>
+          request.method === 'GET' &&
+          request.url === `http://localhost:8080/api/influx/measurements/grouped/${encoded}` &&
+          request.params.get('from') === from &&
+          request.params.get('to') === to
+      )
+      req.flush(mockResponse)
+    })
+
+    it('should return error Observable with user-friendly message on HTTP error', () => {
+      const alias = 'errAlias'
+      const from = '2025-05-01T00:00:00Z'
+      const to = '2025-05-02T00:00:00Z'
+      const errorMsg = 'Fehler beim Laden der Sensordaten.'
+
+      service.getGroupedByAlias(alias, from, to).subscribe({
+        next: () => fail('expected error'),
+        error: (err) => {
+          expect(err.message).toBe(errorMsg)
+        },
+      })
+
+      const req = httpMock.expectOne(() => true)
+      req.flush('failure', { status: 500, statusText: 'Server Error' })
+    })
+  })
 })
