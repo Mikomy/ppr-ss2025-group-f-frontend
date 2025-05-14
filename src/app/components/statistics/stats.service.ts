@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core'
 import { Observable, forkJoin, of } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { catchError, map } from 'rxjs/operators'
 import { BackendService } from '../../services/backend.service'
 import { SensorGroup, StatisticResult, Series } from '../../models/stats.model'
 import { Measurement } from '../../models/measurement.model'
 import { ScatterDataPoint } from 'chart.js'
+import { Anomaly } from '../../models/anomaly.model'
 
 /**
  * Service responsible for fetching sensor measurements
@@ -224,5 +225,24 @@ export class StatsService {
     const num = vals.reduce((sum, y, i) => sum + (i - xMean) * (y - yMean), 0)
     const den = vals.reduce((sum, _, i) => sum + Math.pow(i - xMean, 2), 0)
     return den ? num / den : 0
+  }
+
+  detectOutliers(group: SensorGroup, from: Date, to: Date): Observable<Anomaly[]> {
+    return this.computeStats(group, from, to).pipe(
+      map((stats) => this.findOutliers(stats)),
+      catchError(() => of([]))
+    )
+  }
+  private findOutliers(stats: StatisticResult): Anomaly[] {
+    const { series, p25, p75 } = stats
+    const iqr = p75 - p25
+    const lower = p25 - 1.5 * iqr
+    const upper = p75 + 1.5 * iqr
+
+    return series.flatMap((s) =>
+      s.points
+        .filter((p) => p.y < lower || p.y > upper)
+        .map((p) => ({ timestamp: new Date(p.x), value: p.y, type: p.y < lower ? 'low' : 'high' }))
+    )
   }
 }

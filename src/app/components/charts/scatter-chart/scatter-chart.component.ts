@@ -21,6 +21,7 @@ Chart.register(...registerables)
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScatterChartComponent implements AfterViewInit, OnChanges {
+  @Input() anomalies: ScatterDataPoint[] = []
   @Input() points: ScatterDataPoint[] = []
   @Input() label = ''
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>

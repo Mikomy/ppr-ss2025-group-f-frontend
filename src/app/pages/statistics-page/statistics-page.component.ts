@@ -24,6 +24,8 @@ import {
   DateTimePickerComponent,
   DateTimeRange,
 } from '../../shared/date-time-picker/date-time-picker.component'
+import { AnomalyListComponent } from '../../components/statistics/anomaly-list/anomaly-list.component'
+import { Anomaly } from '../../models/anomaly.model'
 
 @Component({
   selector: 'app-statistics-page',
@@ -41,12 +43,16 @@ import {
     MatNativeDateModule,
     MatIconModule,
     DateTimePickerComponent,
+    AnomalyListComponent,
   ],
   providers: [{ provide: MatFormFieldControl, useExisting: DateTimePickerComponent }],
   templateUrl: './statistics-page.component.html',
   styleUrl: './statistics-page.component.scss',
 })
 export class StatisticsPageComponent implements OnInit {
+  canShowAnomalies = false
+  anomalies?: Anomaly[]
+
   timeForm!: FormGroup
   submitted = false
   resultsGroup1?: StatisticResult
@@ -123,6 +129,22 @@ export class StatisticsPageComponent implements OnInit {
     this.resultsGroup2 = s2
     this.correlation = corr
     this.saveToStorage(s1, s2, corr)
+    this.canShowAnomalies = true
+  }
+
+  onShowAnomalies(): void {
+    if (!this.canShowAnomalies) {
+      this.errorMessage = 'Bitte zuerst Kennzahlen berechnen.'
+      return
+    }
+    const raw = this.timeForm.value.dateTimeRange as DateTimeRange
+    const fromIso = this.combineDateTime(raw.fromDate!, raw.fromTime!)
+    const toIso = this.combineDateTime(raw.toDate!, raw.toTime!)
+    const from = new Date(fromIso)
+    const to = new Date(toIso)
+    this.stats
+      .detectOutliers(this.group1Ctrl.value, from, to)
+      .subscribe((a1) => (this.anomalies = a1))
   }
 
   /** Typed Getter für Sensorgruppe 1 */
