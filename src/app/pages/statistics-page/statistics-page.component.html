@@ -51,6 +51,41 @@
       Anomalien anzeigen
     </button>
 
-    <app-anomaly-list *ngIf="anomalies" [anomalies]="anomalies"></app-anomaly-list>
+    <!-- Scatter-Charts -->
+    <div class="chart-section" *ngIf="resultsAvailable">
+      <app-scatter-chart
+        [label]="'Gruppe1'"
+        [points]="resultsGroup1?.series?.[0]?.points ?? []"
+        [anomalies]="anomaliesPointsGroup1"
+        [simultaneous]="simultaneousAnomalies"
+        [lowThreshold]="(resultsGroup1?.p25 ?? 0) - 1.5 * (resultsGroup1?.iqr ?? 0)"
+        [highThreshold]="(resultsGroup1?.p75 ?? 0) + 1.5 * (resultsGroup1?.iqr ?? 0)"
+      ></app-scatter-chart>
+
+      <app-scatter-chart
+        [label]="'Gruppe2'"
+        [points]="resultsGroup2?.series?.[0]?.points ?? []"
+        [anomalies]="anomaliesPointsGroup2"
+        [simultaneous]="simultaneousAnomalies"
+        [lowThreshold]="(resultsGroup2?.p25 ?? 0) - 1.5 * (resultsGroup2?.iqr ?? 0)"
+        [highThreshold]="(resultsGroup2?.p75 ?? 0) + 1.5 * (resultsGroup2?.iqr ?? 0)"
+      ></app-scatter-chart>
+    </div>
+
+    <div class="anomalies" *ngIf="anomaliesVisible">
+      <app-anomaly-list
+        [anomalies]="anomaliesGroup1"
+        [otherTimestamps]="otherTimestampsGroup2"
+        otherLabel="In Gruppe2"
+        title="Gruppe1"
+      ></app-anomaly-list>
+
+      <app-anomaly-list
+        [anomalies]="anomaliesGroup2"
+        [otherTimestamps]="otherTimestampsGroup1"
+        otherLabel="In Gruppe1"
+        title="Gruppe2"
+      ></app-anomaly-list>
+    </div>
   </mat-card-content>
 </mat-card>

@@ -233,7 +233,7 @@ export class StatsService {
       catchError(() => of([]))
     )
   }
-  private findOutliers(stats: StatisticResult): Anomaly[] {
+  findOutliers(stats: StatisticResult): Anomaly[] {
     const { series, p25, p75 } = stats
     const iqr = p75 - p25
     const lower = p25 - 1.5 * iqr

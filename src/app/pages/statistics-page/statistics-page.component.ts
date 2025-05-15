@@ -26,6 +26,8 @@ import {
 } from '../../shared/date-time-picker/date-time-picker.component'
 import { AnomalyListComponent } from '../../components/statistics/anomaly-list/anomaly-list.component'
 import { Anomaly } from '../../models/anomaly.model'
+import { ScatterChartComponent } from '../../components/charts/scatter-chart/scatter-chart.component'
+import { ScatterDataPoint } from 'chart.js'
 
 @Component({
   selector: 'app-statistics-page',
@@ -44,14 +46,24 @@ import { Anomaly } from '../../models/anomaly.model'
     MatIconModule,
     DateTimePickerComponent,
     AnomalyListComponent,
+    ScatterChartComponent,
   ],
-  providers: [{ provide: MatFormFieldControl, useExisting: DateTimePickerComponent }],
+  providers: [
+    {
+      provide: MatFormFieldControl,
+      useExisting: DateTimePickerComponent,
+    },
+  ],
   templateUrl: './statistics-page.component.html',
   styleUrl: './statistics-page.component.scss',
 })
 export class StatisticsPageComponent implements OnInit {
   canShowAnomalies = false
-  anomalies?: Anomaly[]
+  anomaliesGroup1: Anomaly[] = []
+  anomaliesGroup2: Anomaly[] = []
+  anomaliesPointsGroup1: ScatterDataPoint[] = []
+  anomaliesPointsGroup2: ScatterDataPoint[] = []
+  simultaneousAnomalies: ScatterDataPoint[] = []
 
   timeForm!: FormGroup
   submitted = false
@@ -119,6 +131,7 @@ export class StatisticsPageComponent implements OnInit {
           'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'),
     })
   }
+
   private onResults(s1: StatisticResult, s2: StatisticResult, corr: number): void {
     if (!s1.count || !s2.count) {
       this.errorMessage =
@@ -133,18 +146,49 @@ export class StatisticsPageComponent implements OnInit {
   }
 
   onShowAnomalies(): void {
-    if (!this.canShowAnomalies) {
-      this.errorMessage = 'Bitte zuerst Kennzahlen berechnen.'
-      return
-    }
+    this.errorMessage = undefined
+    const { from, to } = this.dateRange
+
+    forkJoin({
+      g1: this.stats.detectOutliers(this.group1Ctrl.value, from, to),
+      g2: this.stats.detectOutliers(this.group2Ctrl.value, from, to),
+    }).subscribe(({ g1, g2 }) => {
+      this.anomaliesGroup1 = g1
+      this.anomaliesGroup2 = g2
+      this.prepareScatterPoints()
+    })
+  }
+
+  private prepareScatterPoints(): void {
+    this.anomaliesPointsGroup1 = this.anomaliesGroup1.map((a) => ({
+      x: +a.timestamp,
+      y: a.value,
+    }))
+    this.anomaliesPointsGroup2 = this.anomaliesGroup2.map((a) => ({
+      x: +a.timestamp,
+      y: a.value,
+    }))
+    this.simultaneousAnomalies = this.findSimultaneous(
+      this.anomaliesPointsGroup1,
+      this.anomaliesPointsGroup2,
+      1800_000
+    )
+  }
+
+  private findSimultaneous(
+    list1: ScatterDataPoint[],
+    list2: ScatterDataPoint[],
+    toleranceMs: number
+  ): ScatterDataPoint[] {
+    return list1.filter((p1) => list2.some((p2) => Math.abs(p1.x - p2.x) <= toleranceMs))
+  }
+
+  private get dateRange(): { from: Date; to: Date } {
     const raw = this.timeForm.value.dateTimeRange as DateTimeRange
-    const fromIso = this.combineDateTime(raw.fromDate!, raw.fromTime!)
-    const toIso = this.combineDateTime(raw.toDate!, raw.toTime!)
-    const from = new Date(fromIso)
-    const to = new Date(toIso)
-    this.stats
-      .detectOutliers(this.group1Ctrl.value, from, to)
-      .subscribe((a1) => (this.anomalies = a1))
+    return {
+      from: new Date(this.combineDateTime(raw.fromDate!, raw.fromTime!)),
+      to: new Date(this.combineDateTime(raw.toDate!, raw.toTime!)),
+    }
   }
 
   /** Typed Getter für Sensorgruppe 1 */
@@ -180,7 +224,11 @@ export class StatisticsPageComponent implements OnInit {
     const raw = this.storage.get(this.storageKey)
     if (raw) {
       try {
-        const stored = JSON.parse(raw) as { s1: StatisticResult; s2: StatisticResult; corr: number }
+        const stored = JSON.parse(raw) as {
+          s1: StatisticResult
+          s2: StatisticResult
+          corr: number
+        }
         this.resultsGroup1 = stored.s1
         this.resultsGroup2 = stored.s2
         this.correlation = stored.corr
@@ -193,5 +241,21 @@ export class StatisticsPageComponent implements OnInit {
   private saveToStorage(s1: StatisticResult, s2: StatisticResult, corr: number) {
     const payload = JSON.stringify({ s1, s2, corr })
     this.storage.set(this.storageKey, payload)
+  }
+
+  get resultsAvailable(): boolean {
+    return !!(this.resultsGroup1 && this.resultsGroup2)
+  }
+
+  get anomaliesVisible(): boolean {
+    return this.anomaliesGroup1.length > 0 || this.anomaliesGroup2.length > 0
+  }
+
+  get otherTimestampsGroup1(): number[] {
+    return this.anomaliesGroup1.map((a) => +a.timestamp)
+  }
+
+  get otherTimestampsGroup2(): number[] {
+    return this.anomaliesGroup2.map((a) => +a.timestamp)
   }
 }

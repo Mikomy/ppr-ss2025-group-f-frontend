@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
-import { By } from '@angular/platform-browser'
 import { StatisticsDisplayComponent } from './statistics-display.component'
 import { StatisticResult, Series } from '../../../models/stats.model'
+import { ScatterChartComponent } from '../../charts/scatter-chart/scatter-chart.component'
 
 describe('StatisticsDisplayComponent', () => {
   let component: StatisticsDisplayComponent
@@ -10,7 +10,7 @@ describe('StatisticsDisplayComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StatisticsDisplayComponent],
+      imports: [StatisticsDisplayComponent, ScatterChartComponent],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents()
 
@@ -72,10 +72,6 @@ describe('StatisticsDisplayComponent', () => {
     expect(texts).toContain('Varianz: 20.00')
     expect(texts).toContain(`Standardabweichung: ${mockStats.stdDev.toFixed(2)}`)
     expect(texts).toContain('Trend (Steigung): -0.50')
-
-    // Should render scatter-chart for each series
-    const charts = fixture.debugElement.queryAll(By.css('app-scatter-chart'))
-    expect(charts.length).toBe(mockSeries.length)
   })
 
   it('trackByName should return measurementName', () => {

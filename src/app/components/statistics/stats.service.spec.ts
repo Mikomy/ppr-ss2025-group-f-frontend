@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { of } from 'rxjs'
 import { StatsService } from './stats.service'
 import { BackendService } from '../../services/backend.service'
-import { SensorGroup, Series } from '../../models/stats.model'
+import { SensorGroup, Series, StatisticResult } from '../../models/stats.model'
 import { Measurement } from '../../models/measurement.model'
 import { ScatterDataPoint } from 'chart.js'
 
@@ -116,5 +116,49 @@ describe('StatsService', () => {
   it('computeTrend should compute negative slope for decreasing data', () => {
     const trend = service['computeTrend']([4, 3, 2, 1])
     expect(trend).toBeLessThan(0)
+  })
+
+  it('should detect low and high outliers correctly via public API', (done) => {
+    // Prepare a synthetic StatisticResult with one low and one high outlier
+    const now = Date.now()
+    const points = [
+      { x: now, y: -10 }, // low outlier (below lower)
+      { x: now + 1, y: 10 },
+      { x: now + 2, y: 20 },
+      { x: now + 3, y: 50 }, // high outlier (above upper)
+    ]
+    const p25 = 10
+    const p75 = 20
+    const stats: StatisticResult = {
+      count: 4,
+      mean: 7.5,
+      median: 15,
+      min: -10,
+      max: 50,
+      variance: 650,
+      stdDev: Math.sqrt(650),
+      p25,
+      p75,
+      iqr: p75 - p25,
+      trend: 0,
+      series: [{ measurementName: 'test', sensorName: 's', points }],
+    }
+
+    // Stub computeStats to return our synthetic stats
+    spyOn<StatsService, 'computeStats'>(service, 'computeStats').and.returnValue(of(stats))
+    const dummyGroup: SensorGroup = {
+      sensors: [{ measurementName: 't', sensorName: 's', alias: 'a' }],
+    }
+    const from = new Date()
+    const to = new Date()
+
+    service.detectOutliers(dummyGroup, from, to).subscribe((anomalies) => {
+      expect(anomalies.length).toBe(2)
+      const types = anomalies.map((a) => a.type).sort()
+      expect(types).toEqual(['high', 'low'])
+      const values = anomalies.map((a) => a.value).sort((a, b) => a - b)
+      expect(values).toEqual([-10, 50])
+      done()
+    })
   })
 })
