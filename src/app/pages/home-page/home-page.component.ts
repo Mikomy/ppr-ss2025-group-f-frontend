@@ -34,6 +34,14 @@ interface MeasurementConfig {
   icon: string
 }
 
+interface SensorGroupOption {
+  key: string
+  measurementName: string
+  alias: string
+  sensorName: string
+  display: string
+}
+
 @Component({
   selector: 'app-home-page',
   standalone: true,
@@ -164,6 +172,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
   latestMeasurement: Measurement | null = null
 
   /**
+   * Holds the dropdown options for sensor groups.
+   */
+  sensorListForFiltering: SensorGroupOption[] = []
+
+  /**
+   * Holds the currently selected sensor group key.
+   */
+  selectedSensorGroupKey: string | null = null
+
+  /**
    * Constructor injecting the backend service.
    * @param backendService The backend service for API calls.
    */
@@ -190,6 +208,20 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }, 3000)
     console.table(this.statistics)
     console.log('Statistics:', this.statistics)
+
+    this.backendService.getDropdownOption().subscribe((opts) => {
+      this.sensorListForFiltering = opts.map((o, i) => ({
+        key: i.toString(),
+        sensorName: o.sensor.name,
+        measurementName: o.measurementName,
+        alias: o.alias!,
+        display: `${o.measurementName} – ${o.sensor.name}`,
+      }))
+
+      // if (this.sensorGroupOptions.length > 0 && !this.selectedSensorGroupKey) {
+      //   this.selectedSensorGroupKey = this.sensorGroupOptions[0].key
+      // }
+    })
   }
 
   /**
@@ -270,5 +302,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
       }
     }
     return latest
+  }
+
+  /**
+   * Handles changes in the sensor group dropdown.
+   * @param event The change event from the dropdown.
+   */
+  onSensorGroupChange(event: Event) {
+    const select = event.target as HTMLSelectElement
+    this.selectedSensorGroupKey = select.value
+    // Hier ggf. weitere Logik, z.B. Filterung der Daten nach Auswahl
   }
 }

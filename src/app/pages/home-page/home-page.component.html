@@ -1,6 +1,29 @@
 <div class="sensor-container">
   <h1 class="sensor_headline"><i class="fas fa-chart-line"></i>Overview</h1>
   <p class="sensor_subheadline">Real-time Sensor Measurements</p>
+
+  <div class="stats-grid" style="margin-bottom: 1rem">
+    <div class="stat-card" style="display: flex; flex-direction: column; align-items: flex-start">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem">Sensor aus Measurement auswählen:</h3>
+      <select
+        id="sensor_select_dashboard"
+        [value]="selectedSensorGroupKey"
+        (change)="onSensorGroupChange($event)"
+        style="
+          width: 100%;
+          padding: 0.5rem;
+          font-size: 1rem;
+          border-radius: 6px;
+          border: 1px solid #ddd;
+        "
+      >
+        <option *ngFor="let singleSensor of sensorListForFiltering" [value]="singleSensor.key">
+          {{ singleSensor.display }}
+        </option>
+      </select>
+    </div>
+  </div>
+
   <!-- <div class="error-message">
     <span>DAS IST EINE TEST FEHLERMELDUNG</span>
   </div> -->
