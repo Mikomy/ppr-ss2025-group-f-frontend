@@ -72,20 +72,26 @@
       ></app-scatter-chart>
     </div>
 
-    <div class="anomalies" *ngIf="anomaliesVisible">
-      <app-anomaly-list
-        [anomalies]="anomaliesGroup1"
-        [otherTimestamps]="otherTimestampsGroup2"
-        otherLabel="In Gruppe2"
-        title="Gruppe1"
-      ></app-anomaly-list>
+    <!-- Anomaly Lists -->
+    <div *ngIf="anomalyChecked">
+      <div *ngIf="anomaliesVisible; else noAnomalyTemplate" class="anomalies">
+        <app-anomaly-list
+          [anomalies]="anomaliesGroup1"
+          [otherTimestamps]="otherTimestampsGroup2"
+          otherLabel="In Gruppe2"
+          title="Gruppe1"
+        ></app-anomaly-list>
 
-      <app-anomaly-list
-        [anomalies]="anomaliesGroup2"
-        [otherTimestamps]="otherTimestampsGroup1"
-        otherLabel="In Gruppe1"
-        title="Gruppe2"
-      ></app-anomaly-list>
+        <app-anomaly-list
+          [anomalies]="anomaliesGroup2"
+          [otherTimestamps]="otherTimestampsGroup1"
+          otherLabel="In Gruppe1"
+          title="Gruppe2"
+        ></app-anomaly-list>
+      </div>
+      <ng-template #noAnomalyTemplate>
+        <p><strong> Keine Ausreißer im ausgewählten Zeitraum gefunden.</strong></p>
+      </ng-template>
     </div>
   </mat-card-content>
 </mat-card>

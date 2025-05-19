@@ -97,75 +97,6 @@ export class StatsService {
     )
   }
 
-  // computeStats(group: SensorGroup, from: Date, to: Date): Observable<StatisticResult> {
-  //   const isoFrom = from.toISOString()
-  //   const isoTo = to.toISOString()
-  //
-  //   // Kick off one HTTP call per sensor-measurement combo
-  //   const calls = group.sensors.map((sensorConfig) =>
-  //     this.backend.getMeasurement(sensorConfig.measurementName, isoFrom, isoTo)
-  //   )
-  //
-  //   return forkJoin(calls).pipe(
-  //     map((allMeasurements: Measurement[][]) => {
-  //       // Build each sensor's series
-  //       const series: Series[] = group.sensors.map((sensorConfig, idx) => {
-  //         const measurementsForName = allMeasurements[idx] || []
-  //         // pick matching sensorId or fallback to first
-  //         const measurement =
-  //           measurementsForName.find((m) => m.sensor.id === sensorConfig.sensorId) ??
-  //           measurementsForName[0]
-  //
-  //         const rawPoints = measurement?.dataPoints || []
-  //         const points: ScatterDataPoint[] = rawPoints.map((dp) => ({
-  //           x: new Date(dp.timestamp).getTime(),
-  //           y: dp.value,
-  //         }))
-  //
-  //         return {
-  //           measurementName: sensorConfig.measurementName,
-  //           sensorName: sensorConfig.measurementName,
-  //           points,
-  //         }
-  //       })
-  //
-  //       // flatten & sort all values to compute statistics
-  //       const allValues = series
-  //         .flatMap((serie) => serie.points.map((p) => p.y))
-  //         .sort((a, b) => a - b)
-  //
-  //       const count = allValues.length
-  //       const mean = count ? allValues.reduce((sum, v) => sum + v, 0) / count : 0
-  //       const median = this.quantile(allValues, 0.5)
-  //       const min = count ? allValues[0] : 0
-  //       const max = count ? allValues[count - 1] : 0
-  //       const variance = count
-  //         ? allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / count
-  //         : 0
-  //       const stdDev = Math.sqrt(variance)
-  //       const p25 = this.quantile(allValues, 0.25)
-  //       const p75 = this.quantile(allValues, 0.75)
-  //       const iqr = p75 - p25
-  //       const trend = this.computeTrend(allValues)
-  //
-  //       return {
-  //         count,
-  //         mean,
-  //         median,
-  //         min,
-  //         max,
-  //         variance,
-  //         stdDev,
-  //         p25,
-  //         p75,
-  //         iqr,
-  //         trend,
-  //         series,
-  //       }
-  //     })
-  //   )
-  // }
-
   /**
    * Computes the Pearson correlation coefficient between
    * two sensor groups over the same time interval.
@@ -227,12 +158,29 @@ export class StatsService {
     return den ? num / den : 0
   }
 
+  /**
+   * Detects outliers (anomalies) in the given sensor group over a time range.
+   * Uses IQR rule: values below p25 - 1.5*IQR or above p75 + 1.5*IQR are flagged.
+   * On any error, returns an empty array.
+   *
+   * @param group   SensorGroup to analyze
+   * @param from    Start date (inclusive)
+   * @param to      End date (inclusive)
+   * @returns       Observable emitting array of Anomaly objects
+   */
   detectOutliers(group: SensorGroup, from: Date, to: Date): Observable<Anomaly[]> {
     return this.computeStats(group, from, to).pipe(
       map((stats) => this.findOutliers(stats)),
       catchError(() => of([]))
     )
   }
+
+  /**
+   * Extracts anomalies from a fully-computed StatisticResult.
+   *
+   * @param stats   Pre-computed statistics including series and quartiles
+   * @returns       List of anomalies (each with timestamp, value, and 'low'|'high' type)
+   */
   findOutliers(stats: StatisticResult): Anomaly[] {
     const { series, p25, p75 } = stats
     const iqr = p75 - p25

@@ -97,23 +97,28 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
   private onTouched!: () => void
   private onChangeFn!: (value: DateTimeRange) => void
   private onValidatorChange!: () => void
+  readonly minDate = new Date(2025, 0, 1)
 
   constructor(private fb: FormBuilder) {
-    this.rangeForm = this.fb.group({
-      fromDate: [null],
-      fromTime: [null],
-      toDate: [null],
-      toTime: [null],
-    })
-    this.rangeForm.valueChanges.subscribe((val) => {
-      if (this.rangeForm.dirty && this.rangeForm.valid) {
-        this.onChangeFn(val)
+    this.rangeForm = this.fb.group(
+      {
+        fromDate: [null],
+        fromTime: [null],
+        toDate: [null],
+        toTime: [null],
+      },
+      { validators: [this.dateRangeValidator.bind(this)] }
+    )
+    this.rangeForm.valueChanges.subscribe(() => {
+      if (this.rangeForm.dirty) {
+        this.onChangeFn(this.rangeForm.value)
         this.onTouched()
         this.onValidatorChange?.()
       }
     })
   }
 
+  /** Write an incoming value to the form controls without emitting change events. */
   writeValue(obj: DateTimeRange): void {
     if (obj) {
       this.rangeForm.setValue(obj, { emitEvent: false })
@@ -136,17 +141,20 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn
   }
-  validate(control: AbstractControl): ValidationErrors | null {
-    const value = control.value as DateTimeRange
-    const { fromDate, fromTime, toDate, toTime } = value || {}
-    if (!fromDate || !fromTime || !toDate || !toTime) {
-      return { required: true }
+
+  /**
+   * Performs validation on the inner FormGroup and returns any errors.
+   */
+  validate(): ValidationErrors | null {
+    if (!this.rangeForm.dirty) {
+      return null
     }
-    const from = this.combine(fromDate, fromTime)
-    const to = this.combine(toDate, toTime)
-    return from > to ? { rangeInvalid: true } : null
+    return this.rangeForm.errors
   }
 
+  /**
+   * Combines a Date and a time string "HH:mm" into a single Date instance.
+   */
   private combine(date: Date, time: string): Date {
     const [h, m] = time.split(':').map(Number)
     const d = new Date(date)
@@ -186,5 +194,27 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
     const h = date.getHours().toString().padStart(2, '0')
     const m = date.getMinutes().toString().padStart(2, '0')
     return `${h}:${m}`
+  }
+
+  /**
+   * Custom validator to ensure complete range, valid order and minDate.
+   */
+  private dateRangeValidator(group: AbstractControl): ValidationErrors | null {
+    if (!group.dirty) {
+      return null
+    }
+    const { fromDate, fromTime, toDate, toTime } = group.value as DateTimeRange
+    if (!fromDate || !fromTime || !toDate || !toTime) {
+      return { required: true }
+    }
+    const from = this.combine(fromDate, fromTime)
+    const to = this.combine(toDate, toTime)
+    if (from > to) {
+      return { rangeInvalid: true }
+    }
+    if (from < this.minDate) {
+      return { dateTooEarly: true }
+    }
+    return null
   }
 }

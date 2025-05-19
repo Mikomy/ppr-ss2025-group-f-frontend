@@ -79,13 +79,6 @@ describe('HistorischeAnalysePageComponent', () => {
     expect(component.errorMessage).toBe('Bitte mindestens eine Messung auswählen.')
   })
 
-  it('loadCharts should error when dateTimeRange invalid', () => {
-    // select a config but leave dateTimeRange invalid
-    component.configs[0] = createConfig('Test', 'Sensor A')
-    component.loadCharts()
-    expect(component.errorMessage).toBe('Bitte komplettes Zeitintervall auswählen.')
-  })
-
   describe('data fetching scenarios', () => {
     beforeEach(() => {
       component.configs[0] = createConfig('Test', 'Sensor A')

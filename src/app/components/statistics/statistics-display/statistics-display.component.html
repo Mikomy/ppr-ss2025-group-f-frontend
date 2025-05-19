@@ -24,14 +24,6 @@
       ><strong>Trend (Steigung):</strong> {{ stats.trend | number: '1.2-2' }}</mat-list-item
     >
   </mat-list>
-  <!--  <div class="chart-container">-->
-  <!--    <app-scatter-chart-->
-  <!--      *ngFor="let s of stats.series; trackBy: trackByName"-->
-  <!--      [label]="s.measurementName"-->
-  <!--      [points]="s.points"-->
-  <!--    >-->
-  <!--    </app-scatter-chart>-->
-  <!--  </div>-->
 </ng-container>
 <ng-template #noData>
   <p>Keine Daten verfügbar.</p>

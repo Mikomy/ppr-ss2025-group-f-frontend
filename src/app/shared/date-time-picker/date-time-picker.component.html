@@ -1,9 +1,12 @@
 <div [formGroup]="rangeForm" class="date-time-range">
   <mat-form-field appearance="fill">
     <mat-label>Von (Datum)</mat-label>
-    <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" />
+    <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" [min]="minDate" />
     <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
     <mat-datepicker #fromPicker></mat-datepicker>
+    <mat-error *ngIf="rangeForm.errors?.['dateTooEarly'] && rangeForm.dirty">
+      Daten sind ab 01.01.2025 verfügbar.
+    </mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="fill">
@@ -28,10 +31,10 @@
     <button mat-button type="button" (click)="setLast30Days()">Letzte 30 Tage</button>
     <button mat-button type="button" (click)="setLast60Days()">Letzte 60 Tage</button>
   </div>
-  <mat-error *ngIf="rangeForm.errors?.['required']">
+  <mat-error *ngIf="rangeForm.errors?.['required'] && rangeForm.dirty">
     Bitte komplettes Zeitintervall auswählen.
   </mat-error>
-  <mat-error *ngIf="rangeForm.errors?.['rangeInvalid']">
+  <mat-error *ngIf="rangeForm.errors?.['rangeInvalid'] && rangeForm.dirty">
     „Von“ darf nicht nach „Bis“ liegen.
   </mat-error>
 </div>

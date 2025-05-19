@@ -57,20 +57,35 @@ import { ScatterDataPoint } from 'chart.js'
   templateUrl: './statistics-page.component.html',
   styleUrl: './statistics-page.component.scss',
 })
+
+/**
+ * StatisticsPageComponent
+ *
+ * Main page for computing statistics and anomaly detection between two sensor groups.
+ * Presents controls for selecting sensor groups and a date-time range,
+ * displays computed statistics, correlation, scatter charts, and anomaly lists.
+ */
 export class StatisticsPageComponent implements OnInit {
+  /** Flag: statistics computed and anomaly button enabled */
   canShowAnomalies = false
+  /** Flag: user clicked 'Anomalien anzeigen' */
+  anomalyChecked = false
+
+  /** Results and derived data */
+  resultsGroup1?: StatisticResult
+  resultsGroup2?: StatisticResult
+  correlation?: number
   anomaliesGroup1: Anomaly[] = []
   anomaliesGroup2: Anomaly[] = []
   anomaliesPointsGroup1: ScatterDataPoint[] = []
   anomaliesPointsGroup2: ScatterDataPoint[] = []
   simultaneousAnomalies: ScatterDataPoint[] = []
 
+  /** FormGroup for inputs */
   timeForm!: FormGroup
   submitted = false
-  resultsGroup1?: StatisticResult
-  resultsGroup2?: StatisticResult
-  correlation?: number
   errorMessage?: string
+
   private storageKey = 'statisticsResult'
 
   constructor(
@@ -79,6 +94,9 @@ export class StatisticsPageComponent implements OnInit {
     private storage: WebStorageService
   ) {}
 
+  /**
+   * Initialize the reactive form and attempt to load saved state.
+   */
   ngOnInit(): void {
     this.timeForm = this.fb.group(
       {
@@ -91,14 +109,17 @@ export class StatisticsPageComponent implements OnInit {
     this.loadFromStorage()
   }
 
+  /**
+   * Handler for the "Berechnen" button: validate, clear prior state,
+   * and trigger fetching of new statistics and correlation.
+   */
   onCompute(): void {
     this.submitted = true
     this.clearResults()
+    this.clearAnomalies()
+    this.anomalyChecked = false
 
-    // this.timeForm.updateValueAndValidity({ onlySelf: false, emitEvent: true })
     this.timeForm.markAllAsTouched()
-    //this.timeForm.updateValueAndValidity();
-
     if (this.timeForm.invalid) {
       this.errorMessage =
         'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
@@ -112,7 +133,9 @@ export class StatisticsPageComponent implements OnInit {
   }
 
   /**
-   * Fetch both statistics and correlation in parallel.
+   * Perform parallel HTTP calls: computeStats for two groups and correlation.
+   * @param fromIso ISO string for start datetime
+   * @param toIso ISO string for end datetime
    */
   private fetchStatisticsAndCorrelation(fromIso: string, toIso: string): void {
     forkJoin({
@@ -132,6 +155,12 @@ export class StatisticsPageComponent implements OnInit {
     })
   }
 
+  /**
+   * Called when both stats and correlation have been fetched.
+   * @param s1 Statistics for group1
+   * @param s2 Statistics for group2
+   * @param corr Pearson correlation coefficient
+   */
   private onResults(s1: StatisticResult, s2: StatisticResult, corr: number): void {
     if (!s1.count || !s2.count) {
       this.errorMessage =
@@ -145,8 +174,13 @@ export class StatisticsPageComponent implements OnInit {
     this.canShowAnomalies = true
   }
 
+  /**
+   * Handler for "Anomalien anzeigen" button.
+   * Triggers outlier detection and marks anomalyChecked flag.
+   */
   onShowAnomalies(): void {
     this.errorMessage = undefined
+    this.anomalyChecked = true
     const { from, to } = this.dateRange
 
     forkJoin({
@@ -159,6 +193,9 @@ export class StatisticsPageComponent implements OnInit {
     })
   }
 
+  /**
+   * Build scatter-plot data for anomalies and simultaneous points.
+   */
   private prepareScatterPoints(): void {
     this.anomaliesPointsGroup1 = this.anomaliesGroup1.map((a) => ({
       x: +a.timestamp,
@@ -203,16 +240,39 @@ export class StatisticsPageComponent implements OnInit {
   onClear(): void {
     this.submitted = false
     this.clearResults()
+    this.clearAnomalies()
     this.storage.set(this.storageKey, '')
   }
 
+  /**
+   * Clear only statistical results and related flags.
+   */
   private clearResults(): void {
     this.resultsGroup1 = undefined
     this.resultsGroup2 = undefined
     this.correlation = undefined
     this.errorMessage = undefined
+    this.canShowAnomalies = false
+    this.anomalyChecked = false
   }
 
+  /**
+   * Clear all anomaly arrays.
+   */
+  private clearAnomalies(): void {
+    this.anomaliesGroup1 = []
+    this.anomaliesGroup2 = []
+    this.anomaliesPointsGroup1 = []
+    this.anomaliesPointsGroup2 = []
+    this.simultaneousAnomalies = []
+  }
+
+  /**
+   * Combine a Date and time string ("HH:mm") into an ISO datetime string.
+   * @param date Date object
+   * @param time Time string "HH:mm"
+   * @returns ISO 8601 string
+   */
   private combineDateTime(date: Date, time: string): string {
     const [h, m] = time.split(':').map(Number)
     const copy = new Date(date)
@@ -220,6 +280,9 @@ export class StatisticsPageComponent implements OnInit {
     return copy.toISOString()
   }
 
+  /**
+   * Load saved stats & correlation from local storage.
+   */
   private loadFromStorage() {
     const raw = this.storage.get(this.storageKey)
     if (raw) {
@@ -243,18 +306,26 @@ export class StatisticsPageComponent implements OnInit {
     this.storage.set(this.storageKey, payload)
   }
 
+  /**
+   * Check if both statistic results are available.
+   */
   get resultsAvailable(): boolean {
     return !!(this.resultsGroup1 && this.resultsGroup2)
   }
 
+  /**
+   * Check if any anomalies were detected.
+   */
   get anomaliesVisible(): boolean {
     return this.anomaliesGroup1.length > 0 || this.anomaliesGroup2.length > 0
   }
 
+  /**
+   * Extract other timestamps for simultaneous comparison.
+   */
   get otherTimestampsGroup1(): number[] {
     return this.anomaliesGroup1.map((a) => +a.timestamp)
   }
-
   get otherTimestampsGroup2(): number[] {
     return this.anomaliesGroup2.map((a) => +a.timestamp)
   }
