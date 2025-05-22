@@ -50,4 +50,53 @@ test.describe('HomePageComponent', () => {
     const statCards = page.locator('.dashboard-container .stats-grid > .stat-card')
     await expect(statCards).toHaveCount(12)
   })
+
+  test.describe('Filtered View', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(
+        '/?sensorName=Netvox%20R72632A%20NPK-Sensor%202&measurementName=device_frmpayload_data_nitrogen'
+      )
+    })
+
+    test('zeigt gefilterte Ansicht Überschrift an', async ({ page }) => {
+      // Use first() to specifically target the first heading
+      await expect(page.locator('.sensor_headline').first()).toContainText('Stickstoff')
+      await expect(page.locator('.sensor_subheadline')).toContainText('Netvox R72632A NPK-Sensor 2')
+    })
+
+    test('zeigt korrekte gefilterte Statistik-Karten an', async ({ page }) => {
+      const statCards = page.locator('.dashboard-container .stats-grid > .stat-card')
+      await expect(statCards).toHaveCount(6) // Gefilterte Ansicht zeigt 6 Karten an
+
+      // Überprüfen auf spezifische Karten in der gefilterten Ansicht
+      await expect(page.locator('.stat-card:has-text("Anzahl Messungen")')).toBeVisible()
+      await expect(page.locator('.stat-card:has-text("Durchschnittswert")')).toBeVisible()
+      await expect(page.locator('.stat-card:has-text("Letzter Wert")')).toBeVisible()
+      await expect(page.locator('.stat-card:has-text("Minimum")')).toBeVisible()
+      await expect(page.locator('.stat-card:has-text("Maximum")')).toBeVisible()
+    })
+
+    test('Filter zurücksetzen Button funktioniert', async ({ page }) => {
+      const resetButton = page.locator('button:has-text("Filter zurücksetzen")')
+      await expect(resetButton).toBeVisible()
+
+      await resetButton.click()
+
+      // Überprüfen, ob die URL-Parameter gelöscht wurden
+      await expect(page).toHaveURL('/')
+
+      // Überprüfen, ob die Ansicht auf ungefiltert zurückgeschaltet wurde
+      const statCards = page.locator('.dashboard-container .stats-grid > .stat-card')
+      await expect(statCards).toHaveCount(12) // Ungefilterte Ansicht zeigt 12 Karten an
+    })
+
+    test('zeigt Ladezustand während der OpenAI-Analyse an', async ({ page }) => {
+      // Neue Analyse auslösen durch Ändern des Filters
+      const filterSelect = page.locator('#sensor_select_dashboard')
+      await filterSelect.selectOption({ index: 1 }) // Anderen Sensor auswählen
+
+      // Überprüfen der Ladeanzeige
+      await expect(page.locator('#ai_synopsis')).toContainText('Lade neue Synopsis...')
+    })
+  })
 })

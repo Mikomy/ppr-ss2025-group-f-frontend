@@ -83,6 +83,28 @@ export class BackendService {
   }
 
   /**
+   * Fetches filtered dashboard statistics from the backend.
+   * @param deviceName The name of the device to filter by
+   * @param measurementName The name of the measurement to filter by
+   * @returns Observable emitting Statistics object.
+   */
+  getFilteredDashboardStatistics(
+    deviceName: string,
+    measurementName: string
+  ): Observable<Statistics> {
+    const params = new HttpParams()
+      .set('deviceName', deviceName)
+      .set('measurementName', measurementName)
+
+    const url = `http://localhost:8080/api/statistics/dashboard_data_for_sensor/`
+    console.log('Calling URL:', url + '?' + params.toString())
+
+    return this.http
+      .get<Statistics>(url, { params })
+      .pipe(catchError(this.handleError<Statistics>('getStatistics')))
+  }
+
+  /**
    * Returns dropdown options for sensor measurements.
    * @returns Observable emitting an array of DropdownOptionModel.
    */

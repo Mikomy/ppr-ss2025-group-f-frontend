@@ -1,26 +1,48 @@
 <div class="sensor-container">
-  <h1 class="sensor_headline"><i class="fas fa-chart-line"></i>Overview</h1>
-  <p class="sensor_subheadline">Real-time Sensor Measurements</p>
+  <h1 class="sensor_headline">
+    <i class="fas fa-chart-line"></i>
+    {{ activeFilter ? getCurrentMeasurementLabel() || 'Overview' : 'Overview' }}
+  </h1>
+  <p class="sensor_subheadline">
+    {{ activeFilter ? activeFilter.sensorName : 'Real-time Sensor Measurements' }}
+  </p>
 
   <div class="stats-grid" style="margin-bottom: 1rem">
     <div class="stat-card" style="display: flex; flex-direction: column; align-items: flex-start">
       <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem">Sensor aus Measurement auswählen:</h3>
-      <select
-        id="sensor_select_dashboard"
-        [value]="selectedSensorGroupKey"
-        (change)="onSensorGroupChange($event)"
-        style="
-          width: 100%;
-          padding: 0.5rem;
-          font-size: 1rem;
-          border-radius: 6px;
-          border: 1px solid #ddd;
-        "
-      >
-        <option *ngFor="let singleSensor of sensorListForFiltering" [value]="singleSensor.key">
-          {{ singleSensor.display }}
-        </option>
-      </select>
+      <div style="display: flex; gap: 1rem; width: 100%">
+        <select
+          id="sensor_select_dashboard"
+          [(ngModel)]="selectedSensorGroupKey"
+          (change)="onSensorGroupChange($event)"
+          style="
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+          "
+        >
+          <option value="">Bitte wählen...</option>
+          <option *ngFor="let singleSensor of sensorListForFiltering" [value]="singleSensor.key">
+            {{ singleSensor.display }}
+          </option>
+        </select>
+        <button
+          *ngIf="activeFilter"
+          (click)="resetFilter()"
+          style="
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+          "
+        >
+          <i class="fas fa-times"></i> Filter zurücksetzen
+        </button>
+      </div>
     </div>
   </div>
 
@@ -75,230 +97,340 @@
 
   <div *ngIf="statistics" class="dashboard-container">
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-temperature-high"></i>
+      <!-- 
+                      Filtered View
+      
+      -->
+      <ng-container *ngIf="activeFilter">
+        <!-- Total Points Card -->
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-database"></i>
+            <!-- Changed: database icon for data points -->
+          </div>
+          <div class="card-content">
+            <h3>Anzahl Messungen</h3>
+            <p class="value">{{ statistics.overallTotalPointCount | number: '1.0-0' : 'de' }}</p>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Durchschn. Temperatur</h3>
-          <p class="value">
-            {{
-              statistics.averageValues['device_frmpayload_data_data_air_temperature_value']
-                | number: '1.1-1'
-            }}°C
-          </p>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-tint"></i>
+        <!-- Average Value Card -->
+        <div class="stat-card" *ngIf="getSensorNameFromJsonResponse() as sensorNameAsKey">
+          <div class="card-icon">
+            <span style="font-size: 1.5em; font-weight: bold; color: #2196f3">Ø</span>
+          </div>
+          <div class="card-content">
+            <h3>Durchschnittswert</h3>
+            <p class="value">{{ sensorNameAsKey.value | number: '1.2-2' }}</p>
+            <small>{{ sensorNameAsKey.key }}</small>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Durchschn. Luftfeuchtigkeit</h3>
-          <p class="value" *ngIf="statistics && statistics.averageValues">
-            {{
-              statistics.averageValues['device_frmpayload_data_air_humidity_value']
-                | number: '1.1-1'
-            }}%
-          </p>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-cloud"></i>
+        <!-- Latest Value Card -->
+        <div *ngIf="latestMeasurement" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-table"></i>
+            <!-- Changed: table icon for current value -->
+          </div>
+          <div class="card-content">
+            <h3>Letzter Wert</h3>
+            <p class="value">
+              {{ latestMeasurement.dataPoints[0].value | number: '1.2-2' }}
+            </p>
+            <small>{{
+              latestMeasurement.dataPoints[0].timestamp | date: 'short' : '' : 'de'
+            }}</small>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Durchschn. CO₂</h3>
-          <p class="value" *ngIf="statistics && statistics.averageValues">
-            {{
-              statistics.averageValues['device_frmpayload_data_co2_concentration_value']
-                | number: '1.0-0'
-            }}
-            ppm
-          </p>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-water"></i>
+        <!-- Minimum Card -->
+        <div class="stat-card" *ngIf="getSensorNameFromJsonResponse() as sensorNameAsKey">
+          <div class="card-icon">
+            <i class="fas fa-arrow-down"></i>
+            <!-- Changed: down arrow for minimum -->
+          </div>
+          <div class="card-content">
+            <h3>Minimum</h3>
+            <p class="value">
+              {{ statistics.minValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+            </p>
+            <small>
+              {{
+                statistics.minValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Durchschn. Bodenfeuchtigkeit</h3>
-          <p
-            class="value"
-            *ngIf="
-              statistics?.averageValues?.['device_frmpayload_data_data_SoilMoisture'] !== undefined
-            "
-          >
-            {{
-              statistics.averageValues['device_frmpayload_data_data_SoilMoisture']
-                | number: '1.1-1'
-            }}%
-          </p>
-        </div>
-      </div>
 
-      <div *ngIf="latestMeasurement" class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-history"></i>
+        <!-- Maximum Card -->
+        <div class="stat-card" *ngIf="getSensorNameFromJsonResponse() as sensorNameAsKey">
+          <div class="card-icon">
+            <i class="fas fa-arrow-up"></i>
+            <!-- Changed: up arrow for maximum -->
+          </div>
+          <div class="card-content">
+            <h3>Maximum</h3>
+            <p class="value">
+              {{ statistics.maxValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+            </p>
+            <small>
+              {{
+                statistics.maxValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Letze Messung</h3>
-          <p class="value">
-            {{ latestMeasurement.dataPoints[0].timestamp | date: 'short' : '' : 'de' }}
-          </p>
-          <small>{{ latestMeasurement.sensor.name }}</small>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-chart-bar"></i>
+        <!-- Latest Timestamp Card -->
+        <div *ngIf="latestMeasurement" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-clock"></i>
+            <!-- Kept: clock icon is appropriate for timestamp -->
+          </div>
+          <div class="card-content">
+            <h3>Letzte Messung</h3>
+            <p class="value">
+              {{ latestMeasurement.dataPoints[0].timestamp | date: 'short' : '' : 'de' }}
+            </p>
+            <small>{{ latestMeasurement.dataPoints[0].value | number: '1.2-2' }}</small>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Anzahl Messungen</h3>
-          <p class="value">{{ statistics.overallTotalPointCount | number: '1.0-0' : 'de' }}</p>
-        </div>
-      </div>
+      </ng-container>
 
-      <!-- NPK Einzelkarten -->
-      <div *ngIf="statistics" class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-flask"></i>
+      <!-- Unfiltered View -->
+      <!-- Unfiltered View -->
+      <!-- Unfiltered View -->
+      <!-- Unfiltered View -->
+      <!-- Unfiltered View -->
+      <!-- Unfiltered View -->
+      <ng-container *ngIf="!activeFilter">
+        <!-- Original stat cards -->
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-temperature-high"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Temperatur</h3>
+            <p class="value">
+              {{
+                statistics.averageValues['device_frmpayload_data_data_air_temperature_value']
+                  | number: '1.1-1'
+              }}°C
+            </p>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Durchschn. Stickstoff (N)</h3>
-          <p class="value">
-            {{ statistics.averageValues['device_frmpayload_data_nitrogen'] | number: '1.0-0' }}
-          </p>
-        </div>
-      </div>
-      <div *ngIf="statistics" class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-flask"></i>
-        </div>
-        <div class="card-content">
-          <h3>Durchschn. Phosphor (P)</h3>
-          <p class="value">
-            {{ statistics.averageValues['device_frmpayload_data_phosphorus'] | number: '1.0-0' }}
-          </p>
-        </div>
-      </div>
-      <div *ngIf="statistics.averageValues['device_frmpayload_data_potassium']" class="stat-card">
-        <div class="card-icon">
-          <i class="fas fa-flask"></i>
-        </div>
-        <div class="card-content">
-          <h3>Durchschn. Kalium (K)</h3>
-          <p class="value">
-            {{ statistics.averageValues['device_frmpayload_data_potassium'] | number: '1.0-0' }}
-          </p>
-        </div>
-      </div>
 
-      <div
-        *ngIf="statistics.minValues['device_frmpayload_data_data_air_temperature_value']"
-        class="stat-card"
-      >
-        <div class="card-icon">
-          <i class="fas fa-thermometer-full"></i>
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-tint"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Luftfeuchtigkeit</h3>
+            <p class="value" *ngIf="statistics && statistics.averageValues">
+              {{
+                statistics.averageValues['device_frmpayload_data_air_humidity_value']
+                  | number: '1.1-1'
+              }}%
+            </p>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Temperatur</h3>
-          <p class="value">
-            {{
-              statistics.minValues['device_frmpayload_data_data_air_temperature_value'].value || 0
-                | number: '1.1-1'
-            }}°C -
-            {{
-              statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].value || 0
-                | number: '1.1-1'
-            }}°C
-          </p>
-          <small>
-            {{
-              statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-            -
-            {{
-              statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-          </small>
-        </div>
-      </div>
 
-      <div
-        *ngIf="statistics.minValues['device_frmpayload_data_air_humidity_value']"
-        class="stat-card"
-      >
-        <div class="card-icon">
-          <i class="fas fa-droplet"></i>
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-cloud"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. CO₂</h3>
+            <p class="value" *ngIf="statistics && statistics.averageValues">
+              {{
+                statistics.averageValues['device_frmpayload_data_co2_concentration_value']
+                  | number: '1.0-0'
+              }}
+              ppm
+            </p>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>Luftfeuchte</h3>
-          <p class="value">
-            {{
-              statistics.minValues['device_frmpayload_data_air_humidity_value'].value || 0
-                | number: '1.1-1'
-            }}% -
-            {{
-              statistics.maxValues['device_frmpayload_data_air_humidity_value'].value || 0
-                | number: '1.1-1'
-            }}%
-          </p>
-          <small>
-            {{
-              statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-            -
-            {{
-              statistics.maxValues['device_frmpayload_data_air_humidity_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-          </small>
-        </div>
-      </div>
 
-      <div
-        *ngIf="statistics.minValues['device_frmpayload_data_co2_concentration_value']"
-        class="stat-card"
-      >
-        <div class="card-icon">
-          <i class="fas fa-cloud"></i>
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-water"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Bodenfeuchtigkeit</h3>
+            <p
+              class="value"
+              *ngIf="
+                statistics?.averageValues?.['device_frmpayload_data_data_SoilMoisture'] !==
+                undefined
+              "
+            >
+              {{
+                statistics.averageValues['device_frmpayload_data_data_SoilMoisture']
+                  | number: '1.1-1'
+              }}%
+            </p>
+          </div>
         </div>
-        <div class="card-content">
-          <h3>CO₂ Konzentration</h3>
-          <p class="value">
-            {{
-              statistics.minValues['device_frmpayload_data_co2_concentration_value'].value || 0
-                | number: '1.1-1'
-            }}
-            ppm -
-            {{
-              statistics.maxValues['device_frmpayload_data_co2_concentration_value'].value || 0
-                | number: '1.1-1'
-            }}
-            ppm
-          </p>
-          <small>
-            {{
-              statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-            -
-            {{
-              statistics.maxValues['device_frmpayload_data_co2_concentration_value'].timestamp
-                | date: 'dd.MM.yy' : '' : 'de'
-            }}
-          </small>
+
+        <div *ngIf="latestMeasurement" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-history"></i>
+          </div>
+          <div class="card-content">
+            <h3>Letze Messung</h3>
+            <p class="value">
+              {{ latestMeasurement.dataPoints[0].timestamp | date: 'short' : '' : 'de' }}
+            </p>
+            <small>{{ latestMeasurement.sensor.name }}</small>
+          </div>
         </div>
-      </div>
+
+        <div class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="card-content">
+            <h3>Anzahl Messungen</h3>
+            <p class="value">{{ statistics.overallTotalPointCount | number: '1.0-0' : 'de' }}</p>
+          </div>
+        </div>
+
+        <!-- NPK Einzelkarten -->
+        <div *ngIf="statistics" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-flask"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Stickstoff (N)</h3>
+            <p class="value">
+              {{ statistics.averageValues['device_frmpayload_data_nitrogen'] | number: '1.0-0' }}
+            </p>
+          </div>
+        </div>
+        <div *ngIf="statistics" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-flask"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Phosphor (P)</h3>
+            <p class="value">
+              {{ statistics.averageValues['device_frmpayload_data_phosphorus'] | number: '1.0-0' }}
+            </p>
+          </div>
+        </div>
+        <div *ngIf="statistics.averageValues['device_frmpayload_data_potassium']" class="stat-card">
+          <div class="card-icon">
+            <i class="fas fa-flask"></i>
+          </div>
+          <div class="card-content">
+            <h3>Durchschn. Kalium (K)</h3>
+            <p class="value">
+              {{ statistics.averageValues['device_frmpayload_data_potassium'] | number: '1.0-0' }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          *ngIf="statistics.minValues['device_frmpayload_data_data_air_temperature_value']"
+          class="stat-card"
+        >
+          <div class="card-icon">
+            <i class="fas fa-thermometer-full"></i>
+          </div>
+          <div class="card-content">
+            <h3>Temperatur</h3>
+            <p class="value">
+              {{
+                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].value || 0
+                  | number: '1.1-1'
+              }}°C -
+              {{
+                statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].value || 0
+                  | number: '1.1-1'
+              }}°C
+            </p>
+            <small>
+              {{
+                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+              -
+              {{
+                statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+          </div>
+        </div>
+
+        <div
+          *ngIf="statistics.minValues['device_frmpayload_data_air_humidity_value']"
+          class="stat-card"
+        >
+          <div class="card-icon">
+            <i class="fas fa-droplet"></i>
+          </div>
+          <div class="card-content">
+            <h3>Luftfeuchte</h3>
+            <p class="value">
+              {{
+                statistics.minValues['device_frmpayload_data_air_humidity_value'].value || 0
+                  | number: '1.1-1'
+              }}% -
+              {{
+                statistics.maxValues['device_frmpayload_data_air_humidity_value'].value || 0
+                  | number: '1.1-1'
+              }}%
+            </p>
+            <small>
+              {{
+                statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+              -
+              {{
+                statistics.maxValues['device_frmpayload_data_air_humidity_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+          </div>
+        </div>
+
+        <div
+          *ngIf="statistics.minValues['device_frmpayload_data_co2_concentration_value']"
+          class="stat-card"
+        >
+          <div class="card-icon">
+            <i class="fas fa-cloud"></i>
+          </div>
+          <div class="card-content">
+            <h3>CO₂ Konzentration</h3>
+            <p class="value">
+              {{
+                statistics.minValues['device_frmpayload_data_co2_concentration_value'].value || 0
+                  | number: '1.1-1'
+              }}
+              ppm -
+              {{
+                statistics.maxValues['device_frmpayload_data_co2_concentration_value'].value || 0
+                  | number: '1.1-1'
+              }}
+              ppm
+            </p>
+            <small>
+              {{
+                statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+              -
+              {{
+                statistics.maxValues['device_frmpayload_data_co2_concentration_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+          </div>
+        </div>
+      </ng-container>
     </div>
   </div>
 
@@ -366,7 +498,7 @@
     <h2>Min/Max Werte der Sensoren</h2>
     <div class="stats-grid" style="grid-template-columns: 1fr">
       <div class="stat-card" style="padding: 4rem 2rem 0rem; overflow: hidden">
-        <div style="display: flex; flex-direction: column; gap: 1rem; min-height: 250px">
+        <div style="display: flex; flex-direction: column, gap: 1rem, min-height: 250px">
           <!-- Chart Container -->
           <div class="chart-grid">
             <div *ngFor="let m of measurements" class="chart-column">
@@ -393,18 +525,17 @@
               <span class="chart-label">{{ m.label }}</span>
             </div>
           </div>
-
-          <!-- Legend -->
-          <div class="chart-legend">
-            <div class="legend-item">
-              <div class="legend-color-min"></div>
-              <span class="legend-label">Minimum</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color-max"></div>
-              <span class="legend-label">Maximum</span>
-            </div>
-          </div>
+        </div>
+      </div>
+      <!-- Legend -->
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-color-min"></div>
+          <span class="legend-label">Minimum</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color-max"></div>
+          <span class="legend-label">Maximum</span>
         </div>
       </div>
     </div>
