@@ -340,21 +340,26 @@
           <div class="card-content">
             <h3>Temperatur</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_data_air_temperature_value'].value || 0
                   | number: '1.1-1'
-              }}°C -
+              }}°C
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].value || 0
                   | number: '1.1-1'
               }}°C
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
@@ -373,21 +378,26 @@
           <div class="card-content">
             <h3>Luftfeuchte</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_air_humidity_value'].value || 0
                   | number: '1.1-1'
-              }}% -
+              }}%
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_air_humidity_value'].value || 0
                   | number: '1.1-1'
               }}%
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_air_humidity_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
@@ -406,23 +416,28 @@
           <div class="card-content">
             <h3>CO₂ Konzentration</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_co2_concentration_value'].value || 0
                   | number: '1.1-1'
               }}
-              ppm -
+              ppm
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_co2_concentration_value'].value || 0
                   | number: '1.1-1'
               }}
               ppm
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_co2_concentration_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
