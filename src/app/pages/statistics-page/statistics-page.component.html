@@ -1,54 +1,70 @@
-<mat-card>
-  <mat-card-title>Statistische Kurzanalysen</mat-card-title>
-  <mat-card-content>
+<div class="sensor-container">
+  <h1 class="sensor_headline">
+    <i class="fas fa-chart-bar"></i>
+    Statistische Kurzanalysen
+  </h1>
+
+  <div class="config-section">
     <form [formGroup]="timeForm" (ngSubmit)="onCompute()" class="controls">
-      <div class="groups">
-        <app-sensor-group-selector
-          formControlName="group1"
-          label="Gruppe 1"
-        ></app-sensor-group-selector>
-        <app-sensor-group-selector
-          formControlName="group2"
-          label="Gruppe 2"
-        ></app-sensor-group-selector>
+      <div class="stat-card">
+        <div class="groups">
+          <app-sensor-group-selector
+            formControlName="group1"
+            label="Gruppe 1"
+          ></app-sensor-group-selector>
+          <app-sensor-group-selector
+            formControlName="group2"
+            label="Gruppe 2"
+          ></app-sensor-group-selector>
+        </div>
+
+        <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit">
+            <i class="fas fa-calculator"></i> Berechnen
+          </button>
+          <button mat-raised-button type="button" (click)="onClear()">
+            <i class="fas fa-trash"></i> Ergebnisse löschen
+          </button>
+        </div>
+
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
       </div>
-
-      <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
-      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('required')">
-        Bitte komplettes Zeitintervall auswählen.
-      </mat-error>
-      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('rangeInvalid')">
-        „Von“ darf nicht nach „Bis“ liegen.
-      </mat-error>
-
-      <button mat-raised-button color="primary" type="submit">Berechnen</button>
-
-      <button mat-raised-button type="button" (click)="onClear()">Ergebnisse löschen</button>
     </form>
-    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+  </div>
 
-    <div class="results" *ngIf="resultsGroup1 && resultsGroup2">
-      <mat-card class="result">
-        <mat-card-title>Gruppe 1</mat-card-title>
+  <div class="results-section" *ngIf="resultsAvailable">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Gruppe 1</h3>
         <app-statistics-display [stats]="resultsGroup1"></app-statistics-display>
-      </mat-card>
-      <mat-card class="result">
-        <mat-card-title>Gruppe 2</mat-card-title>
+      </div>
+      <div class="stat-card">
+        <h3>Gruppe 2</h3>
         <app-statistics-display [stats]="resultsGroup2"></app-statistics-display>
-      </mat-card>
+      </div>
     </div>
 
-    <div *ngIf="correlation !== undefined" class="correlation">
-      <p>Pearson-Korrelation: {{ correlation | number: '1.2-2' }}</p>
+    <div class="correlation-card stat-card" *ngIf="correlation !== undefined">
+      <div class="card-icon">
+        <i class="fas fa-link"></i>
+      </div>
+      <div class="card-content">
+        <h3>Pearson-Korrelation</h3>
+        <p class="value">{{ correlation | number: '1.2-2' }}</p>
+      </div>
     </div>
+
     <button
       mat-raised-button
+      class="anomaly-button"
       type="button"
       color="accent"
       [disabled]="!canShowAnomalies"
       (click)="onShowAnomalies()"
     >
-      Anomalien anzeigen
+      <i class="fas fa-search"></i> Anomalien anzeigen
     </button>
 
     <!-- Scatter-Charts -->
@@ -93,5 +109,5 @@
         <p><strong> Keine Ausreißer im ausgewählten Zeitraum gefunden.</strong></p>
       </ng-template>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>
