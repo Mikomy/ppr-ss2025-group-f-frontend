@@ -1,58 +1,69 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { of } from 'rxjs'
+import { of, Subject } from 'rxjs'
 import { HomePageComponent } from './home-page.component'
 import { BackendService } from '../../services/backend.service'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router'
+
+interface QueryParams {
+  sensorName?: string
+  measurementName?: string
+}
 
 describe('HomePageComponent', () => {
   let component: HomePageComponent
   let fixture: ComponentFixture<HomePageComponent>
   let backendServiceSpy: jasmine.SpyObj<BackendService>
+  let routerSpy: jasmine.SpyObj<Router>
+  const queryParamsSubject = new Subject<QueryParams>()
 
   beforeEach(async () => {
+    // Create spies
     backendServiceSpy = jasmine.createSpyObj('BackendService', [
       'getDashboardStatistics',
       'getOpenAiSynopsis',
+      'getDropdownOption',
+      'getFilteredDashboardStatistics',
     ])
-    // Mock Statistics with all required nested objects/fields for template
+    routerSpy = jasmine.createSpyObj('Router', ['navigate'])
+
+    // Setup mock responses
     backendServiceSpy.getDashboardStatistics.and.returnValue(
       of({
         overallTotalPointCount: 0,
         averageValues: {},
         latestMeasurements: {},
         measurementPointCount: {},
-        minValues: {
-          device_frmpayload_data_air_humidity_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_data_air_temperature_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_co2_concentration_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_data_SoilMoisture: { timestamp: '', value: 0 },
-          device_frmpayload_data_nitrogen: { timestamp: '', value: 0 },
-          device_frmpayload_data_phosphorus: { timestamp: '', value: 0 },
-          device_frmpayload_data_potassium: { timestamp: '', value: 0 },
-        },
-        maxValues: {
-          device_frmpayload_data_air_humidity_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_data_air_temperature_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_co2_concentration_value: { timestamp: '', value: 0 },
-          device_frmpayload_data_data_SoilMoisture: { timestamp: '', value: 0 },
-          device_frmpayload_data_nitrogen: { timestamp: '', value: 0 },
-          device_frmpayload_data_phosphorus: { timestamp: '', value: 0 },
-          device_frmpayload_data_potassium: { timestamp: '', value: 0 },
-        },
+        minValues: {},
+        maxValues: {},
       })
     )
-    backendServiceSpy.getOpenAiSynopsis.and.returnValue(of('KI-Analyse'))
+    backendServiceSpy.getOpenAiSynopsis.and.returnValue(of('Test Synopsis'))
+    backendServiceSpy.getDropdownOption.and.returnValue(of([]))
 
     await TestBed.configureTestingModule({
-      imports: [
-        HomePageComponent, // standalone component imports its Angular Material & CommonModule dependencies
-        HttpClientTestingModule, // provide HttpClient for BackendService
+      imports: [HomePageComponent, HttpClientTestingModule],
+      providers: [
+        { provide: BackendService, useValue: backendServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParamsSubject.asObservable(),
+            snapshot: {
+              queryParamMap: convertToParamMap({}),
+            },
+          },
+        },
       ],
-      providers: [{ provide: BackendService, useValue: backendServiceSpy }],
     }).compileComponents()
 
     fixture = TestBed.createComponent(HomePageComponent)
     component = fixture.componentInstance
+
+    // Emit initial empty query params
+    queryParamsSubject.next({})
+
     fixture.detectChanges()
   })
 

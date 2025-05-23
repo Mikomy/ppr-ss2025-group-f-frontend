@@ -7,6 +7,8 @@ import { MatDividerModule } from '@angular/material/divider'
 import { SensorData } from '../../models/sensorData.model'
 import { Statistics } from '../../models/statistics.model'
 import { Measurement } from '../../models/measurement.model'
+import { Router, ActivatedRoute } from '@angular/router' // Add this import
+import { FormsModule } from '@angular/forms' // Add this import
 
 // DEUTSCH Übersetzung ermöglichen
 import localeDe from '@angular/common/locales/de'
@@ -45,40 +47,25 @@ interface SensorGroupOption {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [MatCardModule, CommonModule, MatGridListModule, MatDividerModule],
+  imports: [
+    MatCardModule,
+    CommonModule,
+    MatGridListModule,
+    MatDividerModule,
+    FormsModule, // Add FormsModule to imports
+  ],
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
   providers: [{ provide: LOCALE_ID, useValue: 'de-DE' }], // Enable German locale
 })
 export class HomePageComponent implements OnInit, OnDestroy {
-  /**
-   * Holds the current statistics data for the dashboard.
-   */
   statistics: Statistics | undefined
-
-  /**
-   * Holds the OpenAI synopsis/analysis text.
-   */
   openAiSynopsis: string | undefined
-
-  /**
-   * Stores measurements grouped by location.
-   */
   measurementsByLocation: Record<string, MeasurementDisplay[]> = {}
-
-  /**
-   * Timer ID for the statistics refresh interval.
-   */
   private statisticsIntervalId: ReturnType<typeof setInterval> | undefined
-
-  /**
-   * Holds the latest error message for statistics loading.
-   */
   statisticsError: string | null = null
+  isSynopsisLoading = false
 
-  /**
-   * Global flag in the window object to ensure OpenAI call is only made once per browser session.
-   */
   private static get openAiCalledOnce(): boolean {
     return (window as NexusWindow).__nexusOpenAiCalled === true
   }
@@ -101,6 +88,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
    * @returns {string} The formatted synopsis or a fallback message.
    */
   getFormattedSynopsis(): string {
+    if (this.isSynopsisLoading) {
+      return 'Lade neue Synopsis...'
+    }
     return (this.openAiSynopsis || 'Keine KI-Analyse verfügbar').replace(/\n/g, '<br>')
   }
 
@@ -124,10 +114,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     },
     {
       key: 'device_frmpayload_data_data_Humidity',
-      label: 'Luftfeuchte 2 %',
+      label: 'Bodenfeuchte 2 - %',
       unit: '%',
       scaleFactor: 2,
-      icon: 'tint',
+      icon: 'water',
     },
     {
       key: 'device_frmpayload_data_co2_concentration_value',
@@ -182,30 +172,89 @@ export class HomePageComponent implements OnInit, OnDestroy {
   selectedSensorGroupKey: string | null = null
 
   /**
+   * Add new property to track active filter
+   */
+  public activeFilter: { sensorName: string; measurementName: string } | null = null
+
+  /**
    * Constructor injecting the backend service.
    * @param backendService The backend service for API calls.
    */
-  constructor(private backendService: BackendService) {}
+  constructor(
+    private backendService: BackendService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   /**
    * Angular lifecycle hook: Called after component initialization.
    * Loads statistics and triggers OpenAI analysis only once per session.
    */
   ngOnInit(): void {
-    this.loadStatistics()
+    // Check URL parameters first
+    this.route.queryParams.subscribe((params) => {
+      if (params['sensorName'] && params['measurementName']) {
+        // Load dropdown options first
+        this.backendService.getDropdownOption().subscribe((opts) => {
+          this.sensorListForFiltering = opts.map((o, i) => ({
+            key: i.toString(),
+            sensorName: o.sensor.name,
+            measurementName: o.measurementName,
+            alias: o.alias!,
+            display: `${o.measurementName} – ${o.sensor.name}`,
+          }))
+
+          // Find matching sensor in dropdown options
+          const matchingSensor = this.sensorListForFiltering.find(
+            (s) =>
+              s.sensorName === params['sensorName'] &&
+              s.measurementName === params['measurementName']
+          )
+
+          if (matchingSensor) {
+            // Set selected key and active filter
+            this.selectedSensorGroupKey = matchingSensor.key
+            this.activeFilter = {
+              sensorName: params['sensorName'],
+              measurementName: params['measurementName'],
+            }
+
+            // Load filtered statistics and trigger OpenAI
+            this.loadFilteredStatistics()
+            this.loadOpenAiSynopsis()
+          } else {
+            this.loadStatistics()
+            this.loadOpenAiSynopsis()
+          }
+        })
+      } else {
+        // No URL parameters, load normal statistics and OpenAI
+        this.loadStatistics()
+        this.loadOpenAiSynopsis()
+        this.backendService.getDropdownOption().subscribe((opts) => {
+          this.sensorListForFiltering = opts.map((o, i) => ({
+            key: i.toString(),
+            sensorName: o.sensor.name,
+            measurementName: o.measurementName,
+            alias: o.alias!,
+            display: `${o.measurementName} – ${o.sensor.name}`,
+          }))
+        })
+      }
+    })
 
     // Load OpenAI synopsis from global storage (persists across navigation)
     this.openAiSynopsis = HomePageComponent.globalOpenAiSynopsis
 
-    // Only call OpenAI once per browser session
-    if (!HomePageComponent.openAiCalledOnce) {
-      HomePageComponent.openAiCalledOnce = true
-      this.loadOpenAiSynopsis()
-    }
-
+    // Set up refresh interval
     this.statisticsIntervalId = setInterval(() => {
-      this.loadStatistics()
+      if (this.activeFilter) {
+        this.loadFilteredStatistics()
+      } else {
+        this.loadStatistics()
+      }
     }, 3000)
+
     console.table(this.statistics)
     console.log('Statistics:', this.statistics)
 
@@ -254,30 +303,76 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Loads dashboard statistics from the backend and updates the component state.
+   * Handles errors and sets the error message if loading fails.
+   */
+  loadFilteredStatistics() {
+    if (!this.selectedSensorGroupKey) {
+      return
+    }
+
+    const selectedSensor = this.sensorListForFiltering.find(
+      (s) => s.key === this.selectedSensorGroupKey
+    )
+
+    if (selectedSensor) {
+      this.backendService
+        .getFilteredDashboardStatistics(selectedSensor.sensorName, selectedSensor.measurementName)
+        .subscribe({
+          next: (stats) => {
+            this.statistics = stats
+            this.statisticsError = null
+            this.latestMeasurement = this.getLatestMeasurement()
+          },
+          error: (error) => {
+            const errMsg = error instanceof Error ? error.message : String(error)
+            this.statisticsError = 'Fehler beim Laden der gefilterten Daten: ' + errMsg
+            this.statistics = undefined
+          },
+        })
+    }
+  }
+
+  /**
    * Loads the OpenAI synopsis by fetching statistics and sending them to the OpenAI endpoint.
    * Stores the result globally so it persists across navigation.
    */
   private loadOpenAiSynopsis() {
-    // Fetch initial statistics for AI analysis
-    this.backendService.getDashboardStatistics().subscribe({
+    this.isSynopsisLoading = true
+
+    // Function to handle OpenAI response
+    const handleOpenAiResponse = (aiSynopsis: string) => {
+      this.openAiSynopsis = aiSynopsis
+      HomePageComponent.globalOpenAiSynopsis = aiSynopsis
+      this.isSynopsisLoading = false
+    }
+
+    // Function to handle errors
+    const handleError = (error: unknown) => {
+      const errMsg = error instanceof Error ? error.message : String(error)
+      this.openAiSynopsis = 'Fehler bei der KI-Analyse: ' + errMsg
+      HomePageComponent.globalOpenAiSynopsis = this.openAiSynopsis
+      this.isSynopsisLoading = false
+    }
+
+    // Get appropriate statistics based on filter state
+    const statsObservable =
+      this.activeFilter && this.selectedSensorGroupKey
+        ? this.backendService.getFilteredDashboardStatistics(
+            this.activeFilter.sensorName,
+            this.activeFilter.measurementName
+          )
+        : this.backendService.getDashboardStatistics()
+
+    // Process statistics and get OpenAI analysis
+    statsObservable.subscribe({
       next: (stats) => {
         this.backendService.getOpenAiSynopsis(JSON.stringify(stats)).subscribe({
-          next: (aiSynopsis) => {
-            this.openAiSynopsis = aiSynopsis
-            HomePageComponent.globalOpenAiSynopsis = aiSynopsis // store globally
-          },
-          error: (error) => {
-            const errMsg = error instanceof Error ? error.message : String(error)
-            this.openAiSynopsis = 'Fehler bei der KI-Analyse: ' + errMsg
-            HomePageComponent.globalOpenAiSynopsis = this.openAiSynopsis
-          },
+          next: handleOpenAiResponse,
+          error: handleError,
         })
       },
-      error: (error) => {
-        const errMsg = error instanceof Error ? error.message : String(error)
-        this.openAiSynopsis = 'Fehler beim Laden der Statistik für KI-Analyse: ' + errMsg
-        HomePageComponent.globalOpenAiSynopsis = this.openAiSynopsis
-      },
+      error: handleError,
     })
   } // end loadOpenAiSynopsis()
 
@@ -311,6 +406,85 @@ export class HomePageComponent implements OnInit, OnDestroy {
   onSensorGroupChange(event: Event) {
     const select = event.target as HTMLSelectElement
     this.selectedSensorGroupKey = select.value
-    // Hier ggf. weitere Logik, z.B. Filterung der Daten nach Auswahl
+
+    const selectedSensor = this.sensorListForFiltering.find((s) => s.key === select.value)
+
+    if (selectedSensor) {
+      // Set active filter
+      this.activeFilter = {
+        sensorName: selectedSensor.sensorName,
+        measurementName: selectedSensor.measurementName,
+      }
+
+      // Update URL parameters
+      this.router.navigate([], {
+        queryParams: {
+          sensorName: selectedSensor.sensorName,
+          measurementName: selectedSensor.measurementName,
+        },
+        queryParamsHandling: 'merge',
+      })
+
+      // Load filtered statistics
+      this.backendService
+        .getFilteredDashboardStatistics(selectedSensor.sensorName, selectedSensor.measurementName)
+        .subscribe({
+          next: (stats) => {
+            this.statistics = stats
+            this.statisticsError = null
+            this.latestMeasurement = this.getLatestMeasurement()
+            // Trigger OpenAI analysis with new data
+            this.loadOpenAiSynopsis()
+          },
+          error: (error) => {
+            const errMsg = error instanceof Error ? error.message : String(error)
+            this.statisticsError = 'Fehler beim Laden der gefilterten Daten: ' + errMsg
+            this.statistics = undefined
+          },
+        })
+    } else {
+      // Clear active filter
+      this.activeFilter = null
+      this.loadStatistics()
+      // Trigger OpenAI analysis for unfiltered data
+      this.loadOpenAiSynopsis()
+    }
+  }
+
+  /**
+   * Resets the filter and loads unfiltered statistics
+   */
+  resetFilter(): void {
+    // Clear filter state
+    this.activeFilter = null
+    this.selectedSensorGroupKey = null
+
+    // Remove URL parameters
+    this.router.navigate([], {
+      queryParams: {},
+      replaceUrl: true, // Replace URL instead of adding to history
+    })
+
+    // Load unfiltered statistics
+    this.loadStatistics()
+  }
+
+  /**
+   * Gets the first available average value from statistics
+   * @returns The first average value or undefined
+   */
+  getSensorNameFromJsonResponse(): { key: string; value: number } | undefined {
+    if (!this.statistics?.averageValues) return undefined
+    const entries = Object.entries(this.statistics.averageValues)
+    return entries.length > 0 ? { key: entries[0][0], value: entries[0][1] } : undefined
+  }
+
+  /**
+   * Gets the label for the current filtered measurement
+   */
+  getCurrentMeasurementLabel(): string | undefined {
+    if (!this.statistics?.averageValues) return undefined
+    const firstKey = Object.keys(this.statistics.averageValues)[0]
+    return this.measurements.find((m) => m.key === firstKey)?.label
   }
 }

@@ -7,7 +7,7 @@ import { Statistics } from '../models/statistics.model'
 /**
  * 09.05.2025
  */
-describe('BackendService - getMeasurement', () => {
+describe('BackendService', () => {
   let service: BackendService
   let httpMock: HttpTestingController
 
@@ -212,5 +212,29 @@ describe('BackendService - getMeasurement', () => {
       const req = httpMock.expectOne(() => true)
       req.flush('failure', { status: 500, statusText: 'Server Error' })
     })
+  })
+
+  it('should get filtered dashboard statistics', () => {
+    const mockStats: Statistics = {
+      averageValues: {},
+      minValues: {},
+      maxValues: {},
+      latestMeasurements: {},
+      measurementPointCount: {},
+      overallTotalPointCount: 0,
+    }
+
+    service.getFilteredDashboardStatistics('device1', 'measurement1').subscribe((stats) => {
+      expect(stats).toEqual(mockStats)
+    })
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/api/statistics/dashboard_data_for_sensor') &&
+        r.params.get('deviceName') === 'device1' &&
+        r.params.get('measurementName') === 'measurement1'
+    )
+    expect(req.request.method).toBe('GET')
+    req.flush(mockStats)
   })
 })
