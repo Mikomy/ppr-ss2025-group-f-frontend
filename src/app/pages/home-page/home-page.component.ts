@@ -94,10 +94,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
     return (this.openAiSynopsis || 'Keine KI-Analyse verfügbar').replace(/\n/g, '<br>')
   }
 
-  /**
-   * List of measurement configurations for the dashboard.
-   */
-  measurements: MeasurementConfig[] = [
+  // Base measurement configurations
+  private baseMeasurements: MeasurementConfig[] = [
     {
       key: 'device_frmpayload_data_data_air_temperature_value',
       label: 'Temperatur °C',
@@ -105,6 +103,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       scaleFactor: 4,
       icon: 'temperature-high',
     },
+
     {
       key: 'device_frmpayload_data_air_humidity_value',
       label: 'Luftfeuchte %',
@@ -155,6 +154,34 @@ export class HomePageComponent implements OnInit, OnDestroy {
       icon: 'water',
     },
   ]
+
+  // Additional measurements to show when filtered
+  private additionalMeasurements: MeasurementConfig[] = [
+    {
+      key: 'device_frmpayload_data_soil_moisture',
+      label: 'Bodenfeuchtigkeit (Milesight) %',
+      unit: '%',
+      scaleFactor: 2,
+      icon: 'water',
+    },
+    {
+      key: 'device_frmpayload_data_data_Temperature',
+      label: 'Temperatur (Senzemo) °C',
+      unit: '°C',
+      scaleFactor: 4,
+      icon: 'temperature-high',
+    },
+    {
+      key: 'device_frmpayload_data_air_temperature_value',
+      label: 'Temperatur (Decentlab) °C',
+      unit: '°C',
+      scaleFactor: 4,
+      icon: 'temperature-high',
+    },
+  ]
+
+  // Current measurements based on filter state
+  measurements: MeasurementConfig[] = []
 
   /**
    * Holds the latest measurement data.
@@ -271,6 +298,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
       //   this.selectedSensorGroupKey = this.sensorGroupOptions[0].key
       // }
     })
+
+    // Initialize measurements
+    this.measurements = [...this.baseMeasurements]
   }
 
   /**
@@ -416,6 +446,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         measurementName: selectedSensor.measurementName,
       }
 
+      // Update measurements
+      this.updateMeasurements()
+
       // Update URL parameters
       this.router.navigate([], {
         queryParams: {
@@ -445,6 +478,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
     } else {
       // Clear active filter
       this.activeFilter = null
+
+      // Update measurements
+      this.updateMeasurements()
+
       this.loadStatistics()
       // Trigger OpenAI analysis for unfiltered data
       this.loadOpenAiSynopsis()
@@ -467,6 +504,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
     // Load unfiltered statistics
     this.loadStatistics()
+
+    // Update measurements
+    this.updateMeasurements()
   }
 
   /**
@@ -486,5 +526,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
     if (!this.statistics?.averageValues) return undefined
     const firstKey = Object.keys(this.statistics.averageValues)[0]
     return this.measurements.find((m) => m.key === firstKey)?.label
+  }
+
+  // Update measurements based on filter status
+  private updateMeasurements(): void {
+    if (this.activeFilter) {
+      // Show all measurements when filtered
+      this.measurements = [...this.baseMeasurements, ...this.additionalMeasurements]
+    } else {
+      // Show only base measurements when not filtered
+      this.measurements = [...this.baseMeasurements]
+    }
   }
 }
