@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
+import { Component, Input, OnChanges, SimpleChanges, isDevMode } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { BaseChartDirective } from 'ng2-charts'
 import { ChartConfiguration } from 'chart.js'
@@ -41,28 +41,71 @@ export class LineChartComponent implements OnChanges {
       },
       y: { title: { display: true, text: 'Wert' } },
     },
-    plugins: { tooltip: { mode: 'nearest', intersect: false }, legend: { position: 'top' } },
+    plugins: {
+      tooltip: { mode: 'nearest', intersect: false },
+      legend: { position: 'top' },
+    },
+    animation: {
+      // Disable animations in test environment to prevent timing issues
+      duration: isDevMode() ? 500 : 0,
+    },
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dataSeries']) {
-      this.updateChart()
+      try {
+        this.updateChart()
+      } catch (error) {
+        console.error('Error updating chart:', error)
+        // Provide safe fallback data when errors occur
+        this.chartData = {
+          labels: [],
+          datasets: [
+            {
+              label: 'No data',
+              data: [],
+              borderColor: '#ccc',
+              backgroundColor: '#ccc',
+            },
+          ],
+        }
+      }
     }
   }
 
   private updateChart(): void {
-    const labels = this.dataSeries[0]?.data.map((pt) => pt.timestamp) || []
+    // Safely handle empty or invalid data
+    if (!this.dataSeries || !this.dataSeries.length) {
+      this.chartData = {
+        labels: [],
+        datasets: [],
+      }
+      return
+    }
+
+    // Find the series with the most data points to use for labels
+    const seriesWithMostPoints = [...this.dataSeries].sort(
+      (a, b) => (b.data?.length || 0) - (a.data?.length || 0)
+    )[0]
+
+    const labels = seriesWithMostPoints?.data?.map((pt) => pt.timestamp) || []
+
+    // Ensure we process all series, even if some have missing data
     const datasets = this.dataSeries.map((s) => ({
       label: s.label,
-      data: s.data.map((pt) => pt.value),
+      data: s.data?.map((pt) => pt.value) || [],
       borderColor: s.color,
       backgroundColor: s.color,
       fill: false,
       tension: 0.1,
-      borderWidth: 1, // Make lines thinner
-      pointRadius: 2, // Make points smaller
-      pointHoverRadius: 3,
+      borderWidth: 1,
+      pointRadius: 2,
+      pointHoverRadius: 4,
     }))
+
     this.chartData = { labels, datasets }
+
+    // Debug info to help diagnose test failures
+    console.debug(`Chart updated with ${datasets.length} datasets`)
   }
 }

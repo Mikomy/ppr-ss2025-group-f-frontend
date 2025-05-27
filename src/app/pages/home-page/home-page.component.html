@@ -152,11 +152,11 @@
           <div class="card-content">
             <h3>Minimum</h3>
             <p class="value">
-              {{ statistics.minValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+              {{ statistics.minValues[sensorNameAsKey.key].value | number: '1.2-2' }}
             </p>
             <small>
               {{
-                statistics.minValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+                statistics.minValues[sensorNameAsKey.key].timestamp | date: 'dd.MM.yy' : '' : 'de'
               }}
             </small>
           </div>
@@ -171,11 +171,11 @@
           <div class="card-content">
             <h3>Maximum</h3>
             <p class="value">
-              {{ statistics.maxValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+              {{ statistics.maxValues[sensorNameAsKey.key].value | number: '1.2-2' }}
             </p>
             <small>
               {{
-                statistics.maxValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+                statistics.maxValues[sensorNameAsKey.key].timestamp | date: 'dd.MM.yy' : '' : 'de'
               }}
             </small>
           </div>
@@ -513,7 +513,7 @@
     <h2>Min/Max Werte der Sensoren</h2>
     <div class="stats-grid" style="grid-template-columns: 1fr">
       <div class="stat-card" style="padding: 4rem 2rem 0rem; overflow: hidden">
-        <div style="display: flex; flex-direction: column, gap: 1rem, min-height: 250px">
+        <div style="display: flex; flex-direction: column; gap: 1rem; min-height: 250px">
           <!-- Chart Container -->
           <div class="chart-grid">
             <div *ngFor="let m of measurements" class="chart-column">
