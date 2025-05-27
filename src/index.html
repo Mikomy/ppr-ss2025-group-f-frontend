@@ -31,14 +31,25 @@
 
   body::before {
     content: '';
+    backdrop-filter: blur(2px);
     position: fixed;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
-    /*background-image: url('https://picsum.photos/1900/1080');*/
-    background-image: url('https://fastly.picsum.photos/id/439/1900/1080.jpg?hmac=G7S1Rc1qogpVMQFYX94MAps3Zn6dXLNN6osleLvmSMM');
+    z-index: -199;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -200;
+    background-image: url('https://picsum.photos/1900/1080');
+    /* background-image: url('https://fastly.picsum.photos/id/439/1900/1080.jpg?hmac=G7S1Rc1qogpVMQFYX94MAps3Zn6dXLNN6osleLvmSMM'); */
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;

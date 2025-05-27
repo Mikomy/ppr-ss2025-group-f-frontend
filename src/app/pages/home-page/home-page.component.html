@@ -87,7 +87,7 @@
     <div style="text-align: center">
       <h2 style="margin: 0; font-size: 1.3rem; color: #d35400">&#9888; Keine Daten verfügbar</h2>
       <h3 style="margin: 0.2em 0 0.5em 0; font-size: 1rem; color: #b9770e">
-        DAS IST EINE TESTMELDUNG DIE ANGEZEIGT WIRD, WENN KEINE SENSORDATEN DA SIND!
+        Für diesen Sensor gibt es keine Messungen!
       </h3>
       <p style="margin: 0; font-size: 1em">
         Bitte überprüfen Sie Ihre Verbindung oder die Sensoren.
@@ -152,11 +152,11 @@
           <div class="card-content">
             <h3>Minimum</h3>
             <p class="value">
-              {{ statistics.minValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+              {{ statistics.minValues[sensorNameAsKey.key].value | number: '1.2-2' }}
             </p>
             <small>
               {{
-                statistics.minValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+                statistics.minValues[sensorNameAsKey.key].timestamp | date: 'dd.MM.yy' : '' : 'de'
               }}
             </small>
           </div>
@@ -171,11 +171,11 @@
           <div class="card-content">
             <h3>Maximum</h3>
             <p class="value">
-              {{ statistics.maxValues[sensorNameAsKey.key]?.value | number: '1.2-2' }}
+              {{ statistics.maxValues[sensorNameAsKey.key].value | number: '1.2-2' }}
             </p>
             <small>
               {{
-                statistics.maxValues[sensorNameAsKey.key]?.timestamp | date: 'dd.MM.yy' : '' : 'de'
+                statistics.maxValues[sensorNameAsKey.key].timestamp | date: 'dd.MM.yy' : '' : 'de'
               }}
             </small>
           </div>
@@ -340,21 +340,26 @@
           <div class="card-content">
             <h3>Temperatur</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_data_air_temperature_value'].value || 0
                   | number: '1.1-1'
-              }}°C -
+              }}°C
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].value || 0
                   | number: '1.1-1'
               }}°C
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_data_air_temperature_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_data_air_temperature_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
@@ -373,21 +378,26 @@
           <div class="card-content">
             <h3>Luftfeuchte</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_air_humidity_value'].value || 0
                   | number: '1.1-1'
-              }}% -
+              }}%
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_air_humidity_value'].value || 0
                   | number: '1.1-1'
               }}%
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_air_humidity_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_air_humidity_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
@@ -406,23 +416,28 @@
           <div class="card-content">
             <h3>CO₂ Konzentration</h3>
             <p class="value">
+              <i class="fas fa-arrow-down"></i>
               {{
                 statistics.minValues['device_frmpayload_data_co2_concentration_value'].value || 0
                   | number: '1.1-1'
               }}
-              ppm -
+              ppm
+            </p>
+            <small style="margin-top: -10px">
+              {{
+                statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
+                  | date: 'dd.MM.yy' : '' : 'de'
+              }}
+            </small>
+            <p class="value">
+              <i class="fas fa-arrow-up"></i>
               {{
                 statistics.maxValues['device_frmpayload_data_co2_concentration_value'].value || 0
                   | number: '1.1-1'
               }}
               ppm
             </p>
-            <small>
-              {{
-                statistics.minValues['device_frmpayload_data_co2_concentration_value'].timestamp
-                  | date: 'dd.MM.yy' : '' : 'de'
-              }}
-              -
+            <small style="margin-top: -10px">
               {{
                 statistics.maxValues['device_frmpayload_data_co2_concentration_value'].timestamp
                   | date: 'dd.MM.yy' : '' : 'de'
@@ -498,7 +513,7 @@
     <h2>Min/Max Werte der Sensoren</h2>
     <div class="stats-grid" style="grid-template-columns: 1fr">
       <div class="stat-card" style="padding: 4rem 2rem 0rem; overflow: hidden">
-        <div style="display: flex; flex-direction: column, gap: 1rem, min-height: 250px">
+        <div style="display: flex; flex-direction: column; gap: 1rem; min-height: 250px">
           <!-- Chart Container -->
           <div class="chart-grid">
             <div *ngFor="let m of measurements" class="chart-column">

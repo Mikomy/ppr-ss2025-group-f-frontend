@@ -1,28 +1,38 @@
-<mat-card>
-  <mat-card-title>
-    Die erstellten Tabellen lassen sich mit der Maus verschieben. Zum Schließen bitte auf das „×“
-    oben rechts in der Tabelle klicken.
-  </mat-card-title>
-  <mat-card-content>
-    <app-sensor-dropdown
-      [selectedOption]="selectedOption"
-      (selectionChange)="onSelectionChange($event)"
-    >
-    </app-sensor-dropdown>
+<div class="sensor-container">
+  <h1 class="sensor_headline">
+    <i class="fas fa-table"></i>
+    Tabellarische Ansicht
+  </h1>
 
-    <div *ngIf="selectedOption" class="controls">
+  <div class="config-section">
+    <div class="stat-card">
       <form [formGroup]="timeForm">
-        <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+        <app-sensor-dropdown
+          [selectedOption]="selectedOption"
+          (selectionChange)="onSelectionChange($event)"
+        >
+        </app-sensor-dropdown>
 
-        <button mat-raised-button color="primary" type="button" (click)="loadDetailedMeasurement()">
-          Neue Tabelle hinzufügen
-        </button>
+        <div *ngIf="selectedOption" class="controls">
+          <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="loadDetailedMeasurement()"
+          >
+            <i class="fas fa-plus"></i> Neue Tabelle hinzufügen
+          </button>
+          <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+        </div>
       </form>
-      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
     </div>
-  </mat-card-content>
-</mat-card>
-<!-- Gespeicherte Tabellen, draggable -->
-<div *ngFor="let table of savedTables" class="draggable" cdkDrag>
-  <app-measurement-table [table]="table" (remove)="removeTable($event)"></app-measurement-table>
+  </div>
+
+  <div class="tables-grid">
+    <div *ngFor="let table of savedTables" cdkDrag class="stat-card table-card">
+      <app-measurement-table [table]="table" (remove)="removeTable($event)"></app-measurement-table>
+    </div>
+  </div>
 </div>

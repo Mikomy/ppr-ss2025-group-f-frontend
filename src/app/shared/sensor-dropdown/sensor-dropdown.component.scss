@@ -18,14 +18,14 @@ mat-card {
   text-align: center;
   color: #3f51b5;
   margin-bottom: 1rem;
-  background-color: grey !important;
+  // background-color: grey !important;
 }
 
 /* Form Field Styling */
 mat-form-field {
   width: 100%;
-  margin-bottom: 1rem;
-  background-color: grey !important;
+  // margin-bottom: 1rem;
+  // background-color: grey !important;
 }
 
 /* Spinner Styling */
@@ -51,4 +51,35 @@ mat-form-field {
 .dropdown-toggle {
   margin-top: 1rem;
   background-color: #ffffff !important;
+}
+
+.compact-dropdown {
+  width: 100%;
+
+  .loading {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+  }
+
+  .error-message {
+    color: #f44336;
+    font-size: 0.875rem;
+    margin: 0.25rem 0;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  ::ng-deep {
+    .mat-form-field-wrapper {
+      margin: 0;
+      padding: 0;
+    }
+
+    .mat-form-field-outline {
+      background: white;
+    }
+  }
 }

@@ -9,7 +9,6 @@ import {
 } from '@angular/forms'
 import { StatsService } from '../../components/statistics/stats.service'
 import { SensorGroup, StatisticResult } from '../../models/stats.model'
-import { StatisticsDisplayComponent } from '../../components/statistics/statistics-display/statistics-display.component'
 import { CommonModule } from '@angular/common'
 import { SensorGroupSelectorComponent } from '../../shared/sensor-group-selector/sensor-group-selector.component'
 import { MatButtonModule } from '@angular/material/button'
@@ -35,7 +34,6 @@ import { ScatterDataPoint } from 'chart.js'
   imports: [
     MatCardModule,
     ReactiveFormsModule,
-    StatisticsDisplayComponent,
     CommonModule,
     MatButtonModule,
     SensorGroupSelectorComponent,

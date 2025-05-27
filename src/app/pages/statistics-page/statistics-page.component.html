@@ -1,97 +1,189 @@
-<mat-card>
-  <mat-card-title>Statistische Kurzanalysen</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="timeForm" (ngSubmit)="onCompute()" class="controls">
-      <div class="groups">
-        <app-sensor-group-selector
-          formControlName="group1"
-          label="Gruppe 1"
-        ></app-sensor-group-selector>
-        <app-sensor-group-selector
-          formControlName="group2"
-          label="Gruppe 2"
-        ></app-sensor-group-selector>
+<div class="sensor-container">
+  <h1 class="sensor_headline">
+    <i class="fas fa-chart-bar"></i>
+    Statistische Kurzanalysen
+  </h1>
+
+  <div class="dashboard-layout">
+    <!-- Left sidebar with config and comparison table -->
+    <div class="sidebar-config">
+      <form [formGroup]="timeForm" (ngSubmit)="onCompute()" class="controls">
+        <div class="stat-card">
+          <div class="groups">
+            <app-sensor-group-selector
+              formControlName="group1"
+              label="Gruppe 1"
+            ></app-sensor-group-selector>
+            <app-sensor-group-selector
+              formControlName="group2"
+              label="Gruppe 2"
+            ></app-sensor-group-selector>
+          </div>
+
+          <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+
+          <div class="button-group">
+            <button mat-raised-button color="primary" type="submit">
+              <i class="fas fa-calculator"></i> Berechnen
+            </button>
+            <button mat-raised-button type="button" (click)="onClear()">
+              <i class="fas fa-trash"></i> Ergebnisse löschen
+            </button>
+          </div>
+
+          <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+        </div>
+      </form>
+
+      <!-- Comparison table in sidebar -->
+      <div class="stat-card comparison-card" *ngIf="resultsAvailable">
+        <h3 class="comparison-title">Statistik-Vergleich</h3>
+
+        <div class="comparison-table">
+          <div class="table-header">
+            <div class="header-cell label-column">Statistik</div>
+            <div class="header-cell">Gruppe 1</div>
+            <div class="header-cell">Gruppe 2</div>
+          </div>
+
+          <div class="table-row" *ngIf="resultsGroup1?.count && resultsGroup2?.count">
+            <div class="label-column">Anzahl Datenpunkte</div>
+            <div>{{ resultsGroup1?.count }}</div>
+            <div>{{ resultsGroup2?.count }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Minimum</div>
+            <div>{{ resultsGroup1?.min | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.min | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Maximum</div>
+            <div>{{ resultsGroup1?.max | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.max | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Mittelwert</div>
+            <div>{{ resultsGroup1?.mean | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.mean | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Median</div>
+            <div>{{ resultsGroup1?.median | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.median | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Standardabweichung</div>
+            <div>{{ resultsGroup1?.stdDev | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.stdDev | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">25%-Quartil</div>
+            <div>{{ resultsGroup1?.p25 | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.p25 | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">75%-Quartil</div>
+            <div>{{ resultsGroup1?.p75 | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.p75 | number: '1.2-2' }}</div>
+          </div>
+
+          <div class="table-row">
+            <div class="label-column">Interquartilsabstand</div>
+            <div>{{ resultsGroup1?.iqr | number: '1.2-2' }}</div>
+            <div>{{ resultsGroup2?.iqr | number: '1.2-2' }}</div>
+          </div>
+        </div>
       </div>
 
-      <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
-      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('required')">
-        Bitte komplettes Zeitintervall auswählen.
-      </mat-error>
-      <mat-error *ngIf="submitted && timeForm.get('dateTimeRange')?.hasError('rangeInvalid')">
-        „Von“ darf nicht nach „Bis“ liegen.
-      </mat-error>
-
-      <button mat-raised-button color="primary" type="submit">Berechnen</button>
-
-      <button mat-raised-button type="button" (click)="onClear()">Ergebnisse löschen</button>
-    </form>
-    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
-
-    <div class="results" *ngIf="resultsGroup1 && resultsGroup2">
-      <mat-card class="result">
-        <mat-card-title>Gruppe 1</mat-card-title>
-        <app-statistics-display [stats]="resultsGroup1"></app-statistics-display>
-      </mat-card>
-      <mat-card class="result">
-        <mat-card-title>Gruppe 2</mat-card-title>
-        <app-statistics-display [stats]="resultsGroup2"></app-statistics-display>
-      </mat-card>
-    </div>
-
-    <div *ngIf="correlation !== undefined" class="correlation">
-      <p>Pearson-Korrelation: {{ correlation | number: '1.2-2' }}</p>
-    </div>
-    <button
-      mat-raised-button
-      type="button"
-      color="accent"
-      [disabled]="!canShowAnomalies"
-      (click)="onShowAnomalies()"
-    >
-      Anomalien anzeigen
-    </button>
-
-    <!-- Scatter-Charts -->
-    <div class="chart-section" *ngIf="resultsAvailable">
-      <app-scatter-chart
-        [label]="'Gruppe1'"
-        [points]="resultsGroup1?.series?.[0]?.points ?? []"
-        [anomalies]="anomaliesPointsGroup1"
-        [simultaneous]="simultaneousAnomalies"
-        [lowThreshold]="(resultsGroup1?.p25 ?? 0) - 1.5 * (resultsGroup1?.iqr ?? 0)"
-        [highThreshold]="(resultsGroup1?.p75 ?? 0) + 1.5 * (resultsGroup1?.iqr ?? 0)"
-      ></app-scatter-chart>
-
-      <app-scatter-chart
-        [label]="'Gruppe2'"
-        [points]="resultsGroup2?.series?.[0]?.points ?? []"
-        [anomalies]="anomaliesPointsGroup2"
-        [simultaneous]="simultaneousAnomalies"
-        [lowThreshold]="(resultsGroup2?.p25 ?? 0) - 1.5 * (resultsGroup2?.iqr ?? 0)"
-        [highThreshold]="(resultsGroup2?.p75 ?? 0) + 1.5 * (resultsGroup2?.iqr ?? 0)"
-      ></app-scatter-chart>
-    </div>
-
-    <!-- Anomaly Lists -->
-    <div *ngIf="anomalyChecked">
-      <div *ngIf="anomaliesVisible; else noAnomalyTemplate" class="anomalies">
-        <app-anomaly-list
-          [anomalies]="anomaliesGroup1"
-          [otherTimestamps]="otherTimestampsGroup2"
-          otherLabel="In Gruppe2"
-          title="Gruppe1"
-        ></app-anomaly-list>
-
-        <app-anomaly-list
-          [anomalies]="anomaliesGroup2"
-          [otherTimestamps]="otherTimestampsGroup1"
-          otherLabel="In Gruppe1"
-          title="Gruppe2"
-        ></app-anomaly-list>
+      <div class="stat-card correlation-sidebar-card" *ngIf="correlation !== undefined">
+        <div class="correlation-content">
+          <div class="card-icon">
+            <i class="fas fa-link"></i>
+          </div>
+          <div class="card-info">
+            <h3>Pearson-Korrelation</h3>
+            <p class="value">{{ correlation | number: '1.2-2' }}</p>
+          </div>
+        </div>
       </div>
-      <ng-template #noAnomalyTemplate>
-        <p><strong> Keine Ausreißer im ausgewählten Zeitraum gefunden.</strong></p>
-      </ng-template>
     </div>
-  </mat-card-content>
-</mat-card>
+
+    <!-- Right side with results -->
+    <div class="main-content">
+      <div class="results-section" *ngIf="resultsAvailable">
+        <button
+          mat-raised-button
+          class="anomaly-button"
+          type="button"
+          color="accent"
+          [disabled]="!canShowAnomalies"
+          (click)="onShowAnomalies()"
+        >
+          <i class="fas fa-search"></i> Anomalien anzeigen
+        </button>
+
+        <!-- Scatter-Charts stacked vertically -->
+        <div class="scatter-charts-container">
+          <!-- First chart -->
+          <div class="stat-card scatter-card">
+            <h3 class="chart-title">Gruppe 1</h3>
+            <div class="chart-wrapper">
+              <app-scatter-chart
+                [label]="'Gruppe1'"
+                [points]="resultsGroup1?.series?.[0]?.points ?? []"
+                [anomalies]="anomaliesPointsGroup1"
+                [simultaneous]="simultaneousAnomalies"
+                [lowThreshold]="(resultsGroup1?.p25 ?? 0) - 1.5 * (resultsGroup1?.iqr ?? 0)"
+                [highThreshold]="(resultsGroup1?.p75 ?? 0) + 1.5 * (resultsGroup1?.iqr ?? 0)"
+              ></app-scatter-chart>
+            </div>
+          </div>
+
+          <!-- Second chart -->
+          <div class="stat-card scatter-card">
+            <h3 class="chart-title">Gruppe 2</h3>
+            <div class="chart-wrapper">
+              <app-scatter-chart
+                [label]="'Gruppe2'"
+                [points]="resultsGroup2?.series?.[0]?.points ?? []"
+                [anomalies]="anomaliesPointsGroup2"
+                [simultaneous]="simultaneousAnomalies"
+                [lowThreshold]="(resultsGroup2?.p25 ?? 0) - 1.5 * (resultsGroup2?.iqr ?? 0)"
+                [highThreshold]="(resultsGroup2?.p75 ?? 0) + 1.5 * (resultsGroup2?.iqr ?? 0)"
+              ></app-scatter-chart>
+            </div>
+          </div>
+        </div>
+
+        <!-- Anomaly Lists -->
+        <div *ngIf="anomalyChecked">
+          <div *ngIf="anomaliesVisible; else noAnomalyTemplate" class="anomalies">
+            <app-anomaly-list
+              [anomalies]="anomaliesGroup1"
+              [otherTimestamps]="otherTimestampsGroup2"
+              otherLabel="In Gruppe2"
+              title="Gruppe1"
+            ></app-anomaly-list>
+
+            <app-anomaly-list
+              [anomalies]="anomaliesGroup2"
+              [otherTimestamps]="otherTimestampsGroup1"
+              otherLabel="In Gruppe1"
+              title="Gruppe2"
+            ></app-anomaly-list>
+          </div>
+          <ng-template #noAnomalyTemplate>
+            <p><strong> Keine Ausreißer im ausgewählten Zeitraum gefunden.</strong></p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

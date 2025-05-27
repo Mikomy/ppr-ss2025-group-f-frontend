@@ -60,7 +60,7 @@ describe('LineChartComponent', () => {
     expect(dataset.data).toEqual([10, 20])
     expect(dataset.fill).toBeFalse()
     expect(dataset.tension).toBe(0.1)
-    expect(dataset.pointRadius).toBe(3)
+    expect(dataset.pointRadius).toBe(2)
   })
 
   it('should handle multiple dataSeries correctly', () => {

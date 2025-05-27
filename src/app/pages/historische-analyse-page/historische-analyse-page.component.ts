@@ -21,7 +21,7 @@ import { BackendService } from '../../services/backend.service'
 import { WebStorageService } from '../../services/webStorage.service'
 import { CommonModule } from '@angular/common'
 import { MatTableModule } from '@angular/material/table'
-import { CdkDrag } from '@angular/cdk/drag-drop'
+import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { SavedChart } from '../../models/savedChart.model'
 import {
   ChartConfig,
@@ -54,6 +54,7 @@ import { FormControl } from '@angular/forms'
     ChartPanelComponent,
     MatButtonToggleModule,
     DateTimePickerComponent,
+    CdkDragHandle,
   ],
   templateUrl: './historische-analyse-page.component.html',
   styleUrl: './historische-analyse-page.component.scss',

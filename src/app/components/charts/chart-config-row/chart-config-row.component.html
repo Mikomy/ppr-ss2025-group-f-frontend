@@ -1,26 +1,17 @@
-<div class="config-row">
-  <!-- Dropdown -->
+<div class="config-row narrow-row">
   <app-sensor-dropdown
     [selectedOption]="config.measurement"
     (selectionChange)="onMeasurementSelected($event)"
   >
   </app-sensor-dropdown>
 
-  <!-- Color picker -->
-  <mat-form-field appearance="fill" class="color-picker">
-    <mat-icon class="color-text" matPrefix>color:</mat-icon>
+  <mat-form-field appearance="outline" class="color-field">
     <input matInput type="color" [value]="config.color" (input)="onColorChange($event)" />
   </mat-form-field>
 
-  <!-- Chart type toggle -->
-  <mat-button-toggle-group
-    [value]="config.chartType"
-    (change)="onTypeChange($event.value)"
-    class="type-toggle"
-    appearance="legacy"
-  >
-    <mat-button-toggle value="line">Line</mat-button-toggle>
-    <mat-button-toggle value="bar">Bar</mat-button-toggle>
-    <mat-button-toggle value="heatmap">Heatmap</mat-button-toggle>
+  <mat-button-toggle-group [value]="config.chartType" (change)="onTypeChange($event.value)">
+    <mat-button-toggle value="line"><i class="fas fa-chart-line"></i></mat-button-toggle>
+    <mat-button-toggle value="bar"><i class="fas fa-chart-bar"></i></mat-button-toggle>
+    <mat-button-toggle value="heatmap"><i class="fas fa-fire"></i></mat-button-toggle>
   </mat-button-toggle-group>
 </div>
