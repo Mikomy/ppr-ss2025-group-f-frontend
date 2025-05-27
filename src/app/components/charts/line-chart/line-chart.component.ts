@@ -25,6 +25,7 @@ export class LineChartComponent implements OnChanges {
   public chartData: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] }
   public chartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       x: {
         type: 'time',
@@ -58,8 +59,9 @@ export class LineChartComponent implements OnChanges {
       backgroundColor: s.color,
       fill: false,
       tension: 0.1,
-      pointRadius: 3,
-      pointHoverRadius: 6,
+      borderWidth: 1, // Make lines thinner
+      pointRadius: 2, // Make points smaller
+      pointHoverRadius: 3,
     }))
     this.chartData = { labels, datasets }
   }
