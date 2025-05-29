@@ -4,14 +4,12 @@
   gap: 15px;
 }
 
-
 app-date-time-picker ::ng-deep .date-time-fields {
   display: flex;
   flex-direction: row;
   gap: 10px;
   flex-wrap: wrap;
 }
-
 
 .controls button[mat-raised-button] {
   width: 100%;
@@ -20,7 +18,7 @@ app-date-time-picker ::ng-deep .date-time-fields {
 
 app-date-time-picker {
   flex: 1;
-  min-width: 300px; 
+  min-width: 300px;
   // max-width: 60%; /* Don't let it take up too much space */
 }
 
@@ -34,7 +32,7 @@ button[mat-raised-button] {
   .controls {
     flex-direction: column;
   }
-  
+
   app-date-time-picker {
     max-width: 100%;
   }
@@ -138,8 +136,8 @@ button[mat-raised-button] {
   gap: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
 }
 
 .quick-select-btn {
@@ -156,29 +154,28 @@ button[mat-raised-button] {
   i {
     margin-right: 6px;
     font-size: 0.9rem;
-    color: white; 
+    color: white;
   }
 
   &:hover {
     background: #e3f2fd;
     border-color: #2196f3;
     color: #1976d2;
-    
+
     i {
-      color: #0d47a1; 
+      color: #0d47a1;
     }
   }
 }
 
 .quick-buttons-card {
   margin-top: 20px;
-  
+
   h3 {
-    text-align: center; 
+    text-align: center;
     margin-bottom: 15px;
   }
 }
-
 
 .sensor-container .config-section .stat-card .controls {
   display: flex !important;
@@ -191,7 +188,7 @@ button[mat-raised-button] {
 
 .sensor-container .config-section .stat-card .controls app-date-time-picker {
   flex: 1 !important;
-  min-width: 300px !important; 
+  min-width: 300px !important;
   // max-width: 60% !important;
 }
 
@@ -206,7 +203,7 @@ button[mat-raised-button] {
   .sensor-container .config-section .stat-card .controls {
     flex-direction: column !important;
   }
-  
+
   .sensor-container .config-section .stat-card .controls app-date-time-picker {
     max-width: 100% !important;
   }
