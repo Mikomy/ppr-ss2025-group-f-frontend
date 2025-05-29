@@ -16,23 +16,6 @@
         <div *ngIf="selectedOption" class="controls">
           <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
-          <!-- Quick Range Buttons in Page -->
-          <div class="quick-buttons">
-            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_WEEK)">
-              Neue Tabelle zur letzten Woche
-            </button>
-            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_MONTH)">
-              Neue Tabelle zum vorigen Monat
-            </button>
-            <button
-              mat-stroked-button
-              type="button"
-              (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)"
-            >
-              Neue Tabelle zu den letzten 90 Tagen
-            </button>
-          </div>
-
           <button
             mat-raised-button
             color="primary"
@@ -44,6 +27,42 @@
           <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
         </div>
       </form>
+    </div>
+
+    <div *ngIf="selectedOption" class="stat-card quick-buttons-card">
+      <h3>Chart-Hinzufügen Schnellwahl</h3>
+      <div class="quick-buttons">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="applyQuick(QuickRangeKey.LAST_WEEK)"
+          class="quick-select-btn"
+        >
+          <i class="fas fa-calendar-week"></i>
+          Letzte Woche
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="applyQuick(QuickRangeKey.LAST_MONTH)"
+          class="quick-select-btn"
+        >
+          <i class="fas fa-calendar-alt"></i>
+          Letztes Monat
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)"
+          class="quick-select-btn"
+        >
+          <i class="fas fa-calendar-plus"></i>
+          Letze 90 Tage
+        </button>
+      </div>
     </div>
   </div>
 

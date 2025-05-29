@@ -4,7 +4,6 @@
     Historische Analyse
   </h1>
 
-  <!-- Config section in a row -->
   <div class="config-section" [formGroup]="timeForm">
     <div class="config-stack">
       <div *ngFor="let cfg of configs; let i = index" class="stat-card">
@@ -12,30 +11,54 @@
         </app-chart-config-row>
       </div>
     </div>
-    <div class="stat-card datepicker-card">
-      <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+    <div class="date-controls-container">
+      <div class="stat-card datepicker-card">
+        <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
-      <!-- Quick Range Buttons in Page -->
-      <div class="quick-buttons">
-        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_WEEK)">
-          Neues Diagramm zur letzten Woche
+        <button mat-raised-button color="primary" (click)="loadCharts()">
+          <i class="fas fa-plus"></i> Neue Charts hinzufügen
         </button>
-        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_MONTH)">
-          Neues Diagramm zum vorigen Monat
-        </button>
-        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)">
-          Neues Diagramm zu den letzten 90 Tagen
-        </button>
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
       </div>
 
-      <button mat-raised-button color="primary" (click)="loadCharts()">
-        <i class="fas fa-plus"></i> Neue Charts hinzufügen
-      </button>
-      <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+      <div class="stat-card quick-buttons-card">
+        <h3>Chart-Hinzufügen Schnellwahl</h3>
+        <div class="quick-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="applyQuick(QuickRangeKey.LAST_WEEK)"
+            class="quick-select-btn"
+          >
+            <i class="fas fa-calendar-week"></i>
+            Letzte Woche
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="applyQuick(QuickRangeKey.LAST_MONTH)"
+            class="quick-select-btn"
+          >
+            <i class="fas fa-calendar-alt"></i>
+            Letztes Monat
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)"
+            class="quick-select-btn"
+          >
+            <i class="fas fa-calendar-plus"></i>
+            Letze 90 Tage
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Charts below config -->
   <div class="charts-section">
     <div class="charts-grid">
       <div
