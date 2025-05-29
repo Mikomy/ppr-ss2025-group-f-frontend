@@ -89,16 +89,15 @@ To add containerized setup, include a Dockerfile and docker-compose.yml and docu
 .husky/              # Git hooks
 src/
 app/
-components/     # Reusable UI components
-tab-navigation/ # Main navigation component (header/navbar)
+components/     # Reusable UI components charts
 models/         # TS models & enums
 pages/          # Route/page components
 services/       # HTTP & business logic
-shared/         # Shared modules (pickers, tables)
+shared/         # Shared modules (pickers, tables, sensor-dropdown)
+tab-navigation/ # Main navigation component (header/navbar)
 app.module.ts   # Root NgModule
 app.routes.ts   # Routing config (includes navigation routes)
 assets/           # Static assets (JSON fixtures)
-environments/     # Environment configs
 index.html          # Main HTML
 main.ts             # Bootstrap script
 styles.scss         # Global styles
