@@ -5,7 +5,6 @@
 - Prerequisites
 - Installation
 - Configuration
-  - Environment Variable
   - Angular CLI
   - Docker & Docker Compose
 - Project Structure
@@ -30,13 +29,16 @@
 
 nexus-frontend is an Angular v19 application for visualizing and analyzing sensor data stored in InfluxDB. Features include:
 
+Ziele:
+- Intuitive, interaktive Visualisierung von Sensordaten
+- Einfache Filter- und Auswahlmöglichkeiten (Zeitspanne, Sensor/Measurement)
+- Erweiterbare Architektur für künftige Features
 - Interactive charts: line, bar, heatmap, scatter
 - Real-time and historical dashboards
 - AI-generated synopses via OpenAI
 - Modular, extensible architecture
 
 The frontend consumes a Spring Boot REST API for data retrieval.
-
 
 ## Prerequisites
 
@@ -61,17 +63,6 @@ yarn install
    ```
 
 ## Configuration
-
-### Environment Variables
-
-Create src/environments/environment.ts (and environment.prod.ts):
-```bash
-export const environment = {
-production: false,
-apiBaseUrl: 'http://localhost:8080/api',
-influxBasePath: '/influx'
-};
-```
 ### Angular CLI
 - Serve (dev): 
 ```bash
@@ -203,6 +194,22 @@ Acknowledgements
 - Material cards + custom layouts
 - `BackendService.getDashboardStatistics()`, `getOpenAiSynopsis()`
 
+#### Shared & Services
+- **Shared Modules** (`src/app/shared`)
+  - Wiederverwendbare Controls: Sensor-Dropdown, DateTime-Picker, Measurement-Table
+- **BackendService** (`src/app/services/backend.service.ts`)
+  - Zentrale HTTP-Aufrufe: Messwerte, gruppierte Daten, Statistik-Endpoints, OpenAI-Synopsis
+- **StatsService** (`src/app/components/statistics/stats.service.ts`)
+  - Berechnung von Mittelwert, Median, Quartilen, IQR, Trend und Korrelation
+  - Tukey-IQR-Regel zur Ausreißererkennung
+
+- **AppModule / AppComponent**
+  - Bootstrap, globales Styling, Einbindung der Navigation
+- **TabNavigationComponent** (`src/app/components/tab-navigation`)
+  - Obenliegende Navbar mit Links zu allen Seiten
+
+- **Assets**: `src/assets/sensor-measurements.json` stellt initiale Dropdown-Liste.
+  - Erweiterung um neue Sensor-Measurement-Kombinationen durch Ergänzung dieser Datei.
 ---
 
 ## Build
