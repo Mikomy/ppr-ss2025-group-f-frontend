@@ -16,6 +16,23 @@
         <div *ngIf="selectedOption" class="controls">
           <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
+          <!-- Quick Range Buttons in Page -->
+          <div class="quick-buttons">
+            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_WEEK)">
+              Neue Tabelle zur letzten Woche
+            </button>
+            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_MONTH)">
+              Neue Tabelle zum vorigen Monat
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)"
+            >
+              Neue Tabelle zu den letzten 90 Tagen
+            </button>
+          </div>
+
           <button
             mat-raised-button
             color="primary"

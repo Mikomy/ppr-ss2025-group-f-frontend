@@ -27,6 +27,7 @@ import { AnomalyListComponent } from '../../components/statistics/anomaly-list/a
 import { Anomaly } from '../../models/anomaly.model'
 import { ScatterChartComponent } from '../../components/charts/scatter-chart/scatter-chart.component'
 import { ScatterDataPoint } from 'chart.js'
+import { QuickRangeKey } from '../../models/quickRange.enum'
 
 @Component({
   selector: 'app-statistics-page',
@@ -98,15 +99,41 @@ export class StatisticsPageComponent implements OnInit {
   ngOnInit(): void {
     this.timeForm = this.fb.group(
       {
-        dateTimeRange: [null, Validators.required],
+        dateTimeRange: this.fb.control(null, { updateOn: 'submit' }),
+        quickRange: [null],
         group1: [null, Validators.required],
         group2: [null, Validators.required],
-      },
-      { updateOn: 'submit' }
+      }
+      // { updateOn: 'submit' }
     )
     this.loadFromStorage()
   }
 
+  get dateControl(): FormControl {
+    return this.timeForm.get('dateTimeRange') as FormControl
+  }
+  get quickControl(): FormControl {
+    return this.timeForm.get('quickRange') as FormControl
+  }
+  get g1(): FormControl {
+    return this.timeForm.get('group1') as FormControl
+  }
+  get g2(): FormControl {
+    return this.timeForm.get('group2') as FormControl
+  }
+
+  applyQuick(key: QuickRangeKey): void {
+    if (!this.group1Ctrl.value || !this.group2Ctrl.value) {
+      this.errorMessage = 'Bitte beide Gruppen auswählen.'
+      return
+    }
+    this.errorMessage = undefined
+    this.quickControl.setValue(key)
+    this.onCompute()
+  }
+  onQuickRangeChange(key: QuickRangeKey | null): void {
+    this.quickControl.setValue(key)
+  }
   /**
    * Handler for the "Berechnen" button: validate, clear prior state,
    * and trigger fetching of new statistics and correlation.
@@ -117,33 +144,70 @@ export class StatisticsPageComponent implements OnInit {
     this.clearAnomalies()
     this.anomalyChecked = false
 
-    this.timeForm.markAllAsTouched()
-    if (this.timeForm.invalid) {
-      this.errorMessage =
-        'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
+    // this.timeForm.markAllAsTouched()
+
+    const g1 = this.group1Ctrl.value as SensorGroup
+    const g2 = this.group2Ctrl.value as SensorGroup
+
+    if (!g1 || !g2) {
+      this.errorMessage = 'Bitte beide Gruppen auswählen.'
       return
     }
-    const { fromDate, fromTime, toDate, toTime } = this.timeForm.value
-      .dateTimeRange as DateTimeRange
-    const fromIso = this.combineDateTime(fromDate!, fromTime!)
-    const toIso = this.combineDateTime(toDate!, toTime!)
-    this.fetchStatisticsAndCorrelation(fromIso, toIso)
-  }
+    const quickTimeRange = this.quickControl.value as QuickRangeKey | null
+    const dateTimeCtrl = this.timeForm.get('dateTimeRange') as FormControl<DateTimeRange | null>
 
-  /**
-   * Perform parallel HTTP calls: computeStats for two groups and correlation.
-   * @param fromIso ISO string for start datetime
-   * @param toIso ISO string for end datetime
-   */
-  private fetchStatisticsAndCorrelation(fromIso: string, toIso: string): void {
+    if (!quickTimeRange && !dateTimeCtrl.value) {
+      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen oder Quick-Range klicken.'
+      return
+    }
+    let fromIso: string | undefined
+    let toIso: string | undefined
+
+    if (quickTimeRange) {
+      fromIso = undefined
+      toIso = undefined
+    }
+    if (!quickTimeRange) {
+      if (this.timeForm.invalid) {
+        this.errorMessage =
+          'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
+        return
+      }
+
+      if (!dateTimeCtrl) {
+        this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
+        return
+      }
+      const { fromDate, fromTime, toDate, toTime } = dateTimeCtrl.value as DateTimeRange
+      fromIso = this.combineDateTime(fromDate!, fromTime!)
+      toIso = this.combineDateTime(toDate!, toTime!)
+    }
+
+    /**
+     * Perform parallel HTTP calls: computeStats for two groups and correlation.
+     * @param fromIso ISO string for start datetime
+     * @param toIso ISO string for end datetime
+     */
+
     forkJoin({
-      s1: this.stats.computeStats(this.group1Ctrl.value, new Date(fromIso), new Date(toIso)),
-      s2: this.stats.computeStats(this.group2Ctrl.value, new Date(fromIso), new Date(toIso)),
+      s1: this.stats.computeStats(
+        g1,
+        fromIso ? new Date(fromIso) : undefined,
+        toIso ? new Date(toIso) : undefined,
+        quickTimeRange || undefined
+      ),
+      s2: this.stats.computeStats(
+        g2,
+        fromIso ? new Date(fromIso) : undefined,
+        toIso ? new Date(toIso) : undefined,
+        quickTimeRange || undefined
+      ),
       corr: this.stats.computeCorrelation(
-        this.group1Ctrl.value,
-        this.group2Ctrl.value,
-        new Date(fromIso),
-        new Date(toIso)
+        g1,
+        g2,
+        fromIso ? new Date(fromIso) : undefined,
+        toIso ? new Date(toIso) : undefined,
+        quickTimeRange || undefined
       ),
     }).subscribe({
       next: ({ s1, s2, corr }) => this.onResults(s1, s2, corr),
@@ -327,4 +391,6 @@ export class StatisticsPageComponent implements OnInit {
   get otherTimestampsGroup2(): number[] {
     return this.anomaliesGroup2.map((a) => +a.timestamp)
   }
+
+  protected readonly QuickRangeKey = QuickRangeKey
 }

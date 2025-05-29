@@ -14,8 +14,7 @@ describe('MeasurementTableComponent', () => {
   const mockTable: SavedTable = {
     id: 't1',
     name: 'Test Table',
-    from: '2025-04-01T00:00:00Z',
-    to: '2025-04-01T01:00:00Z',
+    label: [''],
     data: {
       measurementName: 'Test',
       sensor: { id: 's1', name: 'Sensor1', location: 'Loc' },

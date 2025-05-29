@@ -1,6 +1,13 @@
 import { MatFormFieldControl } from '@angular/material/form-field'
 
-import { ChangeDetectionStrategy, Component, forwardRef, LOCALE_ID } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  forwardRef,
+  LOCALE_ID,
+  Output,
+} from '@angular/core'
 import { CommonModule, registerLocaleData } from '@angular/common'
 import {
   FormsModule,
@@ -30,6 +37,7 @@ import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
   MomentDateAdapter,
 } from '@angular/material-moment-adapter'
+import { QuickRangeKey } from '../../models/quickRange.enum'
 
 registerLocaleData(localeDe, 'de')
 
@@ -93,10 +101,13 @@ export interface DateTimeRange {
   styleUrl: './date-time-picker.component.scss',
 })
 export class DateTimePickerComponent implements ControlValueAccessor, Validator {
+  @Output() quickRangeChange = new EventEmitter<QuickRangeKey | null>()
+
   rangeForm: FormGroup
   private onTouched!: () => void
   private onChangeFn!: (value: DateTimeRange) => void
   private onValidatorChange!: () => void
+  // quickRange: QuickRangeKey | null = null;
   readonly minDate = new Date(2025, 0, 1)
 
   constructor(private fb: FormBuilder) {
@@ -162,39 +173,35 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
     return d
   }
 
-  setLastWeek(): void {
-    this.applyQuickRange(7)
-  }
-  setLast30Days(): void {
-    this.applyQuickRange(30)
-  }
-  setLast60Days(): void {
-    this.applyQuickRange(60)
-  }
-
-  private applyQuickRange(days: number) {
-    const now = new Date()
-    const start = new Date(now)
-    start.setDate(now.getDate() - days)
-    this.rangeForm.setValue(
-      {
-        fromDate: start,
-        fromTime: this.padTime(start),
-        toDate: now,
-        toTime: this.padTime(now),
-      },
-      { emitEvent: false }
-    )
-    if (this.rangeForm.valid) {
-      this.onChangeFn(this.rangeForm.value)
-      this.onValidatorChange?.()
-    }
-  }
-  private padTime(date: Date): string {
-    const h = date.getHours().toString().padStart(2, '0')
-    const m = date.getMinutes().toString().padStart(2, '0')
-    return `${h}:${m}`
-  }
+  // setLastWeek(): void { this.applyQuickRange(7, QuickRangeKey.LAST_WEEK); }
+  // setLastMonth(): void { this.applyQuickRange(30, QuickRangeKey.LAST_MONTH); }
+  // setLast90Days(): void { this.applyQuickRange(90, QuickRangeKey.LAST_90_DAYS); }
+  //
+  // private applyQuickRange(days: number, key: QuickRangeKey) {
+  //   const now = new Date()
+  //   const start = new Date(now)
+  //   start.setDate(now.getDate() - days)
+  //   this.rangeForm.setValue(
+  //     {
+  //       fromDate: start,
+  //       fromTime: this.padTime(start),
+  //       toDate: now,
+  //       toTime: this.padTime(now),
+  //     },
+  //     { emitEvent: false }
+  //   )
+  //   if (this.rangeForm.valid) {
+  //     this.quickRange = key;
+  //     this.quickRangeChange.emit(key);
+  //     this.onChangeFn(this.rangeForm.value)
+  //     this.onValidatorChange?.()
+  //   }
+  // }
+  // private padTime(date: Date): string {
+  //   const h = date.getHours().toString().padStart(2, '0')
+  //   const m = date.getMinutes().toString().padStart(2, '0')
+  //   return `${h}:${m}`
+  // }
 
   /**
    * Custom validator to ensure complete range, valid order and minDate.

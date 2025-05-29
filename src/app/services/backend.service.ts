@@ -18,6 +18,7 @@ import measurementList from '../assets/sensor-measurements.json'
 import { Measurement } from '../models/measurement.model'
 import { DropdownOptionModel } from '../models/dropdown.option.model'
 import { Statistics } from '../models/statistics.model'
+import { QuickRangeKey } from '../models/quickRange.enum'
 
 /**
  * 09.05.2025
@@ -46,14 +47,23 @@ export class BackendService {
    * Fetch all sensor-grouped data for a given measurement alias.
    * Returns one Measurement[] per sensor.
    * optional time range (fromIso and toIso).
+   * optional timeRange (LAST_MONTHS)
    * @param alias  z.B. 'device_frmpayload_data_nitrogen'
    * @param fromIso          z.B. '2025-04-29T12:12:00.000Z'
    * @param toIso            z.B. '2025-04-29T13:12:00.000Z'
+   * @param timeRange        z.B. 'LAST_MONTHS'
+   *
    */
-  getGroupedByAlias(alias: string, fromIso?: string, toIso?: string): Observable<Measurement[]> {
+  getGroupedByAlias(
+    alias: string,
+    fromIso?: string,
+    toIso?: string,
+    timeRange?: QuickRangeKey
+  ): Observable<Measurement[]> {
     let params = new HttpParams()
     if (fromIso) params = params.set('from', fromIso)
     if (toIso) params = params.set('to', toIso)
+    if (timeRange) params = params.set('timeRange', timeRange)
 
     return this.http
       .get<

@@ -13,8 +13,7 @@ describe('ChartPanelComponent', () => {
   const dummyConfig: SavedChart & { chartType: ChartType } = {
     id: 'c1',
     titles: ['First', 'Second'],
-    from: '2025-04-01T00:00:00Z',
-    to: '2025-04-01T01:00:00Z',
+    label: ['2025-04-01T00:00:00Z', '2025-04-01T01:00:00Z'],
     series: [],
     chartType: 'line',
   }
@@ -42,11 +41,13 @@ describe('ChartPanelComponent', () => {
     expect(titleElem.textContent?.trim()).toBe('First / Second')
   })
 
-  it('should display the from and to dates in subtitle', () => {
+  it('should display the label dates in subtitle', () => {
     const subtitleElem: HTMLElement = fixture.debugElement.query(
       By.css('mat-card-subtitle')
     ).nativeElement
-    expect(subtitleElem.textContent?.trim()).toBe('2025-04-01T00:00:00Z – 2025-04-01T01:00:00Z')
+    expect(subtitleElem.textContent?.trim()).toBe(
+      'Zeitraum: 2025-04-01T00:00:00Z,2025-04-01T01:00:00Z'
+    )
   })
 
   it('should render app-chart-host element', () => {

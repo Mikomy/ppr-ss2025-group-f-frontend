@@ -65,7 +65,9 @@ describe('TableViewPageComponent', () => {
 
     component.selectedOption = dummyOption
     component.loadDetailedMeasurement()
-    expect(component.errorMessage).toBe('Bitte komplettes Zeitintervall auswählen.')
+    expect(component.errorMessage).toBe(
+      'Bitte komplettes Zeitintervall auswählen oder Quick-Range klicken.'
+    )
   })
 
   it('loadDetailedMeasurement should call backend and add table on success', fakeAsync(() => {
@@ -132,8 +134,8 @@ describe('TableViewPageComponent', () => {
 
   it('removeTable should remove entry and update storage', () => {
     component.savedTables = [
-      { id: '1', name: 'A', from: '', to: '', data: dummyMeasurement },
-      { id: '2', name: 'B', from: '', to: '', data: dummyMeasurement },
+      { id: '1', name: 'A', label: [''], data: dummyMeasurement },
+      { id: '2', name: 'B', label: [''], data: dummyMeasurement },
     ]
 
     component.removeTable('1')

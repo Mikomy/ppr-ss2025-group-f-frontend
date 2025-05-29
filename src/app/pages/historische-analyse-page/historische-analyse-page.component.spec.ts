@@ -82,7 +82,7 @@ describe('HistorischeAnalysePageComponent', () => {
   describe('data fetching scenarios', () => {
     beforeEach(() => {
       component.configs[0] = createConfig('Test', 'Sensor A')
-      component.timeForm.setValue({
+      component.timeForm.patchValue({
         dateTimeRange: {
           fromDate: new Date('2025-04-01'),
           fromTime: '00:00',
@@ -135,16 +135,14 @@ describe('HistorischeAnalysePageComponent', () => {
     const chart1: SavedChart = {
       id: '1',
       titles: ['A'],
-      from: '',
-      to: '',
+      label: [''],
       series: [],
       chartType: 'line',
     }
     const chart2: SavedChart = {
       id: '2',
       titles: ['B'],
-      from: '',
-      to: '',
+      label: [''],
       series: [],
       chartType: 'line',
     }

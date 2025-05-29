@@ -4,7 +4,7 @@
   </button>
   <mat-card-header>
     <mat-card-title>{{ config.titles.join(' / ') }}</mat-card-title>
-    <mat-card-subtitle>{{ config.from }} – {{ config.to }}</mat-card-subtitle>
+    <mat-card-subtitle> Zeitraum: {{ config.label }}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
     <app-chart-host [dataSeries]="config.series" [chartType]="config.chartType"> </app-chart-host>

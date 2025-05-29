@@ -65,9 +65,7 @@ describe('StatisticsPageComponent (shallow)', () => {
       toTime: '01:00',
     })
     component.onCompute()
-    expect(component.errorMessage).toBe(
-      'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'
-    )
+    expect(component.errorMessage).toBe('Bitte beide Gruppen auswählen.')
   })
 
   it('should call StatsService and set results on valid form', fakeAsync(() => {

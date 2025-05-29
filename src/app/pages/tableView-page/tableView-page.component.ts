@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { SensorDropdownComponent } from '../../shared/sensor-dropdown/sensor-dropdown.component'
 import { BackendService } from '../../services/backend.service'
 import { Measurement } from '../../models/measurement.model'
@@ -19,6 +19,7 @@ import {
   DateTimePickerComponent,
   DateTimeRange,
 } from '../../shared/date-time-picker/date-time-picker.component'
+import { QuickRangeKey } from '../../models/quickRange.enum'
 
 /**
  * Component for displaying and managing sensor measurement tables.
@@ -90,10 +91,21 @@ export class TableViewPageComponent implements OnInit {
     const raw = this.storage.get(this.storageKey)
     this.savedTables = raw ? (JSON.parse(raw) as SavedTable[]) : []
     this.timeForm = this.fb.group({
-      dateTimeRange: [null, Validators.required],
+      dateTimeRange: [null],
+      quickRange: [null],
     })
   }
 
+  // get pickerControl(): FormControl {
+  //   return this.timeForm.get('dateTimeRange') as FormControl;
+  // }
+  applyQuick(key: QuickRangeKey): void {
+    this.timeForm.patchValue({ quickRange: key, dateTimeRange: null })
+    this.loadDetailedMeasurement()
+  }
+  get quickControl(): FormControl {
+    return this.timeForm.get('quickRange') as FormControl
+  }
   /**
    * Handler for sensor dropdown selection change.
    * Resets all date, time, and error fields.
@@ -104,6 +116,9 @@ export class TableViewPageComponent implements OnInit {
     this.errorMessage = undefined
   }
 
+  // onQuickRangeChange(key: QuickRangeKey | null): void {
+  //   this.quickControl.setValue(key);
+  // }
   /**
    * Validates user input and, if valid, requests detailed measurement data
    * from the backend service and adds a new table to `savedTables`.
@@ -114,23 +129,36 @@ export class TableViewPageComponent implements OnInit {
       this.errorMessage = 'Bitte Sensor auswählen.'
       return
     }
-    const dateTimeCtrl = this.timeForm.value.dateTimeRange as DateTimeRange
-    if (!dateTimeCtrl) {
-      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
-      return
-    }
-    if (!this.selectedOption) {
-      this.errorMessage = 'Bitte einen Measurement auswählen.'
+
+    let fromIso: string | undefined
+    let toIso: string | undefined
+
+    const quickTimeRange = this.quickControl.value as QuickRangeKey
+    const dateTimeCtrl = this.timeForm.get('dateTimeRange') as FormControl<DateTimeRange | null>
+
+    if (!quickTimeRange && !dateTimeCtrl.value) {
+      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen oder Quick-Range klicken.'
       return
     }
 
-    const fromIso = this.combineDateAndTime(dateTimeCtrl.fromDate!, dateTimeCtrl.fromTime!)
-    const toIso = this.combineDateAndTime(dateTimeCtrl.toDate!, dateTimeCtrl.toTime!)
+    if (quickTimeRange) {
+      fromIso = undefined
+      toIso = undefined
+    } else {
+      const dateTimeCtrl = this.timeForm.value.dateTimeRange as DateTimeRange
+      if (!dateTimeCtrl) {
+        this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
+        return
+      }
+
+      fromIso = this.combineDateAndTime(dateTimeCtrl.fromDate!, dateTimeCtrl.fromTime!)
+      toIso = this.combineDateAndTime(dateTimeCtrl.toDate!, dateTimeCtrl.toTime!)
+    }
     const alias = this.selectedOption.alias
 
     // Fetch measurement data and handle response
     this.backendService
-      .getGroupedByAlias(alias, fromIso, toIso)
+      .getGroupedByAlias(alias, fromIso, toIso, quickTimeRange)
       .pipe(take(1))
       .subscribe({
         next: (measurement) => {
@@ -149,7 +177,7 @@ export class TableViewPageComponent implements OnInit {
             this.errorMessage = 'Keine Messwerte im gewählten Zeitraum vorhanden.'
           }
           this.errorMessage = undefined
-          this.addTable(match, fromIso, toIso)
+          this.addTable(match, fromIso, toIso, quickTimeRange)
         },
         error: () =>
           (this.errorMessage =
@@ -169,12 +197,14 @@ export class TableViewPageComponent implements OnInit {
    * @param data Measurement data returned from backend
    * @param from ISO string representing start of data range
    * @param to   ISO string representing end of data range
+   * @param timeRange
    */
-  private addTable(data: Measurement, from: string, to: string): void {
+  private addTable(data: Measurement, from?: string, to?: string, timeRange?: QuickRangeKey): void {
     const id = Date.now().toString()
+    const label = timeRange ? [timeRange] : [from!, ' - ', to!]
     this.savedTables = [
       ...this.savedTables,
-      { id, name: this.selectedOption!.measurementName, from, to, data },
+      { id, name: this.selectedOption!.measurementName, label, data },
     ]
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
   }
@@ -187,4 +217,6 @@ export class TableViewPageComponent implements OnInit {
     this.savedTables = this.savedTables.filter((t) => t.id !== id)
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
   }
+
+  protected readonly QuickRangeKey = QuickRangeKey
 }

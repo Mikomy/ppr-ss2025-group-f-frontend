@@ -1,11 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import {
-  FormGroup,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms'
+import { FormGroup, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatCardModule } from '@angular/material/card'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
@@ -33,6 +27,7 @@ import {
   DateTimeRange,
 } from '../../shared/date-time-picker/date-time-picker.component'
 import { FormControl } from '@angular/forms'
+import { QuickRangeKey } from '../../models/quickRange.enum'
 
 @Component({
   selector: 'app-historische-analyse-page',
@@ -81,16 +76,26 @@ export class HistorischeAnalysePageComponent implements OnInit {
     const raw = this.storage.get(this.storageKey)
     this.savedCharts = raw ? JSON.parse(raw) : []
     this.timeForm = this.fb.group({
-      dateTimeRange: this.fb.control<DateTimeRange>(
-        { fromDate: null, fromTime: null, toDate: null, toTime: null },
-        Validators.required
-      ),
+      dateTimeRange: [null],
+      quickRange: [null],
     })
   }
+
+  applyQuick(key: QuickRangeKey): void {
+    this.timeForm.patchValue({ quickRange: key, dateTimeRange: null })
+    this.loadCharts()
+  }
+  // onQuickRangeChange(key:QuickRangeKey | null) {
+  //   this.timeForm.get('quickRange')!.setValue(key);
+  // }
 
   onConfigChange(index: number, config: ChartConfig): void {
     this.configs[index] = config
     this.errorMessage = undefined
+  }
+
+  get quickControl(): FormControl {
+    return this.timeForm.get('quickRange') as FormControl
   }
 
   loadCharts(): void {
@@ -101,29 +106,38 @@ export class HistorischeAnalysePageComponent implements OnInit {
       return
     }
 
-    const dateTimeCtrl = this.timeForm.get('dateTimeRange') as FormControl
-    if (dateTimeCtrl.invalid) {
-      const errors = dateTimeCtrl.errors || {}
-      this.errorMessage = errors['required']
-        ? 'Bitte komplettes Zeitintervall auswählen.'
-        : errors['required']
-          ? '„Von“ darf nicht nach „Bis“ liegen.'
-          : undefined
+    // const quickTimeRange = this.quickControl.value as QuickRangeKey;
+    const quickTimeRange = this.quickControl.value as QuickRangeKey
+    const dateTimeCtrl = this.timeForm.get('dateTimeRange') as FormControl<DateTimeRange | null>
+    let fromIso: string | undefined
+    let toIso: string | undefined
+
+    if (!quickTimeRange && !dateTimeCtrl.value) {
+      this.errorMessage = 'Bitte komplettes Zeitintervall auswählen oder Quick-Range klicken.'
       return
     }
 
-    // Reset Errors
+    if (quickTimeRange) {
+      fromIso = undefined
+      toIso = undefined
+    } else {
+      if (!dateTimeCtrl) {
+        this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
+        return
+      }
+
+      // Build ISO strings
+      const { fromDate, fromTime, toDate, toTime } = dateTimeCtrl.value as DateTimeRange
+      fromIso = this.combineDateAndTime(fromDate!, fromTime!)
+      toIso = this.combineDateAndTime(toDate!, toTime!)
+    }
     this.errorMessage = undefined
     this.timeError = undefined
-
-    // Build ISO strings
-    const { fromDate, fromTime, toDate, toTime } = dateTimeCtrl.value as DateTimeRange
-    const fromIso = this.combineDateAndTime(fromDate!, fromTime!)
-    const toIso = this.combineDateAndTime(toDate!, toTime!)
-
     // Fetch all series
     const calls = selectedConfigs.map((cfg) =>
-      this.backend.getGroupedByAlias(cfg.measurement!.alias!, fromIso, toIso).pipe(take(1))
+      this.backend
+        .getGroupedByAlias(cfg.measurement!.alias!, fromIso, toIso, quickTimeRange)
+        .pipe(take(1))
     )
 
     forkJoin(calls).subscribe({
@@ -143,11 +157,11 @@ export class HistorischeAnalysePageComponent implements OnInit {
           })
 
           const id = Date.now().toString()
+          const label = quickTimeRange ? [quickTimeRange] : [fromIso!, ' - ', toIso!]
           const newChart: SavedChart = {
             id,
             titles: selectedConfigs.map((c) => c.measurement!.measurementName),
-            from: fromIso,
-            to: toIso,
+            label,
             series,
             chartType: selectedConfigs[0].chartType,
           }
@@ -176,4 +190,6 @@ export class HistorischeAnalysePageComponent implements OnInit {
     this.savedCharts = this.savedCharts.filter((c) => c.id !== id)
     this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
   }
+
+  protected readonly QuickRangeKey = QuickRangeKey
 }

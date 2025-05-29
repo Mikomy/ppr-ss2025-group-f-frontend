@@ -6,6 +6,7 @@ import { SensorGroup, StatisticResult, Series } from '../../models/stats.model'
 import { Measurement } from '../../models/measurement.model'
 import { ScatterDataPoint } from 'chart.js'
 import { Anomaly } from '../../models/anomaly.model'
+import { QuickRangeKey } from '../../models/quickRange.enum'
 
 /**
  * Service responsible for fetching sensor measurements
@@ -26,9 +27,15 @@ export class StatsService {
    * @param group  SensorGroup containing measurementName + sensorId list
    * @param from   Start Date (inclusive)
    * @param to     End Date (inclusive)
+   * @param quickRange
    * @returns      Observable of the computed StatisticResult
    */
-  computeStats(group: SensorGroup, from: Date, to: Date): Observable<StatisticResult> {
+  computeStats(
+    group: SensorGroup,
+    from?: Date,
+    to?: Date,
+    quickRange?: QuickRangeKey
+  ): Observable<StatisticResult> {
     if (!group.sensors.length) {
       return of({
         count: 0,
@@ -47,11 +54,11 @@ export class StatsService {
     }
 
     const alias = group.sensors[0].alias
-    const isoFrom = from.toISOString()
-    const isoTo = to.toISOString()
+    const isoFrom = from?.toISOString()
+    const isoTo = to?.toISOString()
 
     // One HTTP call for the whole measurement (all sensors)
-    return this.backend.getGroupedByAlias(alias, isoFrom, isoTo).pipe(
+    return this.backend.getGroupedByAlias(alias, isoFrom, isoTo, quickRange).pipe(
       map((all: Measurement[]) => {
         console.log('>>> group.sensors:', group.sensors)
         console.log('>>> group.alias:', alias)
@@ -105,12 +112,19 @@ export class StatsService {
    * @param g2   Second SensorGroup
    * @param from Start Date
    * @param to   End Date
+   * @param quickRange
    * @returns    Observable<number> correlation in [-1,1]
    */
-  computeCorrelation(g1: SensorGroup, g2: SensorGroup, from: Date, to: Date): Observable<number> {
+  computeCorrelation(
+    g1: SensorGroup,
+    g2: SensorGroup,
+    from?: Date,
+    to?: Date,
+    quickRange?: QuickRangeKey
+  ): Observable<number> {
     return forkJoin({
-      s1: this.computeStats(g1, from, to),
-      s2: this.computeStats(g2, from, to),
+      s1: this.computeStats(g1, from, to, quickRange),
+      s2: this.computeStats(g2, from, to, quickRange),
     }).pipe(
       map(({ s1, s2 }) => {
         const x = s1.series.flatMap((sr) => sr.points.map((p) => p.y))
@@ -166,10 +180,16 @@ export class StatsService {
    * @param group   SensorGroup to analyze
    * @param from    Start date (inclusive)
    * @param to      End date (inclusive)
+   * @param quickRange
    * @returns       Observable emitting array of Anomaly objects
    */
-  detectOutliers(group: SensorGroup, from: Date, to: Date): Observable<Anomaly[]> {
-    return this.computeStats(group, from, to).pipe(
+  detectOutliers(
+    group: SensorGroup,
+    from?: Date,
+    to?: Date,
+    quickRange?: QuickRangeKey
+  ): Observable<Anomaly[]> {
+    return this.computeStats(group, from, to, quickRange).pipe(
       map((stats) => this.findOutliers(stats)),
       catchError(() => of([]))
     )

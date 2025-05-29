@@ -22,6 +22,22 @@
 
           <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
 
+          <div class="quick-buttons">
+            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_WEEK)">
+              Berechne die letzte Woche
+            </button>
+            <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_MONTH)">
+              Berechne den vorigen Monat
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)"
+            >
+              Berechne die letzten 90 Tage
+            </button>
+          </div>
+
           <div class="button-group">
             <button mat-raised-button color="primary" type="submit">
               <i class="fas fa-calculator"></i> Berechnen

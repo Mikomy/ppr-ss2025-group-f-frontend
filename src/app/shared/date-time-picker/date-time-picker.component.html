@@ -30,20 +30,20 @@
     </mat-form-field>
   </div>
 
-  <div class="quick-buttons">
-    <button mat-stroked-button type="button" (click)="setLastWeek()" class="quick-select-btn">
-      <i class="fas fa-calendar-week"></i>
-      Letzte Woche
-    </button>
-    <button mat-stroked-button type="button" (click)="setLast30Days()" class="quick-select-btn">
-      <i class="fas fa-calendar-alt"></i>
-      Letzte 30 Tage
-    </button>
-    <button mat-stroked-button type="button" (click)="setLast60Days()" class="quick-select-btn">
-      <i class="fas fa-calendar-plus"></i>
-      Letzte 60 Tage
-    </button>
-  </div>
+  <!--  <div class="quick-buttons">-->
+  <!--    <button mat-stroked-button type="button" (click)="setLastWeek()" class="quick-select-btn">-->
+  <!--      <i class="fas fa-calendar-week"></i>-->
+  <!--      Letzte Woche-->
+  <!--    </button>-->
+  <!--    <button mat-stroked-button type="button" (click)="setLastMonth()" class="quick-select-btn">-->
+  <!--      <i class="fas fa-calendar-alt"></i>-->
+  <!--      Letzte Monate-->
+  <!--    </button>-->
+  <!--    <button mat-stroked-button type="button" (click)="setLast90Days()" class="quick-select-btn">-->
+  <!--      <i class="fas fa-calendar-plus"></i>-->
+  <!--      Letzte 90 Tage-->
+  <!--    </button>-->
+  <!--  </div>-->
   <mat-error *ngIf="rangeForm.errors?.['required'] && rangeForm.dirty">
     Bitte komplettes Zeitintervall auswählen.
   </mat-error>

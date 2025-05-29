@@ -14,6 +14,20 @@
     </div>
     <div class="stat-card datepicker-card">
       <app-date-time-picker formControlName="dateTimeRange"></app-date-time-picker>
+
+      <!-- Quick Range Buttons in Page -->
+      <div class="quick-buttons">
+        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_WEEK)">
+          Neues Diagramm zur letzten Woche
+        </button>
+        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_MONTH)">
+          Neues Diagramm zum vorigen Monat
+        </button>
+        <button mat-stroked-button type="button" (click)="applyQuick(QuickRangeKey.LAST_90_DAYS)">
+          Neues Diagramm zu den letzten 90 Tagen
+        </button>
+      </div>
+
       <button mat-raised-button color="primary" (click)="loadCharts()">
         <i class="fas fa-plus"></i> Neue Charts hinzufügen
       </button>
