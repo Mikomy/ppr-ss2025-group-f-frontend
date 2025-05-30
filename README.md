@@ -9,7 +9,7 @@
   - Docker & Docker Compose
 - Project Structure
 - Pages Overview
-  1. Historical Analysis
+  1. Chart Analysis
   2. Statistical Quick Analysis
   3. Tabular View
   4. Home Dashboard
@@ -29,10 +29,10 @@
 
 nexus-frontend is an Angular v19 application for visualizing and analyzing sensor data stored in InfluxDB. Features include:
 
-Ziele:
+Objectives:
 - Intuitive, interaktive Visualisierung von Sensordaten
-- Einfache Filter- und Auswahlmöglichkeiten (Zeitspanne, Sensor/Measurement)
-- Erweiterbare Architektur für künftige Features
+- Easy filtering and selection (by time range, sensor/measurement)
+- Extendable architecture for future feature development
 - Interactive charts: line, bar, heatmap, scatter
 - Real-time and historical dashboards
 - AI-generated synopses via OpenAI
@@ -68,6 +68,8 @@ yarn install
 ```bash
 npm start
 ```
+The app will be available at http://localhost:4200/.
+
 - Build (dev): 
 ```bash
 npm run watch
@@ -120,9 +122,9 @@ across all pages. This component renders a top bar containing:
 - Title: Shows “The Nexus Project” next to the logo.
 - Navigation Links: Horizontal links for each route:
   - Home - Live Overview (/)
-  - Historical Analysis (/history)
+  - Chart Analysis (/chart)
   - Statistics (/statistics)
-  - Table View (/tableView)
+  - Table View (/table)
 
 When a link matches the active route, an active class is applied for visual 
 feedback. The TabNavigationComponent resides in src/app/components/tab-navigation 
@@ -131,7 +133,7 @@ and is included in the main AppComponent template.
 Acknowledgements
 ## Pages Overview
 
-### 1. Historical Analysis
+### 1. Chart Analysis
 
 **Objective:** Show historical sensor data in customizable charts.
 
@@ -143,7 +145,7 @@ Acknowledgements
 - Remove or reorder panels; persists in localStorage.
 
 **Tech:**
-- `HistorischeAnalysePageComponent`
+- `ChartViewPageComponent`
 - Subcomponents: `ChartConfigRowComponent`, `ChartPanelComponent`
 - Services: `BackendService.getGroupedByAlias()`, `WebStorageService`
 
@@ -195,20 +197,20 @@ Acknowledgements
 
 #### Shared & Services
 - **Shared Modules** (`src/app/shared`)
-  - Wiederverwendbare Controls: Sensor-Dropdown, DateTime-Picker, Measurement-Table
+  - Reusable controls: Sensor-Dropdown, DateTime-Picker, Measurement-Table
 - **BackendService** (`src/app/services/backend.service.ts`)
-  - Zentrale HTTP-Aufrufe: Messwerte, gruppierte Daten, Statistik-Endpoints, OpenAI-Synopsis
+  - Centralized HTTP requests: measurement values, grouped data, statistics endpoints, OpenAI-generated synopses
 - **StatsService** (`src/app/components/statistics/stats.service.ts`)
-  - Berechnung von Mittelwert, Median, Quartilen, IQR, Trend und Korrelation
-  - Tukey-IQR-Regel zur Ausreißererkennung
+  - Calculates mean, median, quartiles, IQR, trend, and correlation
+  - Implements Tukey’s IQR rule for outlier detection
 
 - **AppModule / AppComponent**
-  - Bootstrap, globales Styling, Einbindung der Navigation
+  - Bootstrapping, global styling, and navigation integration
 - **TabNavigationComponent** (`src/app/components/tab-navigation`)
-  - Obenliegende Navbar mit Links zu allen Seiten
+  - Top navigation bar with links to all main pages.
 
-- **Assets**: `src/assets/sensor-measurements.json` stellt initiale Dropdown-Liste.
-  - Erweiterung um neue Sensor-Measurement-Kombinationen durch Ergänzung dieser Datei.
+- **Assets**: `src/assets/sensor-measurements.json` provides the initial dropdown list.
+  - Add new sensor-measurement combinations by extending this file.
 ---
 
 ## Build

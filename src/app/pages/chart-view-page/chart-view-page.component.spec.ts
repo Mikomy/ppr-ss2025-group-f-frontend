@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { of, throwError } from 'rxjs'
 
-import { HistorischeAnalysePageComponent } from './historische-analyse-page.component'
+import { ChartViewPageComponent } from './chart-view-page.component'
 import { BackendService } from '../../services/backend.service'
 import { WebStorageService } from '../../services/webStorage.service'
 import { ChartConfig } from '../../components/charts/chart-config-row/chart-config-row.component'
@@ -34,9 +34,9 @@ const sampleMeasurement: Measurement = {
   dataPoints: [{ timestamp: '2025-04-01T00:00:00Z', value: 100 } as DP],
 }
 
-describe('HistorischeAnalysePageComponent', () => {
-  let component: HistorischeAnalysePageComponent
-  let fixture: ComponentFixture<HistorischeAnalysePageComponent>
+describe('chart-view-page Component', () => {
+  let component: ChartViewPageComponent
+  let fixture: ComponentFixture<ChartViewPageComponent>
   let backendSpy: jasmine.SpyObj<BackendService>
   let storageSpy: jasmine.SpyObj<WebStorageService>
 
@@ -47,7 +47,7 @@ describe('HistorischeAnalysePageComponent', () => {
     backendSpy.getDropdownOption.and.returnValue(of([]))
 
     await TestBed.configureTestingModule({
-      imports: [HistorischeAnalysePageComponent, ReactiveFormsModule, FormsModule],
+      imports: [ChartViewPageComponent, ReactiveFormsModule, FormsModule],
       providers: [
         { provide: BackendService, useValue: backendSpy },
         { provide: WebStorageService, useValue: storageSpy },
@@ -55,7 +55,7 @@ describe('HistorischeAnalysePageComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents()
 
-    fixture = TestBed.createComponent(HistorischeAnalysePageComponent)
+    fixture = TestBed.createComponent(ChartViewPageComponent)
     component = fixture.componentInstance
     fixture.detectChanges() // ngOnInit
   })

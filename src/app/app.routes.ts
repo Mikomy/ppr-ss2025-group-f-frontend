@@ -12,10 +12,10 @@ export const routes: Routes = [
       import('./pages/home-page/home-page.component').then((m) => m.HomePageComponent),
   },
   {
-    path: 'history',
+    path: 'chart',
     loadComponent: () =>
-      import('./pages/historische-analyse-page/historische-analyse-page.component').then(
-        (m) => m.HistorischeAnalysePageComponent
+      import('./pages/chart-view-page/chart-view-page.component').then(
+        (m) => m.ChartViewPageComponent
       ),
   },
   {
@@ -26,9 +26,9 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'tableView',
+    path: 'table',
     loadComponent: () =>
-      import('./pages/tableView-page/tableView-page.component').then(
+      import('./pages/table-view-page/table-view-page.component').then(
         (m) => m.TableViewPageComponent
       ),
   },

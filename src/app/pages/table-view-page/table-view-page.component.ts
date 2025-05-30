@@ -28,7 +28,7 @@ import { QuickRangeKey } from '../../models/quickRange.enum'
  * web storage under a configurable key.
  */
 @Component({
-  selector: 'app-tabellenansicht-page',
+  selector: 'app-table-view-page',
   standalone: true,
   imports: [
     CommonModule,
@@ -43,8 +43,8 @@ import { QuickRangeKey } from '../../models/quickRange.enum'
     DateTimePickerComponent,
     CdkDrag,
   ],
-  templateUrl: './tableView-page.component.html',
-  styleUrls: ['./tableView-page.component.scss'],
+  templateUrl: './table-view-page.component.html',
+  styleUrls: ['./table-view-page.component.scss'],
 })
 export class TableViewPageComponent implements OnInit {
   /** Currently selected dropdown option containing sensor and measurement info */

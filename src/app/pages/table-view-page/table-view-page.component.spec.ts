@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { of, throwError } from 'rxjs'
 
-import { TableViewPageComponent } from './tableView-page.component'
+import { TableViewPageComponent } from './table-view-page.component'
 import { BackendService } from '../../services/backend.service'
 import { WebStorageService } from '../../services/webStorage.service'
 import { DropdownOptionModel } from '../../models/dropdown.option.model'

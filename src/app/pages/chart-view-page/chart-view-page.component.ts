@@ -30,7 +30,7 @@ import { FormControl } from '@angular/forms'
 import { QuickRangeKey } from '../../models/quickRange.enum'
 
 @Component({
-  selector: 'app-historische-analyse-page',
+  selector: 'app-chart-view-page',
   standalone: true,
   imports: [
     CommonModule,
@@ -51,10 +51,10 @@ import { QuickRangeKey } from '../../models/quickRange.enum'
     DateTimePickerComponent,
     CdkDragHandle,
   ],
-  templateUrl: './historische-analyse-page.component.html',
-  styleUrl: './historische-analyse-page.component.scss',
+  templateUrl: './chart-view-page.component.html',
+  styleUrl: './chart-view-page.component.scss',
 })
-export class HistorischeAnalysePageComponent implements OnInit {
+export class ChartViewPageComponent implements OnInit {
   configs: ChartConfig[] = Array(3)
     .fill({ color: '#3366cc', chartType: 'line' })
     .map((c) => ({ ...c }))
