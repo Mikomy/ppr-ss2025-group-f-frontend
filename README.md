@@ -1,6 +1,7 @@
 # Nexus Frontend
 
 ## Table of Contents
+
 - Project Overview
 - Prerequisites
 - Installation
@@ -24,12 +25,12 @@
 - Contributing
 - License
 
-
 ## Project Overview
 
 nexus-frontend is an Angular v19 application for visualizing and analyzing sensor data stored in InfluxDB. Features include:
 
 Objectives:
+
 - Intuitive, interaktive Visualisierung von Sensordaten
 - Easy filtering and selection (by time range, sensor/measurement)
 - Extendable architecture for future feature development
@@ -43,48 +44,61 @@ The frontend consumes a Spring Boot REST API for data retrieval.
 ## Prerequisites
 
 Make sure you have installed:
+
 - Node.js >= 18.x
 - npm >= 9.x or Yarn >= 1.x
 - Angular CLI
 
-
 ## Installation
+
 Clone the repo:
-   ```bash
-git clone https://github.com/your-org/nexus-frontend.git
+
+```bash
+git clone https://github.com/Mikomy/ppr-ss2025-group-f-frontend.git
 cd nexus-frontend
-   ```
+```
+
 Install dependencies:
+
 ```bash
 npm install
 ```
+or
 ```bash
 yarn install
-   ```
+```
 
 ## Configuration
+
 ### Angular CLI
-- Serve (dev): 
+
+- Serve (dev):
+
 ```bash
 npm start
 ```
+
 The app will be available at http://localhost:4200/.
 
-- Build (dev): 
+- Build (dev):
+
 ```bash
 npm run watch
 ```
-- Build (prod): 
+
+- Build (prod):
+
 ```bash
 npm run build
 ```
 
 ### Docker & Docker Compose
+
 Currently not configured.
 To add containerized setup, include a Dockerfile and docker-compose.yml and document the commands here.
 
-
 ## Project Structure
+
 ```
 .angular/            # Angular CLI config
 .github/             # CI workflows (.github/workflows)
@@ -116,8 +130,10 @@ README.md           # This file
 ```
 
 ## Navigation
+
 The application uses a TabNavigationComponent to provide consistent navigation
 across all pages. This component renders a top bar containing:
+
 - Logo: Displays the Nexus logo (assets/nexus_logo.jpeg) on the left.
 - Title: Shows “The Nexus Project” next to the logo.
 - Navigation Links: Horizontal links for each route:
@@ -126,11 +142,12 @@ across all pages. This component renders a top bar containing:
   - Statistics (/statistics)
   - Table View (/table)
 
-When a link matches the active route, an active class is applied for visual 
-feedback. The TabNavigationComponent resides in src/app/components/tab-navigation 
+When a link matches the active route, an active class is applied for visual
+feedback. The TabNavigationComponent resides in src/app/components/tab-navigation
 and is included in the main AppComponent template.
 
 Acknowledgements
+
 ## Pages Overview
 
 ### 1. Chart Analysis
@@ -138,6 +155,7 @@ Acknowledgements
 **Objective:** Show historical sensor data in customizable charts.
 
 **Workflow:**
+
 - Select max three sensor+measurement combos.
 - Choose color and chart type (line, bar, heatmap).
 - Set time range or quick preset (Last Week/Month/90 Days).
@@ -145,6 +163,7 @@ Acknowledgements
 - Remove or reorder panels; persists in localStorage.
 
 **Tech:**
+
 - `ChartViewPageComponent`
 - Subcomponents: `ChartConfigRowComponent`, `ChartPanelComponent`
 - Services: `BackendService.getGroupedByAlias()`, `WebStorageService`
@@ -154,12 +173,14 @@ Acknowledgements
 **Objective:** Compare two groups statistically and detect anomalies.
 
 **Workflow:**
+
 - Pick two sensor groups.
 - Define time interval (manual or quick preset).
 - Click **Compute** for stats: count, min, max, mean, median, stdDev, quartiles, IQR, Pearson correlation.
 - Click **Show Anomalies** to highlight outliers (Tukey 1.5×IQR).
 
 **Tech:**
+
 - `StatisticsPageComponent`
 - Subcomponents: `SensorGroupSelectorComponent`, `ScatterChartComponent`, `AnomalyListComponent`
 - `StatsService`
@@ -169,6 +190,7 @@ Acknowledgements
 **Objective:** Render raw data in interactive tables.
 
 **Workflow:**
+
 - Select sensor+measurement from dropdown.
 - Choose time range or quick preset.
 - Click **Add Table** to display draggable tables.
@@ -176,6 +198,7 @@ Acknowledgements
 - Configs persist in localStorage.
 
 **Tech:**
+
 - `TableViewPageComponent`
 - Subcomponents: `SensorDropdownComponent`, `MeasurementTableComponent` (MatTable + MatPaginator)
 
@@ -184,52 +207,63 @@ Acknowledgements
 **Objective:** Provide real-time stats, latest measurement, and AI synopsis.
 
 **Workflow:**
+
 - Optionally filter by sensor+measurement.
 - View cards: total points, average, min, max, latest.
 - Inline bar chart of min/max across measurements.
 - Read OpenAI synopsis (auto-refresh on data load).
 
 **Tech:**
+
 - `HomePageComponent` (3s refresh)
 - Native `<select>` + reset button
 - Material cards + custom layouts
 - `BackendService.getDashboardStatistics()`, `getOpenAiSynopsis()`
 
 #### Shared & Services
+
 - **Shared Modules** (`src/app/shared`)
   - Reusable controls: Sensor-Dropdown, DateTime-Picker, Measurement-Table
 - **BackendService** (`src/app/services/backend.service.ts`)
   - Centralized HTTP requests: measurement values, grouped data, statistics endpoints, OpenAI-generated synopses
 - **StatsService** (`src/app/components/statistics/stats.service.ts`)
+
   - Calculates mean, median, quartiles, IQR, trend, and correlation
   - Implements Tukey’s IQR rule for outlier detection
 
 - **AppModule / AppComponent**
   - Bootstrapping, global styling, and navigation integration
 - **TabNavigationComponent** (`src/app/components/tab-navigation`)
+
   - Top navigation bar with links to all main pages.
 
 - **Assets**: `src/assets/sensor-measurements.json` provides the initial dropdown list.
   - Add new sensor-measurement combinations by extending this file.
+
 ---
 
 ## Build
+
 To create a production-ready bundle:
 Production build:
+
 ```bash
 npm run build -- --configuration production
 ```
+
 ```bash
 ng build --prod
 ```
+
 Outputs optimized files into the dist/ directory.
 Enables AOT compilation, minification, and tree-shaking.
 Custom output path:
+
 ```bash
 ng build --output-path=public/ngx-dist
 ```
-Use when integrating into another server or custom directory.
 
+Use when integrating into another server or custom directory.
 
 ## Tests
 
