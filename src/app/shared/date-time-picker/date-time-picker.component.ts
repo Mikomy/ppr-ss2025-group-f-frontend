@@ -133,6 +133,17 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
   writeValue(obj: DateTimeRange): void {
     if (obj) {
       this.rangeForm.setValue(obj, { emitEvent: false })
+    } else {
+      // obj == null → komplett zurücksetzen
+      this.rangeForm.reset(
+        {
+          fromDate: null,
+          fromTime: null,
+          toDate: null,
+          toTime: null,
+        },
+        { emitEvent: false }
+      )
     }
   }
 
@@ -172,36 +183,6 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator 
     d.setHours(h, m, 0, 0)
     return d
   }
-
-  // setLastWeek(): void { this.applyQuickRange(7, QuickRangeKey.LAST_WEEK); }
-  // setLastMonth(): void { this.applyQuickRange(30, QuickRangeKey.LAST_MONTH); }
-  // setLast90Days(): void { this.applyQuickRange(90, QuickRangeKey.LAST_90_DAYS); }
-  //
-  // private applyQuickRange(days: number, key: QuickRangeKey) {
-  //   const now = new Date()
-  //   const start = new Date(now)
-  //   start.setDate(now.getDate() - days)
-  //   this.rangeForm.setValue(
-  //     {
-  //       fromDate: start,
-  //       fromTime: this.padTime(start),
-  //       toDate: now,
-  //       toTime: this.padTime(now),
-  //     },
-  //     { emitEvent: false }
-  //   )
-  //   if (this.rangeForm.valid) {
-  //     this.quickRange = key;
-  //     this.quickRangeChange.emit(key);
-  //     this.onChangeFn(this.rangeForm.value)
-  //     this.onValidatorChange?.()
-  //   }
-  // }
-  // private padTime(date: Date): string {
-  //   const h = date.getHours().toString().padStart(2, '0')
-  //   const m = date.getMinutes().toString().padStart(2, '0')
-  //   return `${h}:${m}`
-  // }
 
   /**
    * Custom validator to ensure complete range, valid order and minDate.

@@ -90,15 +90,13 @@ export class TableViewPageComponent implements OnInit {
   ngOnInit(): void {
     const raw = this.storage.get(this.storageKey)
     this.savedTables = raw ? (JSON.parse(raw) as SavedTable[]) : []
+
     this.timeForm = this.fb.group({
-      dateTimeRange: [null],
-      quickRange: [null],
+      dateTimeRange: [null as DateTimeRange | null],
+      quickRange: [null as QuickRangeKey | null],
     })
   }
 
-  // get pickerControl(): FormControl {
-  //   return this.timeForm.get('dateTimeRange') as FormControl;
-  // }
   applyQuick(key: QuickRangeKey): void {
     this.timeForm.patchValue({ quickRange: key, dateTimeRange: null })
     this.loadDetailedMeasurement()
@@ -116,9 +114,6 @@ export class TableViewPageComponent implements OnInit {
     this.errorMessage = undefined
   }
 
-  // onQuickRangeChange(key: QuickRangeKey | null): void {
-  //   this.quickControl.setValue(key);
-  // }
   /**
    * Validates user input and, if valid, requests detailed measurement data
    * from the backend service and adds a new table to `savedTables`.
@@ -170,7 +165,7 @@ export class TableViewPageComponent implements OnInit {
           const sensorName = this.selectedOption!.sensor.name
           const match = measurement.find((m) => m.sensor.name === sensorName)
           if (!match || !match.dataPoints.length) {
-            this.errorMessage = 'Keine Daten für Sensor "${this.selectedOption!.sensor.name}".'
+            this.errorMessage = `Keine Daten für Sensor "${this.selectedOption!.sensor.name}".`
             return
           }
           if (!match.dataPoints.length) {
@@ -207,8 +202,11 @@ export class TableViewPageComponent implements OnInit {
       { id, name: this.selectedOption!.measurementName, label, data },
     ]
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
-  }
 
+    if (timeRange != null) {
+      this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })
+    }
+  }
   /**
    * Removes a table configuration by id and updates persisted storage.
    * @param id Unique identifier of the table to remove
@@ -217,6 +215,6 @@ export class TableViewPageComponent implements OnInit {
     this.savedTables = this.savedTables.filter((t) => t.id !== id)
     this.storage.set(this.storageKey, JSON.stringify(this.savedTables))
   }
-
+  /** Expose QuickRangeKey enum to the template */
   protected readonly QuickRangeKey = QuickRangeKey
 }

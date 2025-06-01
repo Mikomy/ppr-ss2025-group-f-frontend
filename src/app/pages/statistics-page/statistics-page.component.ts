@@ -70,12 +70,16 @@ export class StatisticsPageComponent implements OnInit {
   /** Flag: user clicked 'Anomalien anzeigen' */
   anomalyChecked = false
 
-  /** Results and derived data */
+  /** Computed statistics result for the first sensor group */
   resultsGroup1?: StatisticResult
+  /** Computed statistics result for the second sensor group */
   resultsGroup2?: StatisticResult
+  /** Pearson correlation coefficient between both groups */
   correlation?: number
+  /** List of detected anomalies for the groups */
   anomaliesGroup1: Anomaly[] = []
   anomaliesGroup2: Anomaly[] = []
+  /** Scatter plot data points for simultaneous anomalies between both groups */
   anomaliesPointsGroup1: ScatterDataPoint[] = []
   anomaliesPointsGroup2: ScatterDataPoint[] = []
   simultaneousAnomalies: ScatterDataPoint[] = []
@@ -87,6 +91,11 @@ export class StatisticsPageComponent implements OnInit {
 
   private storageKey = 'statisticsResult'
 
+  /**
+   * @param fb      FormBuilder for creating reactive forms
+   * @param stats   Service for computing statistics and correlations
+   * @param storage Service for reading and writing to local storage
+   */
   constructor(
     private fb: FormBuilder,
     private stats: StatsService,
@@ -99,8 +108,8 @@ export class StatisticsPageComponent implements OnInit {
   ngOnInit(): void {
     this.timeForm = this.fb.group(
       {
-        dateTimeRange: this.fb.control(null, { updateOn: 'submit' }),
-        quickRange: [null],
+        dateTimeRange: this.fb.control(null as DateTimeRange | null, { updateOn: 'submit' }),
+        quickRange: [null as QuickRangeKey | null],
         group1: [null, Validators.required],
         group2: [null, Validators.required],
       }
@@ -109,12 +118,19 @@ export class StatisticsPageComponent implements OnInit {
     this.loadFromStorage()
   }
 
-  get dateControl(): FormControl {
-    return this.timeForm.get('dateTimeRange') as FormControl
-  }
+  /**
+   * Getter for the quickRange FormControl.
+   *
+   * @returns The FormControl managing the quickRange value
+   */
   get quickControl(): FormControl {
     return this.timeForm.get('quickRange') as FormControl
   }
+  /**
+   * Getter for the sensor groups FormControl.
+   *
+   * @returns The FormControl managing the SensorGroup selection
+   */
   get g1(): FormControl {
     return this.timeForm.get('group1') as FormControl
   }
@@ -122,6 +138,13 @@ export class StatisticsPageComponent implements OnInit {
     return this.timeForm.get('group2') as FormControl
   }
 
+  /**
+   * Applies a predefined quick time range (e.g., last week, last month).
+   * Validates that both sensor groups are selected, sets the quickRange value,
+   * and triggers computation of statistics.
+   *
+   * @param key The QuickRangeKey enum value representing the selected quick range
+   */
   applyQuick(key: QuickRangeKey): void {
     if (!this.group1Ctrl.value || !this.group2Ctrl.value) {
       this.errorMessage = 'Bitte beide Gruppen auswählen.'
@@ -131,9 +154,7 @@ export class StatisticsPageComponent implements OnInit {
     this.quickControl.setValue(key)
     this.onCompute()
   }
-  onQuickRangeChange(key: QuickRangeKey | null): void {
-    this.quickControl.setValue(key)
-  }
+
   /**
    * Handler for the "Berechnen" button: validate, clear prior state,
    * and trigger fetching of new statistics and correlation.
@@ -210,7 +231,13 @@ export class StatisticsPageComponent implements OnInit {
         quickTimeRange || undefined
       ),
     }).subscribe({
-      next: ({ s1, s2, corr }) => this.onResults(s1, s2, corr),
+      next: ({ s1, s2, corr }) => {
+        this.onResults(s1, s2, corr)
+
+        if (quickTimeRange != null) {
+          this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })
+        }
+      },
       error: () =>
         (this.errorMessage =
           'Für mindestens eine Gruppe wurden keine Daten im gewählten Zeitraum gefunden.'),
@@ -274,6 +301,14 @@ export class StatisticsPageComponent implements OnInit {
     )
   }
 
+  /**
+   * Finds data points that occur within a specified time tolerance between two lists.
+   *
+   * @param list1       Scatter data points from group1
+   * @param list2       Scatter data points from group2
+   * @param toleranceMs Time tolerance in milliseconds for matching timestamps
+   * @returns           Array of simultaneous ScatterDataPoint objects
+   */
   private findSimultaneous(
     list1: ScatterDataPoint[],
     list2: ScatterDataPoint[],
@@ -282,6 +317,11 @@ export class StatisticsPageComponent implements OnInit {
     return list1.filter((p1) => list2.some((p2) => Math.abs(p1.x - p2.x) <= toleranceMs))
   }
 
+  /**
+   * Computes the dateRange object from the form's DateTimeRange control.
+   *
+   * @returns An object containing `from` and `to` Date values
+   */
   private get dateRange(): { from: Date; to: Date } {
     const raw = this.timeForm.value.dateTimeRange as DateTimeRange
     return {
@@ -362,7 +402,13 @@ export class StatisticsPageComponent implements OnInit {
       }
     }
   }
-
+  /**
+   * Saves computed statistics and correlation to local storage.
+   *
+   * @param s1   StatisticResult for group1
+   * @param s2   StatisticResult for group2
+   * @param corr Pearson correlation coefficient
+   */
   private saveToStorage(s1: StatisticResult, s2: StatisticResult, corr: number) {
     const payload = JSON.stringify({ s1, s2, corr })
     this.storage.set(this.storageKey, payload)
@@ -392,5 +438,6 @@ export class StatisticsPageComponent implements OnInit {
     return this.anomaliesGroup2.map((a) => +a.timestamp)
   }
 
+  /** Expose QuickRangeKey enum to the template */
   protected readonly QuickRangeKey = QuickRangeKey
 }

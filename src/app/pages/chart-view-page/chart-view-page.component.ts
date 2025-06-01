@@ -55,49 +55,89 @@ import { QuickRangeKey } from '../../models/quickRange.enum'
   styleUrl: './chart-view-page.component.scss',
 })
 export class ChartViewPageComponent implements OnInit {
+  /**
+   * An array of ChartConfig objects, initialized with three default configs.
+   * Each config holds color and chartType properties; measurement is assigned later.
+   */
   configs: ChartConfig[] = Array(3)
     .fill({ color: '#3366cc', chartType: 'line' })
     .map((c) => ({ ...c }))
+
+  /** Reactive form containing dateTimeRange and quickRange FormControls */
   timeForm!: FormGroup
-
+  /** Error message shown when date/time validation fails */
   timeError?: string
+  /** General error message shown for measurement loading errors */
   errorMessage?: string
-
+  /** Array of charts persisted in local storage */
   savedCharts: SavedChart[] = []
+  /** Key used to store savedCharts in local storage */
   private storageKey = 'saved-sensor-charts'
 
+  /**
+   * @param fb         FormBuilder for constructing reactive forms
+   * @param backend    Service responsible for fetching measurement data
+   * @param storage    Service for reading/writing local storage
+   */
   constructor(
     private fb: FormBuilder,
     private backend: BackendService,
     private storage: WebStorageService
   ) {}
 
+  /**
+   * Initializes the form, loads any saved charts,
+   * and sets up a valueChanges subscription to clear quickRange when the user
+   * selects a manual date range.
+   */
   ngOnInit(): void {
     const raw = this.storage.get(this.storageKey)
     this.savedCharts = raw ? JSON.parse(raw) : []
+
     this.timeForm = this.fb.group({
-      dateTimeRange: [null],
-      quickRange: [null],
+      dateTimeRange: [null as DateTimeRange | null],
+      quickRange: [null as QuickRangeKey | null],
     })
   }
 
+  /**
+   * Applies a predefined quick time range (e.g., last week, last month).
+   * Clears the manual date picker, sets quickRange, and then triggers chart loading.
+   *
+   * @param key  The QuickRangeKey enum value representing the selected quick range
+   */
   applyQuick(key: QuickRangeKey): void {
     this.timeForm.patchValue({ quickRange: key, dateTimeRange: null })
     this.loadCharts()
   }
-  // onQuickRangeChange(key:QuickRangeKey | null) {
-  //   this.timeForm.get('quickRange')!.setValue(key);
-  // }
 
+  /**
+   * Updates the ChartConfig at the specified index when its values change.
+   * Also clears any existing error messages.
+   *
+   * @param index   Index of the config row to update
+   * @param config  The new ChartConfig object provided by the child component
+   */
   onConfigChange(index: number, config: ChartConfig): void {
     this.configs[index] = config
     this.errorMessage = undefined
   }
 
+  /**
+   * Getter for the quickRange FormControl.
+   *
+   * @returns FormControl instance managing the quickRange value
+   */
   get quickControl(): FormControl {
     return this.timeForm.get('quickRange') as FormControl
   }
 
+  /**
+   * Validates user input for at least one selected measurement and either a
+   * manual date range or a quick range. Then fetches data for each selected
+   * config in parallel, constructs a new SavedChart from the results, and
+   * persists it to local storage. Resets quickRange after successful load.
+   */
   loadCharts(): void {
     // Validate at least one measurement and full interval
     const selectedConfigs = this.configs.filter((cfg) => cfg.measurement)
@@ -167,6 +207,10 @@ export class ChartViewPageComponent implements OnInit {
           }
           this.savedCharts = [...this.savedCharts, newChart]
           this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
+
+          if (quickTimeRange != null) {
+            this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })
+          }
         } catch (error) {
           if (error instanceof Error) {
             this.errorMessage = error.message
@@ -179,6 +223,13 @@ export class ChartViewPageComponent implements OnInit {
     })
   }
 
+  /**
+   * Combines a Date object and a time string ("HH:mm") into an ISO string.
+   *
+   * @param date  The Date part of the range
+   * @param time  The time string in "HH:mm" format
+   * @returns     An ISO 8601 formatted string representing the combined date-time
+   */
   private combineDateAndTime(date: Date, time: string) {
     const dt = new Date(date)
     const [h, m] = time.split(':').map(Number)
@@ -186,10 +237,15 @@ export class ChartViewPageComponent implements OnInit {
     return dt.toISOString()
   }
 
+  /**
+   * Removes a saved chart by its unique identifier and updates local storage.
+   *
+   * @param id  The ID of the chart to remove
+   */
   removeChart(id: string): void {
     this.savedCharts = this.savedCharts.filter((c) => c.id !== id)
     this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
   }
-
+  /** Expose QuickRangeKey enum to the template */
   protected readonly QuickRangeKey = QuickRangeKey
 }
