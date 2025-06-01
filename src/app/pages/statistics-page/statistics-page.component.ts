@@ -151,6 +151,14 @@ export class StatisticsPageComponent implements OnInit {
       return
     }
     this.errorMessage = undefined
+    this.timeForm.patchValue(
+      {
+        quickRange: key,
+        dateTimeRange: null,
+      },
+      { emitEvent: false }
+    )
+
     this.quickControl.setValue(key)
     this.onCompute()
   }
