@@ -88,6 +88,7 @@ export class StatisticsPageComponent implements OnInit {
   timeForm!: FormGroup
   submitted = false
   errorMessage?: string
+  private lastQuickRange: QuickRangeKey | null = null
 
   private storageKey = 'statisticsResult'
 
@@ -151,6 +152,7 @@ export class StatisticsPageComponent implements OnInit {
       return
     }
     this.errorMessage = undefined
+    this.lastQuickRange = key
     this.timeForm.patchValue(
       {
         quickRange: key,
@@ -241,10 +243,6 @@ export class StatisticsPageComponent implements OnInit {
     }).subscribe({
       next: ({ s1, s2, corr }) => {
         this.onResults(s1, s2, corr)
-
-        if (quickTimeRange != null) {
-          this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })
-        }
       },
       error: () =>
         (this.errorMessage =
@@ -278,16 +276,30 @@ export class StatisticsPageComponent implements OnInit {
   onShowAnomalies(): void {
     this.errorMessage = undefined
     this.anomalyChecked = true
-    const { from, to } = this.dateRange
 
-    forkJoin({
-      g1: this.stats.detectOutliers(this.group1Ctrl.value, from, to),
-      g2: this.stats.detectOutliers(this.group2Ctrl.value, from, to),
-    }).subscribe(({ g1, g2 }) => {
-      this.anomaliesGroup1 = g1
-      this.anomaliesGroup2 = g2
-      this.prepareScatterPoints()
-    })
+    if (this.timeForm.value.dateTimeRange) {
+      const { from, to } = this.dateRange
+      forkJoin({
+        g1: this.stats.detectOutliers(this.group1Ctrl.value, from, to),
+        g2: this.stats.detectOutliers(this.group2Ctrl.value, from, to),
+      }).subscribe(({ g1, g2 }) => {
+        this.anomaliesGroup1 = g1
+        this.anomaliesGroup2 = g2
+        this.prepareScatterPoints()
+      })
+    } else if (this.lastQuickRange != null) {
+      const qr = this.lastQuickRange
+      forkJoin({
+        g1: this.stats.detectOutliers(this.group1Ctrl.value, undefined, undefined, qr),
+        g2: this.stats.detectOutliers(this.group2Ctrl.value, undefined, undefined, qr),
+      }).subscribe(({ g1, g2 }) => {
+        this.anomaliesGroup1 = g1
+        this.anomaliesGroup2 = g2
+        this.prepareScatterPoints()
+      })
+    } else {
+      this.errorMessage = 'Keine gültige Zeitspanne für die Anomalie-Analyse vorhanden.'
+    }
   }
 
   /**
@@ -352,6 +364,7 @@ export class StatisticsPageComponent implements OnInit {
     this.clearResults()
     this.clearAnomalies()
     this.storage.set(this.storageKey, '')
+    this.lastQuickRange = null
   }
 
   /**
