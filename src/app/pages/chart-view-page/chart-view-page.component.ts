@@ -184,15 +184,17 @@ export class ChartViewPageComponent implements OnInit {
       next: (groups) => {
         try {
           const series = groups.map((measurements, idx) => {
-            const sensor = selectedConfigs[idx].measurement!.sensor.name
+            const cfg = selectedConfigs[idx]
+            const sensor = cfg.measurement!.sensor.name
             const m = measurements.find((x) => x.sensor.name === sensor)
             if (!m || !m.dataPoints.length) {
               throw new Error(`Keine Daten für Sensor ${sensor}`)
             }
             return {
-              label: selectedConfigs[idx].measurement!.measurementName,
+              label: cfg.measurement!.measurementName,
               data: m.dataPoints.map((dp) => ({ timestamp: dp.timestamp, value: dp.value })),
-              color: selectedConfigs[idx].color,
+              color: cfg.color,
+              chartType: cfg.chartType,
             }
           })
 
@@ -203,10 +205,15 @@ export class ChartViewPageComponent implements OnInit {
             titles: selectedConfigs.map((c) => c.measurement!.measurementName),
             label,
             series,
-            chartType: selectedConfigs[0].chartType,
           }
           this.savedCharts = [...this.savedCharts, newChart]
           this.storage.set(this.storageKey, JSON.stringify(this.savedCharts))
+
+          // Reset all sensor dropdowns (measurement = undefined)
+          this.configs = this.configs.map((c) => ({
+            color: c.color,
+            chartType: c.chartType,
+          }))
 
           if (quickTimeRange != null) {
             this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })

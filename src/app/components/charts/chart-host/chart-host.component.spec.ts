@@ -1,13 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { NO_ERRORS_SCHEMA } from '@angular/core'
-import { NGX_ECHARTS_CONFIG } from 'ngx-echarts'
-import { ChartHostComponent } from './chart-host.component'
-import { ChartType } from '../chart-config-row/chart-config-row.component'
+// src/app/components/charts/chart-host/chart-host.component.spec.ts
 
-// Dummy data series for testing
-const dummySeries = [
-  { label: 'A', data: [{ timestamp: '2025-04-01T00:00:00Z', value: 1 }], color: '#000' },
-]
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ChartHostComponent } from './chart-host.component'
+import { ChartDataset } from 'chart.js'
 
 describe('ChartHostComponent', () => {
   let component: ChartHostComponent
@@ -16,45 +11,69 @@ describe('ChartHostComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ChartHostComponent],
-      providers: [{ provide: NGX_ECHARTS_CONFIG, useValue: {} }],
-      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents()
 
     fixture = TestBed.createComponent(ChartHostComponent)
     component = fixture.componentInstance
-    component.dataSeries = dummySeries
   })
 
-  it('should create', () => {
-    fixture.detectChanges()
+  it('should create the component', () => {
     expect(component).toBeTruthy()
   })
 
-  it('should render line chart by default', () => {
-    // default chartType is 'line'
+  it('should have empty chartData.datasets when dataSeries is undefined', () => {
+    component.dataSeries = undefined as {
+      label: string
+      data: { timestamp: string; value: number }[]
+      color: string
+      chartType: 'bar' | 'line'
+    }[]
     fixture.detectChanges()
-    const line = fixture.nativeElement.querySelector('app-line-chart')
-    const bar = fixture.nativeElement.querySelector('app-bar-chart')
-    const heat = fixture.nativeElement.querySelector('app-heatmap-chart')
-
-    expect(line).toBeTruthy()
-    expect(bar).toBeNull()
-    expect(heat).toBeNull()
+    expect(component.chartData.datasets).toEqual([])
   })
 
-  it('should render bar chart when chartType is bar', () => {
-    component.chartType = 'bar' as ChartType
+  it('should have empty chartData.datasets when dataSeries is an empty array', () => {
+    component.dataSeries = []
     fixture.detectChanges()
-    expect(fixture.nativeElement.querySelector('app-bar-chart')).toBeTruthy()
-    expect(fixture.nativeElement.querySelector('app-line-chart')).toBeNull()
-    expect(fixture.nativeElement.querySelector('app-heatmap-chart')).toBeNull()
+    expect(component.chartData.datasets).toEqual([])
   })
 
-  it('should render heatmap chart when chartType is heatmap', () => {
-    component.chartType = 'heatmap' as ChartType
-    fixture.detectChanges()
-    expect(fixture.nativeElement.querySelector('app-heatmap-chart')).toBeTruthy()
-    expect(fixture.nativeElement.querySelector('app-line-chart')).toBeNull()
-    expect(fixture.nativeElement.querySelector('app-bar-chart')).toBeNull()
+  it('should transform a single line series correctly', () => {
+    component.dataSeries = [
+      {
+        label: 'Test Line',
+        data: [
+          { timestamp: '2025-06-01T00:00:00Z', value: 10 },
+          { timestamp: '2025-06-02T00:00:00Z', value: 20 },
+        ],
+        color: '#ff0000',
+        chartType: 'line' as const,
+      },
+    ]
+    component.ngOnChanges()
+
+    type LineDataset = ChartDataset<'line', { x: string; y: number }[]> & {
+      tension: number
+      fill: boolean
+      pointRadius: number
+    }
+    // Expect exactly one dataset
+    expect(component.chartData.datasets.length).toBe(1)
+    const dataset = component.chartData.datasets[0] as LineDataset
+
+    // Verify label and type
+    expect(dataset.label).toBe('Test Line')
+    expect(dataset.type).toBe('line')
+
+    // Verify data points were transformed correctly
+    expect(dataset.data).toEqual([
+      { x: '2025-06-01T00:00:00Z', y: 10 },
+      { x: '2025-06-02T00:00:00Z', y: 20 },
+    ])
+
+    // Verify line‐specific properties exist
+    expect(dataset.tension).toBeCloseTo(0.1)
+    expect(dataset.fill).toBeFalse()
+    expect(dataset.pointRadius).toBe(2)
   })
 })

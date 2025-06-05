@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { ChartHostComponent } from '../chart-host/chart-host.component'
 import { SavedChart } from '../../../models/savedChart.model'
-
 @Component({
   selector: 'app-chart-panel',
   standalone: true,
@@ -23,11 +22,12 @@ import { SavedChart } from '../../../models/savedChart.model'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartPanelComponent {
-  /** Konfiguration des Charts, inkl. Typ, Farben und Datenserien */
-  @Input() config!: SavedChart & { chartType: 'line' | 'bar' | 'heatmap' }
+  /**
+   * Configuration for charts
+   */
+  @Input() config!: SavedChart
   @Output() remove = new EventEmitter<string>()
 
-  /** Entfernt dieses Panel */
   onRemove(): void {
     this.remove.emit(this.config.id)
   }

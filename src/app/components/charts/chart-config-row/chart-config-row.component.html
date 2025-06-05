@@ -10,8 +10,9 @@
   </mat-form-field>
 
   <mat-button-toggle-group [value]="config.chartType" (change)="onTypeChange($event.value)">
-    <mat-button-toggle value="line"><i class="fas fa-chart-line"></i></mat-button-toggle>
-    <mat-button-toggle value="bar"><i class="fas fa-chart-bar"></i></mat-button-toggle>
-    <mat-button-toggle value="heatmap"><i class="fas fa-fire"></i></mat-button-toggle>
+    <mat-button-toggle value="line">
+      <i class="fas fa-chart-line"></i>
+    </mat-button-toggle>
+    <!--    <mat-button-toggle value="bar"><i class="fas fa-chart-bar"></i></mat-button-toggle>-->
   </mat-button-toggle-group>
 </div>

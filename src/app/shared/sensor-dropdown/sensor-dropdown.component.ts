@@ -56,12 +56,9 @@ export class SensorDropdownComponent implements OnInit, OnChanges {
           // startWith: zuerst mit dem aktuellen Wert starten
           startWith<DropdownOptionModel | string | null>(this.selectedOption ?? null),
           map((value) => {
-            // Wenn bereits eine Auswahl (Objekt) im Control steht:
             if (value && typeof value === 'object' && 'measurementName' in value) {
-              // dann zeige die *ganze* Liste:
               return this.dropdownOptions.slice()
             }
-            // Sonst filtere klassisch nach Text
             const filterValue = typeof value === 'string' ? value.toLowerCase() : ''
             return this.dropdownOptions.filter(
               (option) =>
@@ -75,12 +72,20 @@ export class SensorDropdownComponent implements OnInit, OnChanges {
     })
   }
 
+  /**
+   * Display function for the Autocomplete input.
+   * Returns "measurementName – sensor.name" when an object is selected.
+   *
+   * @param option  The selected DropdownOptionModel or a raw string
+   * @returns The string that should appear in the input box
+   */
   displayFn = (option: DropdownOptionModel | string | null): string =>
-    typeof option === 'object' && option ? option.measurementName : (option as string) || ''
+    typeof option === 'object' && option
+      ? `${option.measurementName} – ${option.sensor.name}`
+      : (option as string) || ''
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['selectedOption'] && this.selectedOption) {
-      // setzt den Control‑Wert, wenn Parent einen Wert reinschiebt
       this.sensorControl.setValue(this.selectedOption)
     }
   }

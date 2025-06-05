@@ -93,7 +93,7 @@ describe('SensorDropdownComponent', () => {
 
   it('displayFn should return measurement name if option is object', () => {
     const option = mockOptions[0]
-    expect(component.displayFn(option)).toBe('Soil Moisture')
+    expect(component.displayFn(option)).toBe('Soil Moisture – Sensor A')
   })
 
   it('displayFn should return string if option is string', () => {

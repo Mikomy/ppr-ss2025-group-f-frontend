@@ -111,7 +111,9 @@ export class ScatterChartComponent implements AfterViewInit, OnChanges {
       type: 'scatter',
       data: { datasets },
       options: {
-        scales: { x: { type: 'time', time: { unit: 'minute' } } },
+        scales: {
+          x: { type: 'time', time: { unit: 'day', displayFormats: { day: 'dd.MM.yyyy' } } },
+        },
       },
     }
     this.chart = new Chart(ctx, config)

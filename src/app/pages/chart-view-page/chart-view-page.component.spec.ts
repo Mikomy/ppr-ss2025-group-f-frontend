@@ -136,15 +136,27 @@ describe('chart-view-page Component', () => {
       id: '1',
       titles: ['A'],
       label: [''],
-      series: [],
-      chartType: 'line',
+      series: [
+        {
+          label: 'A',
+          data: [{ timestamp: '2025-04-01T00:00:00Z', value: 5 }],
+          color: '#111111',
+          chartType: 'line',
+        },
+      ],
     }
     const chart2: SavedChart = {
       id: '2',
       titles: ['B'],
       label: [''],
-      series: [],
-      chartType: 'line',
+      series: [
+        {
+          label: 'B',
+          data: [{ timestamp: '2025-04-01T00:00:00Z', value: 7 }],
+          color: '#222222',
+          chartType: 'line',
+        },
+      ],
     }
     component.savedCharts = [chart1, chart2]
     component.removeChart('1')

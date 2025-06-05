@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { SensorDropdownComponent } from '../../../shared/sensor-dropdown/sensor-dropdown.component'
 import { DropdownOptionModel } from '../../../models/dropdown.option.model'
 
-export type ChartType = 'line' | 'bar' | 'heatmap'
+export type ChartType = 'line' | 'bar'
 
 export interface ChartConfig {
   measurement?: DropdownOptionModel
@@ -34,26 +34,40 @@ export class ChartConfigRowComponent {
   @Input() config!: ChartConfig
   @Output() configChange = new EventEmitter<ChartConfig>()
 
-  /** Emit updated config */
+  /**
+   * Emits the updated config object to the parent component.
+   */
   private emitChange() {
     this.configChange.emit({ ...this.config })
   }
 
-  /** Handler when measurement selected */
+  /**
+   * Handler when a measurement option is selected from the dropdown.
+   *
+   * @param option The selected DropdownOptionModel
+   */
   onMeasurementSelected(option: DropdownOptionModel) {
     console.log('Measurement selected:', option)
     this.config.measurement = option
     this.emitChange()
   }
 
-  /** Hadler when color picker changes */
+  /**
+   * Handler when the color picker value changes.
+   *
+   * @param event The input event from the color picker
+   */
   onColorChange(event: Event) {
     const input = event.target as HTMLInputElement
     this.config.color = input.value
     this.emitChange()
   }
 
-  /** Handler when chart type toggled */
+  /**
+   * Handler when the chart type (line or bar) is toggled.
+   *
+   * @param type The selected chart type ('line' or 'bar')
+   */
   onTypeChange(type: ChartType) {
     this.config.chartType = type
     this.emitChange()

@@ -26,6 +26,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { CommonModule } from '@angular/common'
 import { MatTableModule } from '@angular/material/table'
+import { SavedChart } from '../../models/savedChart.model'
 
 describe('ChartViewPageComponent (Integration)', () => {
   let fixture: ComponentFixture<ChartViewPageComponent>
@@ -257,11 +258,12 @@ describe('ChartViewPageComponent (Integration)', () => {
 
   it('should remove a saved chart when clicking its remove button', fakeAsync(() => {
     // 1) Prepopulate savedCharts manually:
-    const fakeSeries = [
+    const fakeSeries: SavedChart['series'] = [
       {
         label: 'Soil Moisture',
         data: [{ timestamp: '2025-04-01T00:00:00Z', value: 10 }],
         color: '#3366cc',
+        chartType: 'line',
       },
     ]
     component.savedCharts = [
@@ -270,7 +272,6 @@ describe('ChartViewPageComponent (Integration)', () => {
         titles: ['Soil Moisture'],
         label: ['2025-05-01T00:00:00Z', ' - ', '2025-05-01T01:00:00Z'],
         series: fakeSeries,
-        chartType: 'line',
       },
     ]
     storageSpy.set.calls.reset()

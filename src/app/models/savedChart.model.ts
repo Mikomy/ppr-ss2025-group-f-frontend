@@ -6,6 +6,6 @@ export interface SavedChart {
     label: string
     data: { timestamp: string; value: number }[]
     color: string
+    chartType: 'line' | 'bar'
   }[]
-  chartType: 'line' | 'bar' | 'heatmap'
 }
