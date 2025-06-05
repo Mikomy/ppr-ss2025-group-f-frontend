@@ -1,5 +1,5 @@
 ---
-name: Tests
+name: Frontend-CI
 on:
   push:
     branches:
@@ -9,6 +9,7 @@ on:
       - main
 jobs:
   build-and-test:
+    name: Build & Test (Unit, Integration, Smoke)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,8 +22,32 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm install
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run Unit Tests
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: |
+          sudo apt-get update && sudo apt-get install -y google-chrome-stable
+          npm run test:unit
+
+      - name: Run Integration Tests
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: |
+          npm run test:integration
+
       - name: Build Angular app
         run: npm run build --if-present
+
+      - name: Run Smoke Tests
+        run: |
+          # Server starten und Playwright-Tests ausführen
+          npx start-server-and-test "npm start" http://localhost:4200 "npm run test:smoke"
 #      - name: Install Google Chrome
 #        run: |
 #          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -

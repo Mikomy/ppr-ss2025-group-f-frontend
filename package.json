@@ -13,6 +13,10 @@
     "precommit": "npm run lint",
     "format": "npx prettier src --check",
     "format:fix": "npx prettier src --write",
+    "test:unit": "ng test --code-coverage --watch=false --browsers=ChromeHeadless",
+    "test:integration": "ng test --code-coverage --watch=false --browsers=ChromeHeadless --include=\"src/**/*.integration.spec.ts\"",
+    "test:smoke": "npx playwright test --config=playwright.config.ts",
+    "test:ci": "npm run lint && npm run test:unit && npm run test:integration && npm run build && npm run test:smoke",
     "e2e": "ng e2e"
   },
   "private": true,

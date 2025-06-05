@@ -22,7 +22,7 @@ describe('ChartHostComponent', () => {
   })
 
   it('should have empty chartData.datasets when dataSeries is undefined', () => {
-    component.dataSeries = undefined as {
+    component.dataSeries = undefined as unknown as {
       label: string
       data: { timestamp: string; value: number }[]
       color: string
