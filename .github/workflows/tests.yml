@@ -46,8 +46,8 @@ jobs:
 
       - name: Run Smoke Tests
         run: |
-          # Server starten und Playwright-Tests ausführen
-          npx start-server-and-test "npm start" http://localhost:4200 "npm run test:smoke"
+         npm run test:smoke
+
 #      - name: Install Google Chrome
 #        run: |
 #          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
