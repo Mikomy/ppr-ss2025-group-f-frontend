@@ -54,9 +54,18 @@ export class ChartHostComponent implements OnChanges {
       x: {
         type: 'time',
         time: {
-          tooltipFormat: 'PP',
+          unit: 'day',
+          tooltipFormat: 'yyyy-MM-dd',
           displayFormats: {
+            millisecond: 'yyyy-MM-dd',
+            second: 'yyyy-MM-dd',
+            minute: 'yyyy-MM-dd',
+            hour: 'yyyy-MM-dd',
             day: 'yyyy-MM-dd',
+            week: 'yyyy-MM-dd',
+            month: 'yyyy-MM-dd',
+            quarter: 'yyyy-MM-dd',
+            year: 'yyyy-MM-dd',
           },
         },
         title: { display: true, text: 'Datum' },

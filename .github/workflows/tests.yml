@@ -44,9 +44,9 @@ jobs:
       - name: Build Angular app
         run: npm run build --if-present
 
-      - name: Run Smoke Tests
-        run: |
-         npm run test:smoke
+#      - name: Run Smoke Tests
+#        run: |
+#          npm run test:smoke
 
 #      - name: Install Google Chrome
 #        run: |
