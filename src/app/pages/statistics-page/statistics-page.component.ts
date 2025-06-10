@@ -82,7 +82,8 @@ export class StatisticsPageComponent implements OnInit {
   /** Scatter plot data points for simultaneous anomalies between both groups */
   anomaliesPointsGroup1: ScatterDataPoint[] = []
   anomaliesPointsGroup2: ScatterDataPoint[] = []
-  simultaneousAnomalies: ScatterDataPoint[] = []
+  simultaneousAnomaliesGroup1: ScatterDataPoint[] = []
+  simultaneousAnomaliesGroup2: ScatterDataPoint[] = []
 
   /** FormGroup for inputs */
   timeForm!: FormGroup
@@ -314,10 +315,15 @@ export class StatisticsPageComponent implements OnInit {
       x: +a.timestamp,
       y: a.value,
     }))
-    this.simultaneousAnomalies = this.findSimultaneous(
+    this.simultaneousAnomaliesGroup1 = this.findSimultaneous(
       this.anomaliesPointsGroup1,
       this.anomaliesPointsGroup2,
       1800_000
+    )
+    this.simultaneousAnomaliesGroup2 = this.findSimultaneous(
+      this.anomaliesPointsGroup2,
+      this.anomaliesPointsGroup1,
+      1_800_000
     )
   }
 
@@ -387,7 +393,7 @@ export class StatisticsPageComponent implements OnInit {
     this.anomaliesGroup2 = []
     this.anomaliesPointsGroup1 = []
     this.anomaliesPointsGroup2 = []
-    this.simultaneousAnomalies = []
+    this.simultaneousAnomaliesGroup1 = []
   }
 
   /**

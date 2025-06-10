@@ -173,7 +173,7 @@
                 [label]="'Gruppe1'"
                 [points]="resultsGroup1?.series?.[0]?.points ?? []"
                 [anomalies]="anomaliesPointsGroup1"
-                [simultaneous]="simultaneousAnomalies"
+                [simultaneous]="simultaneousAnomaliesGroup1"
                 [lowThreshold]="(resultsGroup1?.p25 ?? 0) - 1.5 * (resultsGroup1?.iqr ?? 0)"
                 [highThreshold]="(resultsGroup1?.p75 ?? 0) + 1.5 * (resultsGroup1?.iqr ?? 0)"
               ></app-scatter-chart>
@@ -188,7 +188,7 @@
                 [label]="'Gruppe2'"
                 [points]="resultsGroup2?.series?.[0]?.points ?? []"
                 [anomalies]="anomaliesPointsGroup2"
-                [simultaneous]="simultaneousAnomalies"
+                [simultaneous]="simultaneousAnomaliesGroup2"
                 [lowThreshold]="(resultsGroup2?.p25 ?? 0) - 1.5 * (resultsGroup2?.iqr ?? 0)"
                 [highThreshold]="(resultsGroup2?.p75 ?? 0) + 1.5 * (resultsGroup2?.iqr ?? 0)"
               ></app-scatter-chart>
