@@ -108,15 +108,18 @@ export class StatisticsPageComponent implements OnInit {
    * Initialize the reactive form and attempt to load saved state.
    */
   ngOnInit(): void {
-    this.timeForm = this.fb.group(
-      {
-        dateTimeRange: this.fb.control(null as DateTimeRange | null, { updateOn: 'submit' }),
-        quickRange: [null as QuickRangeKey | null],
-        group1: [null, Validators.required],
-        group2: [null, Validators.required],
+    this.timeForm = this.fb.group({
+      dateTimeRange: this.fb.control(null as DateTimeRange | null, { updateOn: 'submit' }),
+      quickRange: [null as QuickRangeKey | null],
+      group1: [null, Validators.required],
+      group2: [null, Validators.required],
+    })
+    this.timeForm.get('dateTimeRange')!.valueChanges.subscribe((range) => {
+      if (range) {
+        this.quickControl.setValue(null, { emitEvent: false })
+        this.lastQuickRange = null
       }
-      // { updateOn: 'submit' }
-    )
+    })
     this.loadFromStorage()
   }
 
@@ -161,7 +164,6 @@ export class StatisticsPageComponent implements OnInit {
       },
       { emitEvent: false }
     )
-
     this.quickControl.setValue(key)
     this.onCompute()
   }
@@ -175,8 +177,6 @@ export class StatisticsPageComponent implements OnInit {
     this.clearResults()
     this.clearAnomalies()
     this.anomalyChecked = false
-
-    // this.timeForm.markAllAsTouched()
 
     const g1 = this.group1Ctrl.value as SensorGroup
     const g2 = this.group2Ctrl.value as SensorGroup
@@ -206,6 +206,10 @@ export class StatisticsPageComponent implements OnInit {
         return
       }
 
+      if (!quickTimeRange && dateTimeCtrl) {
+        this.lastQuickRange = null
+        this.timeForm.patchValue({ quickRange: null }, { emitEvent: false })
+      }
       if (!dateTimeCtrl) {
         this.errorMessage = 'Bitte komplettes Zeitintervall auswählen.'
         return
