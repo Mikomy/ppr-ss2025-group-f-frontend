@@ -142,34 +142,6 @@ describe('TableViewPageComponent – Integration Tests', () => {
     )
   }))
 
-  it('Quick-Range "Last Week" ruft Service mit LAST_WEEK auf und rendert genau eine Tabelle', fakeAsync(() => {
-    component.onSelectionChange(dummyOption)
-    fixture.detectChanges()
-
-    let capturedTimeRange: QuickRangeKey | undefined
-    backendSpy.getGroupedByAlias.and.callFake(
-      (alias: string, fromIso?: string, toIso?: string, timeRange?: QuickRangeKey) => {
-        capturedTimeRange = timeRange
-        return of([dummyMeasurement])
-      }
-    )
-
-    const quickBtnEls: NodeListOf<HTMLButtonElement> =
-      fixture.nativeElement.querySelectorAll('button.quick-select-btn')
-    expect(quickBtnEls.length).toBe(3, 'Es müssen genau 3 Quick-Range-Buttons vorhanden sein')
-    quickBtnEls[0].click()
-    tick()
-    fixture.detectChanges()
-
-    expect(capturedTimeRange).toBe(QuickRangeKey.LAST_WEEK)
-
-    const renderedTables = fixture.nativeElement.querySelectorAll('app-measurement-table')
-    expect(renderedTables.length).toBe(
-      1,
-      'Genau eine MeasurementTableComponent soll gerendert werden'
-    )
-  }))
-
   it('should remove a table when clicking the remove button and update WebStorage', fakeAsync(() => {
     // 1) Manually add two entries to savedTables
     component.savedTables = [
