@@ -27,6 +27,8 @@
 
 ## Project Overview
 
+### Frontend
+
 nexus-frontend is an Angular v19 application for visualizing and analyzing sensor data stored in InfluxDB. Features include:
 
 Objectives:
@@ -40,6 +42,14 @@ Objectives:
 - Modular, extensible architecture
 
 The frontend consumes a Spring Boot REST API for data retrieval.
+
+### Backend (API) — Repository
+
+ The backend source code and API server are maintained in a separate repository:
+
+**Backend repo:** https://github.com/GeorgFH/ppr-ss2025-group-f-backend
+
+This backend repository contains the Spring Boot application, API specification (OpenAPI), and  instructions.
 
 ## Prerequisites
 
